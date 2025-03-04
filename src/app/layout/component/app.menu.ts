@@ -31,7 +31,7 @@ export class AppMenu {
             },
             {
                 label: 'User',
-                items: [{ label: 'Users Management', icon: 'pi pi-fw pi-users', routerLink: ['/pages/empty'] }]
+                items: [{ label: 'Users Management', icon: 'pi pi-fw pi-users', routerLink: ['/usermanagement'] }]
             },
             {
                 label: 'Process',
