@@ -13,7 +13,7 @@ import { Image } from 'primeng/image';
 @Component({
     selector: 'app-dataconfig',
     standalone: true,
-    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, Image],
+    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator],
     templateUrl: './datasourceConfig.html'
 })
 export class DatasourceConfig {}

@@ -5,6 +5,7 @@ import { Documentation } from './app/pages/documentation/documentation';
 import { Landing } from './app/pages/landing/landing';
 import { Notfound } from './app/pages/notfound/notfound';
 import { Home } from './app/pages/home/home';
+import {DatasourceConfig} from "./app/pages/ConfigurationManagment/DatasourceConfig";
 
 export const appRoutes: Routes = [
     {
@@ -12,7 +13,8 @@ export const appRoutes: Routes = [
         component: AppLayout,
         children: [
             { path: '', component: Home },
-            {path: 'dash', component: Dashboard},
+            {path: 'dataconfig', component: DatasourceConfig},
+            // {path: 'dash', component: Dashboard},
             { path: 'uikit', loadChildren: () => import('./app/pages/uikit/uikit.routes') },
             { path: 'documentation', component: Documentation },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
