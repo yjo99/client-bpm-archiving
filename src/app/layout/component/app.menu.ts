@@ -27,15 +27,15 @@ export class AppMenu {
             },
             {
                 label: 'Configuration',
-                items: [{ label: 'Datasource Management', icon: 'pi pi-fw pi-cog', routerLink: ['/dataconfig'] }]
+                items: [{ label: 'Datasource Management', icon: 'pi pi-fw pi-cog', routerLink: ['/pages/dataconfig'] }]
             },
             {
                 label: 'User',
-                items: [{ label: 'Users Management', icon: 'pi pi-fw pi-users', routerLink: ['/usermanagement'] }]
+                items: [{ label: 'Users Management', icon: 'pi pi-fw pi-users', routerLink: ['/pages/usermanagement'] }]
             },
             {
                 label: 'Process',
-                items: [{ label: 'Process Management', icon: 'pi pi-fw pi-share-alt', routerLink: ['/pages/empty'] }]
+                items: [{ label: 'Process Management', icon: 'pi pi-fw pi-share-alt', routerLink: ['/pages/processmanagement'] }]
             },
             {
                 label: 'System',
