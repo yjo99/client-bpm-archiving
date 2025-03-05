@@ -1,9 +1,9 @@
-interface BaseServer {
+export interface BaseServerModel {
   serverName: string;
   serverHostName: string;
   serverPort: number;
   userName: string;
   userPassword: string;
-  MaximmParallelTransactoin: number;
+  MaximumParallelTransactoin: number;
   useSecureConnection: boolean;
 }

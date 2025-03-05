@@ -1,1 +1,0 @@
-interface BPMServer extends BaseServer {}

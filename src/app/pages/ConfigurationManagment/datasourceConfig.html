@@ -19,6 +19,7 @@
     <h3>Datasource Configuration Management</h3>
 </div>
 
+<!--BPM-->
 <div class="card">
     <h4 class="font-semibold text-xl mb-4">BPM Server Configuration</h4>
     <div class="grid-container">
@@ -33,20 +34,17 @@
                 </div>
             </a>
         </div>
-        <div *ngFor="let product of products" class="grid-item">
+        <div *ngFor="let server of bpmServers" class="grid-item">
             <div class="border border-surface rounded-border m-2 p-4">
                 <div class="mb-4">
                     <div class="relative mx-auto">
-                        <img src="./assets/images/data-server.png" [alt]="product.name" class="w-full rounded-border" />
+                        <img src="./assets/images/data-server.png" [alt]="server.serverName" class="w-full rounded-border" />
                     </div>
                 </div>
-                <div class="mb-4 font-medium">{{ product.name }}</div>
+                <div class="mb-4 font-medium">{{ server.serverName }}</div>
+                <div class="mb-4 font-medium">{{ server.serverHostName }}:{{ server.serverPort }}</div>
                 <div class="flex justify-between items-center">
-                    <div class="mt-0 font-semibold text-xl">{{ '$' + product.price }}</div>
-                    <span>
-                        <p-button icon="pi pi-heart" severity="secondary" [outlined]="true" />
-                        <p-button icon="pi pi-shopping-cart" styleClass="ml-2" />
-                    </span>
+                    <p-button label="Delete" severity="danger" (click)="deleteBPMServer(server.serverName)"></p-button>
                 </div>
             </div>
         </div>
@@ -54,3 +52,68 @@
 </div>
 
 
+<!--ECM-->
+<div class="card">
+    <h4 class="font-semibold text-xl mb-4">ECM Server Configuration</h4>
+    <div class="grid-container">
+        <div class="grid-item">
+            <!--            //todo : change routing-->
+            <a [routerLink]="['/']" class="block h-full">
+                <div class="grid-item h-full">
+                    <div class=" rounded-border m-2 p-4 flex flex-col justify-center items-center h-full">
+                        <i class="pi pi-plus text-green-500 text-2xl"></i>
+                        <p class="mt-4 text-center">Add New Server</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div *ngFor="let server of ecmServers" class="grid-item">
+            <div class="border border-surface rounded-border m-2 p-4">
+                <div class="mb-4">
+                    <div class="relative mx-auto">
+                        <img src="./assets/images/data-server.png" [alt]="server.serverName" class="w-full rounded-border" />
+                    </div>
+                </div>
+                <div class="mb-4 font-medium">{{ server.serverName }}</div>
+                <div class="mb-4 font-medium">{{ server.serverHostName }}:{{ server.serverPort }}</div>
+                <div class="flex justify-between items-center">
+                    <p-button label="Delete" severity="danger" (click)="deleteECMServer(server.serverName)"></p-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!--DB-->
+<div class="card">
+    <h4 class="font-semibold text-xl mb-4">DB Server Configuration</h4>
+    <div class="grid-container">
+        <div class="grid-item">
+            <!--            //todo : change routing-->
+            <a [routerLink]="['/']" class="block h-full">
+                <div class="grid-item h-full">
+                    <div class=" rounded-border m-2 p-4 flex flex-col justify-center items-center h-full">
+                        <i class="pi pi-plus text-green-500 text-2xl"></i>
+                        <p class="mt-4 text-center">Add New Server</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div *ngFor="let server of dbServers" class="grid-item">
+            <div class="border border-surface rounded-border m-2 p-4">
+                <div class="mb-4">
+                    <div class="relative mx-auto">
+                        <img src="./assets/images/data-server.png" [alt]="server.serverName" class="w-full rounded-border" />
+                    </div>
+                </div>
+                <div class="mb-4 font-medium">{{ server.serverName }}</div>
+                <div class="mb-4 font-medium">{{ server.serverHostName }}:{{ server.serverPort }}</div>
+                <div class="flex justify-between items-center">
+                    <p-button label="Delete" severity="danger" (click)="deleteDBServer(server.serverName)"></p-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

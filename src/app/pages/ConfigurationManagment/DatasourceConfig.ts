@@ -7,9 +7,12 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
-import {Product, ProductService} from "../service/product.service";
-import {PhotoService} from "../service/photo.service";
-import {NgForOf} from "@angular/common";
+import {NgForOf, NgStyle} from "@angular/common";
+import {DatasourceConfigService} from "../../layout/service/DatasourceConfig.service";
+import {BpmServerModel} from "../../layout/model/bpm-server.model";
+import {EcmServerModel} from "../../layout/model/ecm-server.model";
+import {DbServerModel} from "../../layout/model/db-server.model";
+import {Tag} from "primeng/tag";
 
 // @ts-ignore
 @Component({
@@ -17,37 +20,36 @@ import {NgForOf} from "@angular/common";
     standalone: true,
     imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, NgForOf],
     templateUrl: './datasourceConfig.html',
-    providers: [ProductService, PhotoService]
+    providers: [DatasourceConfigService]
 
 })
 export class DatasourceConfig implements OnInit{
-    products!: Product[];
-    carouselResponsiveOptions: any[] = [
-        {
-            breakpoint: '1024px',
-            numVisible: 3,
-            numScroll: 3
-        },
-        {
-            breakpoint: '768px',
-            numVisible: 2,
-            numScroll: 2
-        },
-        {
-            breakpoint: '560px',
-            numVisible: 1,
-            numScroll: 1
-        }
-    ];
+    bpmServers: BpmServerModel[] = [];
+    ecmServers: EcmServerModel[] = [];
+    dbServers: DbServerModel[] = [];
 
-    constructor(
-        private productService: ProductService,
-    ) {}
+    constructor(private datasourceConfigService: DatasourceConfigService) {}
 
-    ngOnInit() {
-        this.productService.getProductsSmall().then((products) => {
-            this.products = products;
-        });
+    ngOnInit(): void {
+        this.bpmServers = this.datasourceConfigService.getBPMServers();
+        this.ecmServers = this.datasourceConfigService.getECMServers();
+        this.dbServers = this.datasourceConfigService.getDBServers();
     }
+
+    deleteBPMServer(serverName: string): void {
+        this.datasourceConfigService.deleteBPMServer(serverName);
+        this.bpmServers = this.datasourceConfigService.getBPMServers(); // Refresh the list
+    }
+
+    deleteECMServer(serverName: string): void {
+        this.datasourceConfigService.deleteECMServer(serverName);
+        this.ecmServers = this.datasourceConfigService.getECMServers(); // Refresh the list
+    }
+
+    deleteDBServer(serverName: string): void {
+        this.datasourceConfigService.deleteDBServer(serverName);
+        this.dbServers = this.datasourceConfigService.getDBServers(); // Refresh the list
+    }
+
 
 }
