@@ -1,5 +1,56 @@
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* Always 4 columns */
+        gap: 16px; /* Adjust the gap between items as needed */
+    }
+
+    .grid-item {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid #e0e0e0; /* Optional: Add border for better visibility */
+        border-radius: 8px; /* Optional: Add border radius for rounded corners */
+        padding: 16px; /* Optional: Add padding inside each item */
+    }
+</style>
 <app-floating-configurator />
 <div class="card">
-    <h1>Welcome, on datasource configuration</h1>
+    <h3>Datasource Configuration Management</h3>
 </div>
+
+<div class="card">
+    <h4 class="font-semibold text-xl mb-4">BPM Server Configuration</h4>
+    <div class="grid-container">
+        <div class="grid-item">
+<!--            //todo : change routing-->
+            <a [routerLink]="['/']" class="block h-full">
+                <div class="grid-item h-full">
+                    <div class=" rounded-border m-2 p-4 flex flex-col justify-center items-center h-full">
+                        <i class="pi pi-plus text-green-500 text-2xl"></i>
+                        <p class="mt-4 text-center">Add New Server</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div *ngFor="let product of products" class="grid-item">
+            <div class="border border-surface rounded-border m-2 p-4">
+                <div class="mb-4">
+                    <div class="relative mx-auto">
+                        <img src="./assets/images/data-server.png" [alt]="product.name" class="w-full rounded-border" />
+                    </div>
+                </div>
+                <div class="mb-4 font-medium">{{ product.name }}</div>
+                <div class="flex justify-between items-center">
+                    <div class="mt-0 font-semibold text-xl">{{ '$' + product.price }}</div>
+                    <span>
+                        <p-button icon="pi pi-heart" severity="secondary" [outlined]="true" />
+                        <p-button icon="pi pi-shopping-cart" styleClass="ml-2" />
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
