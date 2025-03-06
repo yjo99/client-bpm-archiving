@@ -14,7 +14,7 @@
         padding: 16px; /* Optional: Add padding inside each item */
     }
 </style>
-<app-floating-configurator />
+<app-floating-configurator/>
 <div class="card">
     <h3>Datasource Configuration Management</h3>
 </div>
@@ -24,8 +24,9 @@
     <h4 class="font-semibold text-xl mb-4">BPM Server Configuration</h4>
     <div class="grid-container">
         <div class="grid-item">
-<!--            //todo : change routing-->
-            <a [routerLink]="['pages/dataconfig/bpmform']" class="block h-full hover:bg-gray-100 transition-colors duration-200">
+            <!--            //todo : change routing-->
+            <a [routerLink]="['/pages/dataconfig/bpmform']"
+               class="block h-full hover:bg-gray-100 transition-colors duration-200">
                 <div class="grid-item h-full">
                     <div class="rounded-border m-2 p-4 flex flex-col justify-center items-center h-full">
                         <i class="pi pi-plus text-green-500 text-2xl"></i>
@@ -38,14 +39,31 @@
             <div class="m-2 p-4">
                 <div class="mb-4">
                     <div class="relative mx-auto">
-                        <img src="./assets/images/data-server.png" [alt]="server.serverName" class="w-full max-w-[80px] rounded-border" />
+                        <img src="./assets/images/data-server.png" [alt]="server.serverName"
+                             class="w-full max-w-[80px] rounded-border"/>
                     </div>
                 </div>
                 <div class="mb-4 font-bold">{{ server.serverName }}</div>
                 <div class="mb-4 font-medium">{{ server.serverHostName }}:{{ server.serverPort }}</div>
-<!--                <div class="flex justify-between items-center">-->
-<!--                    <p-button label="Delete" severity="danger" (click)="deleteBPMServer(server.serverName)"></p-button>-->
-<!--                </div>-->
+                <div class="flex justify-between items-center">
+                    <!--                    <p-button label="Delete" severity="danger" (click)="deleteBPMServer(server.id)"></p-button>-->
+                    <p-button label="Delete" icon="pi pi-trash" severity="danger" [style]="{ width: 'auto' }"
+                              (click)="openConfirmation()"/>
+                    <p-dialog header="Confirmation" [(visible)]="displayConfirmation" [style]="{ width: '350px' }"
+                              [modal]="true">
+                        <div class="flex items-center justify-center">
+                            <i class="pi pi-exclamation-triangle mr-4" style="font-size: 2rem"> </i>
+                            <span>Are you sure you want to proceed?</span>
+                        </div>
+                        <ng-template #footer>
+                            <p-button label="No" icon="pi pi-times" (click)="closeConfirmation()" text
+                                      severity="secondary"/>
+                            <p-button label="Yes" icon="pi pi-check" (click)="deleteBPMServer(server.id)"
+                                      severity="danger" outlined autofocus/>
+                        </ng-template>
+                    </p-dialog>
+                    <p-button label="Update" (click)="onUpdateBPMServer(server)"></p-button>
+                </div>
             </div>
         </div>
     </div>
@@ -58,7 +76,8 @@
     <div class="grid-container">
         <div class="grid-item">
             <!--            //todo : change routing-->
-            <a [routerLink]="['/']" class="block h-full hover:bg-gray-100 transition-colors duration-200">
+            <a [routerLink]="['/pages/dataconfig/ecmform']"
+               class="block h-full hover:bg-gray-100 transition-colors duration-200">
                 <div class="grid-item h-full">
                     <div class="rounded-border m-2 p-4 flex flex-col justify-center items-center h-full">
                         <i class="pi pi-plus text-green-500 text-2xl"></i>
@@ -71,19 +90,34 @@
             <div class="m-2 p-4">
                 <div class="mb-4">
                     <div class="relative mx-auto">
-                        <img src="./assets/images/data-server.png" [alt]="server.serverName" class="w-full max-w-[80px] rounded-border" />
+                        <img src="./assets/images/data-server.png" [alt]="server.serverName"
+                             class="w-full max-w-[80px] rounded-border"/>
                     </div>
                 </div>
                 <div class="mb-4 font-bold">{{ server.serverName }}</div>
                 <div class="mb-4 font-medium">{{ server.serverHostName }}:{{ server.serverPort }}</div>
-<!--                <div class="flex justify-between items-center">-->
-<!--                    <p-button label="Delete" severity="danger" (click)="deleteECMServer(server.serverName)"></p-button>-->
-<!--                </div>-->
+                <div class="flex justify-between items-center">
+                    <p-button label="Delete" icon="pi pi-trash" severity="danger" [style]="{ width: 'auto' }"
+                              (click)="openConfirmation()"/>
+                    <p-dialog header="Confirmation" [(visible)]="displayConfirmation" [style]="{ width: '350px' }"
+                              [modal]="true">
+                        <div class="flex items-center justify-center">
+                            <i class="pi pi-exclamation-triangle mr-4" style="font-size: 2rem"> </i>
+                            <span>Are you sure you want to proceed?</span>
+                        </div>
+                        <ng-template #footer>
+                            <p-button label="No" icon="pi pi-times" (click)="closeConfirmation()" text
+                                      severity="secondary"/>
+                            <p-button label="Yes" icon="pi pi-check" (click)="deleteECMServer(server.id)"
+                                      severity="danger" outlined autofocus/>
+                        </ng-template>
+                    </p-dialog>
+                    <p-button label="Update" (click)="onUpdateECMServer(server)"></p-button>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
 
 
 <!--DB-->
@@ -92,7 +126,8 @@
     <div class="grid-container">
         <div class="grid-item">
             <!--            //todo : change routing-->
-            <a [routerLink]="['/dataconfig/bpmform']" class="block h-full hover:bg-gray-100 transition-colors duration-200">
+            <a [routerLink]="['/pages/dataconfig/dbform']"
+               class="block h-full hover:bg-gray-100 transition-colors duration-200">
                 <div class="grid-item h-full">
                     <div class="rounded-border m-2 p-4 flex flex-col justify-center items-center h-full">
                         <i class="pi pi-plus text-green-500 text-2xl"></i>
@@ -105,14 +140,30 @@
             <div class="m-2 p-4">
                 <div class="mb-4">
                     <div class="relative mx-auto">
-                        <img src="./assets/images/data-server.png" [alt]="server.serverName" class="w-full max-w-[80px] rounded-border" />
+                        <img src="./assets/images/data-server.png" [alt]="server.serverName"
+                             class="w-full max-w-[80px] rounded-border"/>
                     </div>
                 </div>
                 <div class="mb-4 font-bold">{{ server.serverName }}</div>
                 <div class="mb-4 font-medium">{{ server.serverHostName }}:{{ server.serverPort }}</div>
-<!--                <div class="flex justify-between items-center">-->
-<!--                    <p-button label="Delete" severity="danger" (click)="deleteDBServer(server.serverName)"></p-button>-->
-<!--                </div>-->
+                <div class="flex justify-between items-center">
+                    <p-button label="Delete" icon="pi pi-trash" severity="danger" [style]="{ width: 'auto' }"
+                              (click)="openConfirmation()"/>
+                    <p-dialog header="Confirmation" [(visible)]="displayConfirmation" [style]="{ width: '350px' }"
+                              [modal]="true">
+                        <div class="flex items-center justify-center">
+                            <i class="pi pi-exclamation-triangle mr-4" style="font-size: 2rem"> </i>
+                            <span>Are you sure you want to proceed?</span>
+                        </div>
+                        <ng-template #footer>
+                            <p-button label="No" icon="pi pi-times" (click)="closeConfirmation()" text
+                                      severity="secondary"/>
+                            <p-button label="Yes" icon="pi pi-check" (click)="deleteDBServer(server.id)"
+                                      severity="danger" outlined autofocus/>
+                        </ng-template>
+                    </p-dialog>
+                    <p-button label="Update" (click)="onUpdateDBServer(server)"></p-button>
+                </div>
             </div>
         </div>
     </div>

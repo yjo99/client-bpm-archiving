@@ -1,0 +1,81 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="card flex flex-col gap-6 p-6 bg-white shadow-lg rounded-lg">
+    <div class="font-semibold text-2xl text-gray-800">
+        {{ isEditMode ? 'Update ECM Server' : 'Add New ECM Server' }}
+    </div>
+
+    <!-- Server Name -->
+    <div class="flex flex-col gap-1">
+        <label for="serverName" class="text-gray-700 font-medium">Server Name</label>
+        <input pInputText id="serverName" type="text" formControlName="serverName" placeholder="Enter server name"
+               class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+    </div>
+
+    <!-- Server Host Name -->
+    <div class="flex flex-col gap-1">
+        <label for="serverHostName" class="text-gray-700 font-medium">Server Host Name</label>
+        <input pInputText id="serverHostName" type="text" formControlName="serverHostName" placeholder="Enter host name"
+               class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+    </div>
+
+    <!-- Server Port -->
+    <div class="flex flex-col gap-1">
+        <label for="serverPort" class="text-gray-700 font-medium">Server Port</label>
+        <input pInputText id="serverPort" type="number" formControlName="serverPort" placeholder="Enter server port"
+               class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+    </div>
+
+    <!-- User Name -->
+    <div class="flex flex-col gap-1">
+        <label for="userName" class="text-gray-700 font-medium">User Name</label>
+        <input pInputText id="userName" type="text" formControlName="userName" placeholder="Enter user name"
+               class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+    </div>
+
+    <!-- User Password -->
+    <div class="flex flex-col gap-1">
+        <label for="userPassword" class="text-gray-700 font-medium">User Password</label>
+        <input pInputText id="userPassword" type="password" formControlName="userPassword" placeholder="Enter password"
+               class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+    </div>
+
+    <!-- Maximum Parallel Transactions -->
+    <div class="flex flex-col gap-1">
+        <label for="MaximumParallelTransactoin" class="text-gray-700 font-medium">Maximum Parallel Transactions</label>
+        <input pInputText id="MaximumParallelTransactoin" type="number" formControlName="MaximumParallelTransactoin"
+               placeholder="Enter max parallel transactions"
+               class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+    </div>
+
+
+    <!-- Context Path -->
+    <div class="flex flex-col gap-1">
+        <label for="contextPath" class="text-gray-700 font-medium">Context Path</label>
+        <input pInputText id="contextPath" type="text" formControlName="contextPath" placeholder="Enter context path"
+               class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+    </div>
+
+    <!-- Repository Name -->
+    <div class="flex flex-col gap-1">
+        <label for="RepositoryName" class="text-gray-700 font-medium">Repository Name</label>
+        <input pInputText id="RepositoryName" type="text" formControlName="RepositoryName"
+               placeholder="Enter repository name"
+               class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+    </div>
+
+
+    <!-- Use Secure Connection -->
+    <div class="flex items-center gap-2">
+        <p-checkbox id="useSecureConnection" formControlName="useSecureConnection" [binary]="true"></p-checkbox>
+        <label for="useSecureConnection" class="text-gray-700 font-medium">Use Secure Connection</label>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+        <p-button label="Test Connection" severity="info" text (click)="testConnection()"/>
+        <p-button type="submit" severity="success" label="{{ isEditMode ? 'Update Server' : 'Add Server' }}"/>
+    </div>
+
+    <div *ngIf="testMessage" class="fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white"
+         [ngClass]="testSuccess ? 'bg-green-500' : 'bg-red-500'">
+        {{ testMessage }}
+    </div>
+</form>

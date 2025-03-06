@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
-import { BpmServerModel } from '../model/bpm-server.model'; // Import BpmServerModel
-import { EcmServerModel } from '../model/ecm-server.model'; // Import EcmServerModel
-import { DbServerModel } from '../model/db-server.model'; // Import DbServerModel
+import {BpmServerModel} from '../model/bpm-server.model'; // Import BpmServerModel
+import {EcmServerModel} from '../model/ecm-server.model'; // Import EcmServerModel
+import {DbServerModel} from '../model/db-server.model';
+import {DatabaseType} from "../model/DatabaseType"; // Import DbServerModel
 @Injectable({
     providedIn: 'root', // Make the service available application-wide
 })
@@ -70,7 +71,7 @@ export class DatasourceConfigService {
             userPassword: 'password',
             MaximumParallelTransactoin: 200,
             useSecureConnection: true,
-            databaseType: 'PostgreSQL',
+            databaseType: DatabaseType.Oracle,
         },
         {
             id: 2,
@@ -81,7 +82,7 @@ export class DatasourceConfigService {
             userPassword: 'password',
             MaximumParallelTransactoin: 300,
             useSecureConnection: false,
-            databaseType: 'MySQL',
+            databaseType: DatabaseType.MySQL,
         },
     ];
 
