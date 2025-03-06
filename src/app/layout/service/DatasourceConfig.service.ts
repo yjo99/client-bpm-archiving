@@ -10,6 +10,7 @@ export class DatasourceConfigService {
     // Mock data for BpmServerModel
     private bpmServers: BpmServerModel[] = [
         {
+            id: 1,
             serverName: 'BPM Server 1',
             serverHostName: 'bpm1.example.com',
             serverPort: 8080,
@@ -19,6 +20,7 @@ export class DatasourceConfigService {
             useSecureConnection: true,
         },
         {
+            id: 2,
             serverName: 'BPM Server 2',
             serverHostName: 'bpm2.example.com',
             serverPort: 8081,
@@ -32,6 +34,7 @@ export class DatasourceConfigService {
     // Mock data for EcmServerModel
     private ecmServers: EcmServerModel[] = [
         {
+            id: 1,
             serverName: 'ECM Server 1',
             serverHostName: 'ecm1.example.com',
             serverPort: 8082,
@@ -43,6 +46,7 @@ export class DatasourceConfigService {
             RepositoryName: 'Repo1',
         },
         {
+            id: 2,
             serverName: 'ECM Server 2',
             serverHostName: 'ecm2.example.com',
             serverPort: 8083,
@@ -58,6 +62,7 @@ export class DatasourceConfigService {
     // Mock data for DbServerModel
     private dbServers: DbServerModel[] = [
         {
+            id: 1,
             serverName: 'DB Server 1',
             serverHostName: 'db1.example.com',
             serverPort: 5432,
@@ -68,6 +73,7 @@ export class DatasourceConfigService {
             databaseType: 'PostgreSQL',
         },
         {
+            id: 2,
             serverName: 'DB Server 2',
             serverHostName: 'db2.example.com',
             serverPort: 3306,
@@ -92,15 +98,15 @@ export class DatasourceConfigService {
         this.bpmServers.push(server);
     }
 
-    updateBPMServer(serverName: string, updatedServer: BpmServerModel): void {
-        const index = this.bpmServers.findIndex((s) => s.serverName === serverName);
+    updateBPMServer(id: number, updatedServer: BpmServerModel): void {
+        const index = this.bpmServers.findIndex((s) => s.id === id);
         if (index !== -1) {
             this.bpmServers[index] = updatedServer;
         }
     }
 
-    deleteBPMServer(serverName: string): void {
-        this.bpmServers = this.bpmServers.filter((s) => s.serverName !== serverName);
+    deleteBPMServer(id: number): void {
+        this.bpmServers = this.bpmServers.filter((s) => s.id !== id);
     }
 
     // ==================== EcmServerModel Methods ====================
@@ -113,15 +119,15 @@ export class DatasourceConfigService {
         this.ecmServers.push(server);
     }
 
-    updateECMServer(serverName: string, updatedServer: EcmServerModel): void {
-        const index = this.ecmServers.findIndex((s) => s.serverName === serverName);
+    updateECMServer(id: number, updatedServer: EcmServerModel): void {
+        const index = this.ecmServers.findIndex((s) => s.id === id);
         if (index !== -1) {
             this.ecmServers[index] = updatedServer;
         }
     }
 
-    deleteECMServer(serverName: string): void {
-        this.ecmServers = this.ecmServers.filter((s) => s.serverName !== serverName);
+    deleteECMServer(id: number): void {
+        this.ecmServers = this.ecmServers.filter((s) => s.id !== id);
     }
 
     // ==================== DbServerModel Methods ====================
@@ -134,14 +140,14 @@ export class DatasourceConfigService {
         this.dbServers.push(server);
     }
 
-    updateDBServer(serverName: string, updatedServer: DbServerModel): void {
-        const index = this.dbServers.findIndex((s) => s.serverName === serverName);
+    updateDBServer(id: number, updatedServer: DbServerModel): void {
+        const index = this.dbServers.findIndex((s) => s.id === id);
         if (index !== -1) {
             this.dbServers[index] = updatedServer;
         }
     }
 
-    deleteDBServer(serverName: string): void {
-        this.dbServers = this.dbServers.filter((s) => s.serverName !== serverName);
+    deleteDBServer(id: number): void {
+        this.dbServers = this.dbServers.filter((s) => s.id !== id);
     }
 }

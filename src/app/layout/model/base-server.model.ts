@@ -1,4 +1,5 @@
 export interface BaseServerModel {
+  id:number;
   serverName: string;
   serverHostName: string;
   serverPort: number;
