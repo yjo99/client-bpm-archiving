@@ -5,11 +5,13 @@ import { Empty } from './empty/empty';
 import {DatasourceConfig} from "./ConfigurationManagment/DatasourceConfig";
 import {UserManagement} from "./user/UserManagement";
 import {ProcessManagement} from "./process/ProcessManagement";
+import {BpmServerFormComponent} from "./ConfigurationManagment/component/BpmServerFormComponent";
 
 export default [
     { path: 'documentation', component: Documentation },
     { path: 'crud', component: Crud },
     {path: 'dataconfig', component: DatasourceConfig},
+    {path: 'dataconfig/bpmform', component: BpmServerFormComponent},
     {path: "usermanagement", component: UserManagement},
     {path: "processmanagement", component: ProcessManagement},
     { path: 'empty', component: Empty },

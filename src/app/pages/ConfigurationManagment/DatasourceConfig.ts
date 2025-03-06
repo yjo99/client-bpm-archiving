@@ -36,18 +36,18 @@ export class DatasourceConfig implements OnInit{
         this.dbServers = this.datasourceConfigService.getDBServers();
     }
 
-    deleteBPMServer(serverName: string): void {
-        this.datasourceConfigService.deleteBPMServer(serverName);
+    deleteBPMServer(id: number): void {
+        this.datasourceConfigService.deleteBPMServer(id);
         this.bpmServers = this.datasourceConfigService.getBPMServers(); // Refresh the list
     }
 
-    deleteECMServer(serverName: string): void {
-        this.datasourceConfigService.deleteECMServer(serverName);
+    deleteECMServer(id: number): void {
+        this.datasourceConfigService.deleteECMServer(id);
         this.ecmServers = this.datasourceConfigService.getECMServers(); // Refresh the list
     }
 
-    deleteDBServer(serverName: string): void {
-        this.datasourceConfigService.deleteDBServer(serverName);
+    deleteDBServer(id: number): void {
+        this.datasourceConfigService.deleteDBServer(id);
         this.dbServers = this.datasourceConfigService.getDBServers(); // Refresh the list
     }
 
