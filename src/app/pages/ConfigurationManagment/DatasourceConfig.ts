@@ -12,16 +12,13 @@ import {DatasourceConfigService} from "../../layout/service/DatasourceConfig.ser
 import {BpmServerModel} from "../../layout/model/bpm-server.model";
 import {EcmServerModel} from "../../layout/model/ecm-server.model";
 import {DbServerModel} from "../../layout/model/db-server.model";
-import {Tag} from "primeng/tag";
-import {ConfirmPopup} from "primeng/confirmpopup";
-import {ConfirmationService} from "primeng/api";
 import {Dialog} from "primeng/dialog";
 
 // @ts-ignore
 @Component({
     selector: 'app-dataconfig',
     standalone: true,
-    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, NgForOf, ConfirmPopup, Dialog],
+    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, NgForOf , Dialog],
     templateUrl: './datasourceConfig.html',
     providers: [DatasourceConfigService]
 
