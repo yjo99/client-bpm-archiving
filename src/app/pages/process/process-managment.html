@@ -53,32 +53,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Nested Table for Instances -->
-                        <div class="ml-8 mt-4">
-                            <p-table [value]="process.instances">
-                                <ng-template pTemplate="header">
-                                    <tr>
-                                        <th>Instance ID</th>
-                                        <th>Status</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
-                                        <th>Created By</th>
-                                    </tr>
-                                </ng-template>
-                                <ng-template pTemplate="body" let-instance>
-                                    <tr>
-                                        <td>{{ instance.id }}</td>
-                                        <!--                                        <td>-->
-                                        <!--                                            <p-tag [value]="instance.status" [severity]="getInstanceSeverity(instance.status.valueOf())"></p-tag>-->
-                                        <!--                                        </td>-->
-                                        <td>{{ instance.startDate | date: 'medium' }}</td>
-                                        <td>{{ instance.endDate ? (instance.endDate | date: 'medium') : '-' }}</td>
-                                        <td>{{ instance.createdBy }}</td>
-                                    </tr>
-                                </ng-template>
-                            </p-table>
-                        </div>
                     </div>
                 </div>
             </ng-template>
@@ -93,7 +67,7 @@
                                     <div class="flex flex-row justify-between items-start gap-2">
                                         <div>
                                             <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{ process.description }}</span>
-                                            <div class="text-lg font-medium mt-1">{{ process.name }}</div>
+                                            <div class="text-lg font-medium mt-2" (click)="viewInstances(process.id, process.name)" class="text-lg font-medium mt-1">{{ process.name }}</div>
                                         </div>
                                         <div class="bg-surface-100 p-1" style="border-radius: 30px">
                                             <div
