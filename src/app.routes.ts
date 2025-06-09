@@ -7,11 +7,13 @@ import { Notfound } from './app/pages/notfound/notfound';
 import { Home } from './app/pages/home/home';
 import {DatasourceConfig} from "./app/pages/ConfigurationManagment/DatasourceConfig";
 import {UserManagement} from "./app/pages/user/UserManagement";
+import {AuthGuard} from "./app/core/guards/auth.guard";
 
 export const appRoutes: Routes = [
     {
         path: '',
         component: AppLayout,
+        canActivate: [AuthGuard],
         children: [
             { path: '', component: Home },
             {path: 'dash', component: Dashboard},
@@ -20,7 +22,7 @@ export const appRoutes: Routes = [
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ]
     },
-    { path: 'landing', component: Landing },
+    { path: 'landing', component: Landing ,canActivate: [AuthGuard]},
     { path: 'notfound', component: Notfound },
     { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },
     { path: '**', redirectTo: '/notfound' }
