@@ -53,6 +53,7 @@ export class AuthService {
     }
 
     isAuthenticated(): boolean {
+        console.log(this.bypassAuth)
         return this.bypassAuth || !!this.tokenSubject.value;
     }
 
