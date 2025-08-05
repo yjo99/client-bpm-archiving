@@ -15,6 +15,20 @@
     }
 </style>
 <app-floating-configurator/>
+<p-dialog [(visible)]="displayMessagePopup" [modal]="true" [closable]="true" [dismissableMask]="true" [style]="{width: '400px'}">
+    <ng-template pTemplate="header">
+        <span [ngClass]="popupSuccess ? 'text-green-600' : 'text-red-600'">
+            {{ popupSuccess ? 'Success' : 'Error' }}
+        </span>
+    </ng-template>
+
+    <p>{{ popupMessage }}</p>
+
+    <ng-template pTemplate="footer">
+        <button pButton type="button" label="OK" (click)="displayMessagePopup=false"></button>
+    </ng-template>
+</p-dialog>
+
 <div class="card">
     <h3>Datasource Configuration Management</h3>
 </div>
