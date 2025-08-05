@@ -18,7 +18,6 @@ import {HttpErrorResponse} from "@angular/common/http";
         NgClass,
         NgIf,
         Button,
-        Checkbox,
         ReactiveFormsModule
     ]
 })
