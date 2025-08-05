@@ -112,8 +112,8 @@ export class DbServerFormComponent implements OnInit {
         const serverData = {
             ...formValue,
             useSecureConnection: formValue.useSecureConnection ? 1 : 0,
-            ID: this.server?.ID,
-            serverCode: 'test' // Changed from ServerCode.BAW_01 to 'test'
+            id: this.server?.id,
+            serverCode: ServerCode.DB_01
         };
 
         try {

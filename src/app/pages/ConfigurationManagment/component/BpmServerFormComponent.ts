@@ -108,7 +108,7 @@ export class BpmServerFormComponent implements OnInit {
         const serverData = {
             ...formValue,
             useSecureConnection: formValue.useSecureConnection ? 1 : 0,
-            ID: this.server?.ID
+            id: this.server?.id
         };
 
         try {

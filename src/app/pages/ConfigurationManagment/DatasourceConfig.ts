@@ -19,7 +19,7 @@ import {ServerConfigService} from "../../core/services/ServerConfigService";
 @Component({
     selector: 'app-dataconfig',
     standalone: true,
-    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, NgClass , NgForOf , Dialog],
+    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator , NgForOf , Dialog],
     templateUrl: './datasourceConfig.html',
     providers: [DatasourceConfigService]
 
@@ -47,25 +47,7 @@ export class DatasourceConfig implements OnInit{
     }
 
     deleteBPMServer(id: number): void {
-        if (!id)
-        {
-            this.showPopup('Invalid server ID', false);
-            return;
-        }
-
-        this.serverConfigService.deleteServer(id).subscribe({
-            next: () => {
-                this.bpmServers = this.bpmServers.filter(server => server.id !== id);
-
-                this.showPopup('Server deleted successfully!', true);
-
-                this.displayConfirmation = false;
-            },
-            error: (err) => {
-                this.showPopup('Failed to delete server', false);
-                console.error('Delete error:', err);
-            }
-        });
+        this.deleteServer(id)
         this.bpmServers = this.datasourceConfigService.getBPMServers(); // Refresh the list
         this.displayConfirmation = false;
 
@@ -77,7 +59,7 @@ export class DatasourceConfig implements OnInit{
     }
 
     deleteECMServer(id: number): void {
-        this.datasourceConfigService.deleteECMServer(id);
+        this.deleteServer(id)
         this.ecmServers = this.datasourceConfigService.getECMServers(); // Refresh the list
         this.displayConfirmation = false;
 
@@ -89,7 +71,7 @@ export class DatasourceConfig implements OnInit{
     }
 
     deleteDBServer(id: number): void {
-        this.datasourceConfigService.deleteDBServer(id);
+        this.deleteServer(id)
         this.dbServers = this.datasourceConfigService.getDBServers(); // Refresh the list
         this.displayConfirmation = false;
     }
@@ -110,5 +92,24 @@ export class DatasourceConfig implements OnInit{
         this.popupMessage = message;
         this.popupSuccess = isSuccess;
         this.displayMessagePopup = true;
+    }
+
+    deleteServer(id:number){
+        if (!id)
+        {
+            this.showPopup('Invalid server ID', false);
+            return;
+        }
+
+        this.serverConfigService.deleteServer(id).subscribe({
+            next: () => {
+                this.bpmServers = this.bpmServers.filter(server => server.id !== id);
+
+                this.displayConfirmation = false;
+            },
+            error: (err) => {
+                console.error('Delete error:', err);
+            }
+        });
     }
 }
