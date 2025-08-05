@@ -1,11 +1,13 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import {BpmServerModel} from "../../../layout/model/bpm-server.model";
-import {InputText} from "primeng/inputtext";
-import {NgClass, NgIf} from "@angular/common";
-import {Button} from "primeng/button";
-import {Checkbox} from "primeng/checkbox"; // Import ActivatedRoute and Router
+import { InputText } from "primeng/inputtext";
+import { NgClass, NgIf } from "@angular/common";
+import { Button } from "primeng/button";
+import { Checkbox } from "primeng/checkbox";
+import {ServerConfigService} from "../../../core/services/ServerConfigService";
+import { HttpErrorResponse } from '@angular/common/http';
+import {ServerCode} from "../../../core/DTO/ServerCode";
 
 @Component({
     selector: 'app-bpm-server-form',
@@ -17,87 +19,157 @@ import {Checkbox} from "primeng/checkbox"; // Import ActivatedRoute and Router
         Button,
         Checkbox,
         NgIf
-    ]
+    ],
+    standalone: true
 })
 export class BpmServerFormComponent implements OnInit {
     form: FormGroup;
     isEditMode = false;
-    // server: BpmServerModel | null = null;
-    @Input() server: BpmServerModel | null = null;
+    @Input() server: any = null;
     testMessage: string | null = null;
     testSuccess: boolean = false;
+    loading = false;
 
     constructor(
         private fb: FormBuilder,
-        private route: ActivatedRoute, // Inject ActivatedRoute
-        private router: Router // Inject Router
+        private route: ActivatedRoute,
+        private router: Router,
+        private serverConfigService: ServerConfigService
     ) {
         this.form = this.fb.group({
             serverName: ['', Validators.required],
             serverHostName: ['', Validators.required],
+            contextPath: ['', Validators.required],
+            repositoryName: ['', Validators.required],
+            databaseType: ['', Validators.required],
             serverPort: ['', [Validators.required, Validators.min(1), Validators.max(65535)]],
             userName: ['', Validators.required],
             userPassword: ['', Validators.required],
-            MaximumParallelTransactoin: ['', [Validators.required, Validators.min(1)]],
+            maximumParallelTransaction: ['', [Validators.required, Validators.min(1)]],
             useSecureConnection: [false],
         });
     }
 
     ngOnInit(): void {
-        console.log("Hello");
         this.route.queryParams.subscribe((params) => {
-            console.log("params" + params['server']);
             if (params['server']) {
                 try {
-                    const parsedServer: BpmServerModel = JSON.parse(params['server']);
-                    console.log("parsedServer: " + parsedServer);
+                    const parsedServer = JSON.parse(params['server']);
                     if (parsedServer) {
                         this.server = parsedServer;
                         this.isEditMode = true;
-                        this.form.patchValue(this.server); // Patch form values if in edit mode
+                        this.form.patchValue({
+                            ...this.server,
+                            useSecureConnection: this.server.useSecureConnection === 1
+                        });
                     }
                 } catch (error) {
                     console.error('Error parsing server data:', error);
                 }
             }
         });
-        console.log("server : " + this.server);
-
-        // if (this.server) {
-        //     this.isEditMode = true;
-        //     this.form.patchValue(this.server);
-        // }
     }
 
-    testConnection(): void {
-        // Simulating API call
-        const isSuccessful = Math.random() > 0.5; // Randomly pass/fail for testing
-
-        if (isSuccessful) {
-            this.testMessage = 'Connection Successful!';
-            this.testSuccess = true;
-        } else {
-            this.testMessage = 'Connection Failed!';
-            this.testSuccess = false;
+    async testConnection(): Promise<void> {
+        if (this.form.invalid) {
+            this.showMessage('Please fill all required fields', false);
+            return;
         }
 
-        // Hide the message after 3 seconds
+        this.loading = true;
+        const formValue = this.form.value;
+
+        const testRequest = {
+            host: formValue.serverHostName,
+            port: parseInt(formValue.serverPort),
+            contextPath: formValue.contextPath,
+            username: formValue.userName,
+            password: formValue.userPassword
+        };
+
+        try {
+            const response = await this.serverConfigService.testServerConnection(testRequest).toPromise();
+            this.showMessage('Connection successful!', true);
+        } catch (error) {
+            this.handleError(error, 'Connection failed');
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    async onSubmit(): Promise<void> {
+        if (this.form.invalid) {
+            this.showMessage('Please fill all required fields', false);
+            return;
+        }
+
+        this.loading = true;
+        const formValue = this.form.value;
+
+        const serverData = {
+            ...formValue,
+            useSecureConnection: formValue.useSecureConnection ? 1 : 0,
+            ID: this.server?.ID
+        };
+
+        try {
+            serverData.serverCode = ServerCode.BAW_01
+            if (this.isEditMode) {
+                await this.serverConfigService.updateServer(serverData).toPromise();
+                this.showMessage('Server updated successfully!', true);
+            } else {
+                await this.serverConfigService.addServer(serverData).toPromise();
+                this.showMessage('Server added successfully!', true);
+            }
+
+            setTimeout(() => {
+                this.router.navigate(['/pages/dataconfig']);
+            }, 1500);
+        } catch (error) {
+            this.handleError(error, 'Operation failed');
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    private showMessage(message: string, isSuccess: boolean): void {
+        this.testMessage = message;
+        this.testSuccess = isSuccess;
         setTimeout(() => (this.testMessage = null), 3000);
     }
 
-    onSubmit(): void {
-        if (this.form.valid) {
-            const formValue = this.form.value;
-            const server: BpmServerModel = {
-                id: this.server ? this.server.id : Date.now(), // Use existing ID or generate a new one
-                ...formValue,
-            };
+    private handleError(error: unknown, defaultMessage: string): void {
+        let errorMessage = defaultMessage;
 
-            // Save or update the server (you can emit an event or call a service here)
-            console.log('Server saved/updated:', server);
-
-            // Navigate back to the list screen
-            this.router.navigate(['/pages/dataconfig']);
+        // Handle HTTP error responses
+        if (error instanceof HttpErrorResponse) {
+            // Try to get error message from response body
+            if (error.error) {
+                // Case 1: Error body is a string
+                if (typeof error.error === 'string') {
+                    errorMessage = error.error;
+                }
+                // Case 2: Error body is an object with message property
+                else if (error.error.message) {
+                    errorMessage = error.error.message;
+                }
+                // Case 3: Error body is an object with other properties
+                else {
+                    errorMessage = JSON.stringify(error.error);
+                }
+            } else {
+                errorMessage = error.message || defaultMessage;
+            }
         }
+        // Handle regular Error objects
+        else if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        // Handle string errors
+        else if (typeof error === 'string') {
+            errorMessage = error;
+        }
+
+        this.showMessage(errorMessage, false);
     }
 }

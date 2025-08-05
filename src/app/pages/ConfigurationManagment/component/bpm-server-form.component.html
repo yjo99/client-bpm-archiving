@@ -1,12 +1,12 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="card flex flex-col gap-6 p-6 bg-white shadow-lg rounded-lg">
     <!-- Title -->
     <div class="font-semibold text-2xl text-gray-800">
-        {{ isEditMode ? 'Update BPM Server' : 'Add New BPM Server' }}
+        {{ isEditMode ? 'Update Archiving Server' : 'Add New Archiving Server' }}
     </div>
 
     <!-- Server Name -->
     <div class="flex flex-col gap-1">
-        <label for="serverName" class="text-gray-700 font-medium">Server Name</label>
+        <label for="serverName" class="text-gray-700 font-medium">Server Name*</label>
         <input
                 pInputText
                 id="serverName"
@@ -19,7 +19,7 @@
 
     <!-- Server Host Name -->
     <div class="flex flex-col gap-1">
-        <label for="serverHostName" class="text-gray-700 font-medium">Server Host Name</label>
+        <label for="serverHostName" class="text-gray-700 font-medium">Server Host Name*</label>
         <input
                 pInputText
                 id="serverHostName"
@@ -30,9 +30,48 @@
         />
     </div>
 
+    <!-- Context Path -->
+    <div class="flex flex-col gap-1">
+        <label for="contextPath" class="text-gray-700 font-medium">Context Path*</label>
+        <input
+                pInputText
+                id="contextPath"
+                type="text"
+                formControlName="contextPath"
+                placeholder="Enter context path (e.g. /baw)"
+                class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+        />
+    </div>
+
+    <!-- Repository Name -->
+    <div class="flex flex-col gap-1">
+        <label for="repositoryName" class="text-gray-700 font-medium">Repository Name*</label>
+        <input
+                pInputText
+                id="repositoryName"
+                type="text"
+                formControlName="repositoryName"
+                placeholder="Enter repository name"
+                class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+        />
+    </div>
+
+    <!-- Database Type -->
+    <div class="flex flex-col gap-1">
+        <label for="databaseType" class="text-gray-700 font-medium">Database Type*</label>
+        <input
+                pInputText
+                id="databaseType"
+                type="text"
+                formControlName="databaseType"
+                placeholder="Enter database type"
+                class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+        />
+    </div>
+
     <!-- Server Port -->
     <div class="flex flex-col gap-1">
-        <label for="serverPort" class="text-gray-700 font-medium">Server Port</label>
+        <label for="serverPort" class="text-gray-700 font-medium">Server Port*</label>
         <input
                 pInputText
                 id="serverPort"
@@ -45,7 +84,7 @@
 
     <!-- User Name -->
     <div class="flex flex-col gap-1">
-        <label for="userName" class="text-gray-700 font-medium">User Name</label>
+        <label for="userName" class="text-gray-700 font-medium">User Name*</label>
         <input
                 pInputText
                 id="userName"
@@ -58,7 +97,7 @@
 
     <!-- User Password -->
     <div class="flex flex-col gap-1">
-        <label for="userPassword" class="text-gray-700 font-medium">User Password</label>
+        <label for="userPassword" class="text-gray-700 font-medium">User Password*</label>
         <input
                 pInputText
                 id="userPassword"
@@ -71,30 +110,31 @@
 
     <!-- Maximum Parallel Transactions -->
     <div class="flex flex-col gap-1">
-        <label for="MaximumParallelTransactoin" class="text-gray-700 font-medium">Maximum Parallel Transactions</label>
+        <label for="maximumParallelTransaction" class="text-gray-700 font-medium">Maximum Parallel Transactions*</label>
         <input
                 pInputText
-                id="MaximumParallelTransactoin"
+                id="maximumParallelTransaction"
                 type="number"
-                formControlName="MaximumParallelTransactoin"
+                formControlName="maximumParallelTransaction"
                 placeholder="Enter maximum parallel transactions"
                 class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
         />
     </div>
 
-    <!-- Use Secure Connection -->
-    <div class="flex items-center gap-2">
-        <p-checkbox
-                id="useSecureConnection"
-                formControlName="useSecureConnection"
-                [binary]="true"
-        ></p-checkbox>
-        <label for="useSecureConnection" class="text-gray-700 font-medium">Use Secure Connection</label>
-    </div>
-
     <div class="flex flex-wrap gap-2">
-        <p-button label="Test Connection" severity="info" text (click)="testConnection()" />
-        <p-button type="submit" severity="success" label="{{ isEditMode ? 'Update Server' : 'Add Server' }}" />
+        <p-button
+                label="Test Connection"
+                severity="info"
+                text
+                (click)="testConnection()"
+                [loading]="loading"
+                [disabled]="loading" />
+        <p-button
+                type="submit"
+                severity="success"
+                label="{{ isEditMode ? 'Update Server' : 'Add Server' }}"
+                [loading]="loading"
+                [disabled]="loading" />
     </div>
 
     <!-- Success & Error Popup -->
