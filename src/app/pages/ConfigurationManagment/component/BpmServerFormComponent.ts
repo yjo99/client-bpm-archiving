@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { InputText } from "primeng/inputtext";
 import { NgClass, NgIf } from "@angular/common";
 import { Button } from "primeng/button";
-import { Checkbox } from "primeng/checkbox";
 import {ServerConfigService} from "../../../core/services/ServerConfigService";
 import { HttpErrorResponse } from '@angular/common/http';
 import {ServerCode} from "../../../core/DTO/ServerCode";
@@ -17,7 +16,6 @@ import {ServerCode} from "../../../core/DTO/ServerCode";
         ReactiveFormsModule,
         NgClass,
         Button,
-        Checkbox,
         NgIf
     ],
     standalone: true
