@@ -13,14 +13,14 @@ export class ServerConfigService {
 
     constructor(private http: HttpClient) { }
 
-    // Add a new server
+    // Add a new server (supports plain text or JSON response)
     addServer(server: ServerData): Observable<any> {
-        return this.http.post(`${this.apiUrl}/add`, server);
+        return this.http.post(`${this.apiUrl}/add`, server, { responseType: 'text' as 'json' });
     }
 
-    // Update an existing server
-    updateServer(server: ServerData): Observable<ServerData> {
-        return this.http.put<ServerData>(`${this.apiUrl}/update`, server);
+    // Update an existing server (supports plain text or JSON response)
+    updateServer(server: ServerData): Observable<any> {
+        return this.http.put(`${this.apiUrl}/update`, server, { responseType: 'text' as 'json' });
     }
 
     // Delete a server
@@ -30,7 +30,7 @@ export class ServerConfigService {
 
     // Test server connection
     testServerConnection(request: ServerConnectionRequest): Observable<any> {
-        return this.http.post(`${this.apiUrl}/test-srv`, request);
+        return this.http.post(`${this.apiUrl}/test-srv`, request, { responseType: 'text' as 'json' });
     }
 
     // Get all servers (if you have this endpoint)

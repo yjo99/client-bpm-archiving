@@ -87,7 +87,8 @@ export class BpmServerFormComponent implements OnInit {
 
         try {
             const response = await this.serverConfigService.testServerConnection(testRequest).toPromise();
-            this.showMessage('Connection successful!', true);
+            // Response is now plain text or success message
+            this.showMessage(response || 'Connection successful!', true);
         } catch (error) {
             this.handleError(error, 'Connection failed');
         } finally {

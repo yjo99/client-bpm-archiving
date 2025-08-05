@@ -137,9 +137,9 @@
                 [disabled]="loading" />
     </div>
 
-    <!-- Success & Error Popup -->
-    <div *ngIf="testMessage" class="fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white"
+    <div *ngIf="testMessage"
+         class="fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white max-w-[90vw] overflow-auto"
          [ngClass]="testSuccess ? 'bg-green-500' : 'bg-red-500'">
-        {{ testMessage }}
+        <div class="font-mono text-sm whitespace-pre-wrap break-all">{{ testMessage }}</div>
     </div>
 </form>
