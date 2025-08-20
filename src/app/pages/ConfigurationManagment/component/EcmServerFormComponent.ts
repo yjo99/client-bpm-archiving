@@ -68,13 +68,20 @@ export class EcmServerFormComponent implements OnInit {
     }
 
     async testConnection(): Promise<void> {
-        if (this.form.invalid) {
-            this.showMessage('Please fill all required fields', false);
+        const formValue = this.form.value;
+
+        if (
+            !formValue.serverHostName ||
+            !formValue.serverPort ||
+            !formValue.contextPath ||
+            !formValue.userName ||
+            !formValue.userPassword
+        ) {
+            this.showMessage('Please fill all required fields for connection test', false);
             return;
         }
 
         this.loading = true;
-        const formValue = this.form.value;
 
         const testRequest = {
             host: formValue.serverHostName,
