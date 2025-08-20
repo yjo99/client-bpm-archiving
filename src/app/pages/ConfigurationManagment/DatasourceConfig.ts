@@ -28,10 +28,12 @@ export class DatasourceConfig implements OnInit{
     bpmServers: BpmServerModel[] = [];
     ecmServers: EcmServerModel[] = [];
     dbServers: DbServerModel[] = [];
-    displayConfirmation: boolean = false;
     displayMessagePopup = false;   // ✅ New popup for messages
     popupMessage = '';             // ✅ Message to show in popup
     popupSuccess = true;
+    selectedServerId: number | null = null;
+    selectedServerType: 'BPM' | 'ECM' | 'DB' | null = null;
+    displayConfirmation = false;
 
 
     constructor(
@@ -93,13 +95,23 @@ export class DatasourceConfig implements OnInit{
         });
     }
 
-    openConfirmation() {
+    openConfirmation(id: number, type: 'BPM' | 'ECM' | 'DB') {
+        this.selectedServerId = id;
+        this.selectedServerType = type;
         this.displayConfirmation = true;
     }
-
+    confirmDelete() {
+        if (this.selectedServerId && this.selectedServerType) {
+            this.deleteServer(this.selectedServerId, this.selectedServerType);
+        }
+        this.closeConfirmation();
+    }
     closeConfirmation() {
         this.displayConfirmation = false;
+        this.selectedServerId = null;
+        this.selectedServerType = null;
     }
+
     private showPopup(message: string, isSuccess: boolean): void {
         this.popupMessage = message;
         this.popupSuccess = isSuccess;

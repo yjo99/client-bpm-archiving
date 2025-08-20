@@ -47,20 +47,20 @@
                 <div class="flex justify-between items-center">
                     <!--                    <p-button label="Delete" severity="danger" (click)="deleteBPMServer(server.id)"></p-button>-->
                     <p-button label="Delete" icon="pi pi-trash" severity="danger" [style]="{ width: 'auto' }"
-                              (click)="openConfirmation()"/>
-                    <p-dialog header="Confirmation" [(visible)]="displayConfirmation" [style]="{ width: '350px' }"
-                              [modal]="true">
-                        <div class="flex items-center justify-center">
-                            <i class="pi pi-exclamation-triangle mr-4" style="font-size: 2rem"> </i>
-                            <span>Are you sure you want to proceed?</span>
-                        </div>
-                        <ng-template #footer>
-                            <p-button label="No" icon="pi pi-times" (click)="closeConfirmation()" text
-                                      severity="secondary"/>
-                            <p-button label="Yes" icon="pi pi-check" (click)="deleteBPMServer(server.id)"
-                                      severity="danger" outlined autofocus/>
-                        </ng-template>
-                    </p-dialog>
+                              (click)="openConfirmation(server.id, 'BPM')"/>
+<!--                    <p-dialog header="Confirmation" [(visible)]="displayConfirmation" [style]="{ width: '350px' }"-->
+<!--                              [modal]="true">-->
+<!--                        <div class="flex items-center justify-center">-->
+<!--                            <i class="pi pi-exclamation-triangle mr-4" style="font-size: 2rem"> </i>-->
+<!--                            <span>Are you sure you want to proceed?</span>-->
+<!--                        </div>-->
+<!--                        <ng-template #footer>-->
+<!--                            <p-button label="No" icon="pi pi-times" (click)="closeConfirmation()" text-->
+<!--                                      severity="secondary"/>-->
+<!--                            <p-button label="Yes" icon="pi pi-check" (click)="deleteBPMServer(server.id)"-->
+<!--                                      severity="danger" outlined autofocus/>-->
+<!--                        </ng-template>-->
+<!--                    </p-dialog>-->
                     <p-button label="Update" (click)="onUpdateBPMServer(server)"></p-button>
                 </div>
             </div>
@@ -96,20 +96,20 @@
                 <div class="mb-4 font-medium">{{ server.serverHostName }}:{{ server.serverPort }}</div>
                 <div class="flex justify-between items-center">
                     <p-button label="Delete" icon="pi pi-trash" severity="danger" [style]="{ width: 'auto' }"
-                              (click)="openConfirmation()"/>
-                    <p-dialog header="Confirmation" [(visible)]="displayConfirmation" [style]="{ width: '350px' }"
-                              [modal]="true">
-                        <div class="flex items-center justify-center">
-                            <i class="pi pi-exclamation-triangle mr-4" style="font-size: 2rem"> </i>
-                            <span>Are you sure you want to proceed?</span>
-                        </div>
-                        <ng-template #footer>
-                            <p-button label="No" icon="pi pi-times" (click)="closeConfirmation()" text
-                                      severity="secondary"/>
-                            <p-button label="Yes" icon="pi pi-check" (click)="deleteECMServer(server.id)"
-                                      severity="danger" outlined autofocus/>
-                        </ng-template>
-                    </p-dialog>
+                              (click)="openConfirmation(server.id, 'ECM')"/>
+<!--                    <p-dialog header="Confirmation" [(visible)]="displayConfirmation" [style]="{ width: '350px' }"-->
+<!--                              [modal]="true">-->
+<!--                        <div class="flex items-center justify-center">-->
+<!--                            <i class="pi pi-exclamation-triangle mr-4" style="font-size: 2rem"> </i>-->
+<!--                            <span>Are you sure you want to proceed?</span>-->
+<!--                        </div>-->
+<!--                        <ng-template #footer>-->
+<!--                            <p-button label="No" icon="pi pi-times" (click)="closeConfirmation()" text-->
+<!--                                      severity="secondary"/>-->
+<!--                            <p-button label="Yes" icon="pi pi-check" (click)="deleteECMServer(server.id)"-->
+<!--                                      severity="danger" outlined autofocus/>-->
+<!--                        </ng-template>-->
+<!--                    </p-dialog>-->
                     <p-button label="Update" (click)="onUpdateECMServer(server)"></p-button>
                 </div>
             </div>
@@ -145,23 +145,35 @@
                 <div class="mb-4 font-medium">{{ server.serverHostName }}:{{ server.serverPort }}</div>
                 <div class="flex justify-between items-center">
                     <p-button label="Delete" icon="pi pi-trash" severity="danger" [style]="{ width: 'auto' }"
-                              (click)="openConfirmation()"/>
-                    <p-dialog header="Confirmation" [(visible)]="displayConfirmation" [style]="{ width: '350px' }"
-                              [modal]="true">
-                        <div class="flex items-center justify-center">
-                            <i class="pi pi-exclamation-triangle mr-4" style="font-size: 2rem"> </i>
-                            <span>Are you sure you want to proceed?</span>
-                        </div>
-                        <ng-template #footer>
-                            <p-button label="No" icon="pi pi-times" (click)="closeConfirmation()" text
-                                      severity="secondary"/>
-                            <p-button label="Yes" icon="pi pi-check" (click)="deleteDBServer(server.id)"
-                                      severity="danger" outlined autofocus/>
-                        </ng-template>
-                    </p-dialog>
+                              (click)="openConfirmation(server.id, 'DB')"/>
+<!--                    <p-dialog header="Confirmation" [(visible)]="displayConfirmation" [style]="{ width: '350px' }"-->
+<!--                              [modal]="true">-->
+<!--                        <div class="flex items-center justify-center">-->
+<!--                            <i class="pi pi-exclamation-triangle mr-4" style="font-size: 2rem"> </i>-->
+<!--                            <span>Are you sure you want to proceed?</span>-->
+<!--                        </div>-->
+<!--                        <ng-template #footer>-->
+<!--                            <p-button label="No" icon="pi pi-times" (click)="closeConfirmation()" text-->
+<!--                                      severity="secondary"/>-->
+<!--                            <p-button label="Yes" icon="pi pi-check" (click)="deleteDBServer(server.id)"-->
+<!--                                      severity="danger" outlined autofocus/>-->
+<!--                        </ng-template>-->
+<!--                    </p-dialog>-->
                     <p-button label="Update" (click)="onUpdateDBServer(server)"></p-button>
                 </div>
             </div>
         </div>
     </div>
+
+    <p-dialog header="Confirmation" [(visible)]="displayConfirmation" [style]="{ width: '350px' }" [modal]="true">
+        <div class="flex items-center justify-center">
+            <i class="pi pi-exclamation-triangle mr-4" style="font-size: 2rem"></i>
+            <span>Are you sure you want to delete this server?</span>
+        </div>
+        <ng-template #footer>
+            <p-button label="No" icon="pi pi-times" (click)="closeConfirmation()" text severity="secondary" />
+            <p-button label="Yes" icon="pi pi-check" (click)="confirmDelete()" severity="danger" outlined autofocus />
+        </ng-template>
+    </p-dialog>
+
 </div>
