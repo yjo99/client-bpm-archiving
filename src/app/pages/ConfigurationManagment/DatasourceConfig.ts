@@ -53,7 +53,7 @@ export class DatasourceConfig implements OnInit{
     }
 
     deleteBPMServer(id: number): void {
-        this.deleteServer(id)
+        this.deleteServer(id,'BPM')
         this.datasourceConfigService.getBPMServers().subscribe(data => {
             this.bpmServers = data;
         });
@@ -67,7 +67,7 @@ export class DatasourceConfig implements OnInit{
     }
 
     deleteECMServer(id: number): void {
-        this.deleteServer(id)
+        this.deleteServer(id,'ECM')
         this.datasourceConfigService.getECMServers().subscribe(data => {
             this.ecmServers = data;
         });
@@ -81,7 +81,7 @@ export class DatasourceConfig implements OnInit{
     }
 
     deleteDBServer(id: number): void {
-        this.deleteServer(id)
+        this.deleteServer(id,'DB')
         this.datasourceConfigService.getDBServers().subscribe(data => {
             this.dbServers = data;
         });
@@ -106,22 +106,29 @@ export class DatasourceConfig implements OnInit{
         this.displayMessagePopup = true;
     }
 
-    deleteServer(id:number){
-        if (!id)
-        {
+    deleteServer(id: number, type: 'BPM' | 'ECM' | 'DB'): void {
+        if (!id) {
             this.showPopup('Invalid server ID', false);
             return;
         }
 
         this.serverConfigService.deleteServer(id).subscribe({
             next: () => {
-                this.bpmServers = this.bpmServers.filter(server => server.id !== id);
-
+                if (type === 'BPM') {
+                    this.bpmServers = this.bpmServers.filter(server => server.id !== id);
+                } else if (type === 'ECM') {
+                    this.ecmServers = this.ecmServers.filter(server => server.id !== id);
+                } else if (type === 'DB') {
+                    this.dbServers = this.dbServers.filter(server => server.id !== id);
+                }
                 this.displayConfirmation = false;
+                this.showPopup('Server deleted successfully', true);
             },
             error: (err) => {
                 console.error('Delete error:', err);
+                this.showPopup('Failed to delete server', false);
             }
         });
     }
+
 }
