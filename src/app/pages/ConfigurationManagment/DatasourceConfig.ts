@@ -41,14 +41,22 @@ export class DatasourceConfig implements OnInit{
     ) {}
 
     ngOnInit(): void {
-        this.bpmServers = this.datasourceConfigService.getBPMServers();
-        this.ecmServers = this.datasourceConfigService.getECMServers();
-        this.dbServers = this.datasourceConfigService.getDBServers();
+        this.datasourceConfigService.getBPMServers().subscribe(data => {
+            this.bpmServers = data;
+        });
+        this.datasourceConfigService.getECMServers().subscribe(data => {
+            this.ecmServers = data;
+        });
+        this.datasourceConfigService.getDBServers().subscribe(data => {
+            this.dbServers = data;
+        });
     }
 
     deleteBPMServer(id: number): void {
         this.deleteServer(id)
-        this.bpmServers = this.datasourceConfigService.getBPMServers(); // Refresh the list
+        this.datasourceConfigService.getBPMServers().subscribe(data => {
+            this.bpmServers = data;
+        });
         this.displayConfirmation = false;
 
     }
@@ -60,7 +68,9 @@ export class DatasourceConfig implements OnInit{
 
     deleteECMServer(id: number): void {
         this.deleteServer(id)
-        this.ecmServers = this.datasourceConfigService.getECMServers(); // Refresh the list
+        this.datasourceConfigService.getECMServers().subscribe(data => {
+            this.ecmServers = data;
+        });
         this.displayConfirmation = false;
 
     }
@@ -72,7 +82,9 @@ export class DatasourceConfig implements OnInit{
 
     deleteDBServer(id: number): void {
         this.deleteServer(id)
-        this.dbServers = this.datasourceConfigService.getDBServers(); // Refresh the list
+        this.datasourceConfigService.getDBServers().subscribe(data => {
+            this.dbServers = data;
+        });
         this.displayConfirmation = false;
     }
     onUpdateDBServer(server: DbServerModel): void {

@@ -1,10 +1,15 @@
 export interface BaseServerModel {
-  id:number;
+  id: number;
   serverName: string;
   serverHostName: string;
-  serverPort: number;
+  serverPort: string;
   userName: string;
   userPassword: string;
-  MaximumParallelTransactoin: number;
-  useSecureConnection: boolean;
+  maximumParallelTransaction?: string;
+  useSecureConnection: number;
+  // Additional properties that might be present in ServerData
+  serverCode?: string;
+  contextPath?: string;
+  repositoryName?: string;
+  databaseType?: string;
 }

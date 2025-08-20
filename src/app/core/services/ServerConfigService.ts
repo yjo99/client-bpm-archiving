@@ -13,12 +13,12 @@ export class ServerConfigService {
 
     constructor(private http: HttpClient) { }
 
-    // Add a new server (supports plain text or JSON response)
+    // Add a new server
     addServer(server: ServerData): Observable<any> {
         return this.http.post(`${this.apiUrl}/add`, server, { responseType: 'text' as 'json' });
     }
 
-    // Update an existing server (supports plain text or JSON response)
+    // Update an existing server
     updateServer(server: ServerData): Observable<any> {
         return this.http.put(`${this.apiUrl}/update`, server, { responseType: 'text' as 'json' });
     }
@@ -33,12 +33,14 @@ export class ServerConfigService {
         return this.http.post(`${this.apiUrl}/test-srv`, request, { responseType: 'text' as 'json' });
     }
 
-    // Get all servers (if you have this endpoint)
-    getAllServers(): Observable<ServerData[]> {
-        return this.http.get<ServerData[]>(this.apiUrl);
+    // Get all servers
+    getAllServers(serverCode: string): Observable<ServerData[]> {
+        return this.http.get<ServerData[]>(`${this.apiUrl}/getServer`, {
+            params: { serverCode }
+        });
     }
 
-    // Get server by ID (if you have this endpoint)
+    // Get server by ID
     getServerById(id: number): Observable<ServerData> {
         return this.http.get<ServerData>(`${this.apiUrl}/${id}`);
     }

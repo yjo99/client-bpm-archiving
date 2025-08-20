@@ -1,5 +1,5 @@
 export interface ServerData {
-    id?: number;
+    id: number;
     serverName: string;
     serverCode: string;
     serverHostName: string;
