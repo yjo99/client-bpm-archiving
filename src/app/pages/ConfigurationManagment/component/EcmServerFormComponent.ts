@@ -41,10 +41,10 @@ export class EcmServerFormComponent implements OnInit {
             serverPort: ['', [Validators.required, Validators.min(1), Validators.max(65535)]],
             userName: ['', Validators.required],
             userPassword: ['', Validators.required],
-            MaximumParallelTransactoin: ['', [Validators.required, Validators.min(1)]],
+            MaximumParallelTransactoin: ['', [Validators.min(0)]],
             useSecureConnection: [false],
             contextPath: ['', Validators.required],
-            RepositoryName: ['', Validators.required],
+            RepositoryName: [''],
         });
     }
 
