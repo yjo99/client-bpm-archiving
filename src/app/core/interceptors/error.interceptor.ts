@@ -15,7 +15,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                 authService.clearToken();
 
                 // ✅ Redirect to login page
-                router.navigate(['/login']);
+                router.navigate(['auth/login']);
             }
             return throwError(() => error);
         })
