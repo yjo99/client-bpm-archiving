@@ -31,10 +31,10 @@ export class AuthService {
             });
         }
 
-        return this.http.post<any>(`${environment.apiUrl}/auth/login`, { username, password }).pipe(
+        return this.http.post<any>(`${environment.apiUrl}/api/auth/login`, { username, password }).pipe(
             tap(response => {
-                if (response.token) {
-                    this.setToken(response.token);
+                if (response && response.accessToken) {
+                      this.setToken(response.accessToken);  // store JWT
                 }
             })
         );
@@ -62,5 +62,10 @@ export class AuthService {
             this.tokenSubject.next(token);
             localStorage.setItem('authToken', token);
         }
+    }
+
+    clearToken(): void {
+      localStorage.removeItem('token');  // or however you store it
+      this.tokenSubject.next(null);      // reset BehaviorSubject
     }
 }

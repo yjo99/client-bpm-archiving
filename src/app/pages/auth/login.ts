@@ -62,12 +62,13 @@ export class Login {
             },
             error: (error) => {
                 this.loading = false;
+
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Login Failed',
                     detail: error.error?.message || 'Invalid credentials'
                 });
-            },
+           },
             complete: () => {
                 this.loading = false;
             }
