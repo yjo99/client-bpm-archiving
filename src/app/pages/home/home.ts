@@ -7,8 +7,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
-import { jwtDecode } from 'jwt-decode';
-import { AuthService } from '../services/auth.service';
+import {AuthService} from "../../core/services/auth.service";
+import {jwtDecode} from "jwt-decode";
 
 @Component({
   selector: 'app-home',
@@ -30,14 +30,14 @@ export class Home implements OnInit {
   constructor(private authService: AuthService) {}
 
     ngOnInit(): void {
-        any token = this.authService.getToken();
-      if (token) {
-//         try {
-//           const decoded: any = jwtDecode(token);
-//           this.username = decoded.sub;
-//         } catch (e) {
-//           console.error('Invalid token', e);
-//         }
-      }
+        const token = this.authService.getToken();
+        if (token) {
+            try {
+                const decoded: any = jwtDecode(token);
+                this.username = decoded.sub;
+            } catch (e) {
+                console.error('Invalid token', e);
+            }
+        }
     }
 }
