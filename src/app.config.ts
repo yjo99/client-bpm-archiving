@@ -7,7 +7,7 @@ import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import {commonHeadersInterceptor} from "./app/core/interceptors/common-headers.interceptor";
 import {authInterceptor} from "./app/core/interceptors/auth.interceptor";
-import {ValidAuthInterceptor} from "./app/core/interceptors/valid.auth.interceptor";
+import {errorInterceptor} from "./app/core/interceptors/error.interceptor";
 
 
 export const appConfig: ApplicationConfig = {
@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
             withInterceptors([
                 commonHeadersInterceptor, // Runs first
                 authInterceptor,// Runs second
-                ValidAuthInterceptor
+                errorInterceptor
             ])
         ),
         provideRouter(appRoutes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation()),
