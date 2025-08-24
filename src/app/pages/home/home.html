@@ -1,5 +1,7 @@
 <app-floating-configurator />
 <div class="card">
     <h1>Welcome, {{ username || 'Guest' }}!</h1>
+    <p *ngIf="roles.length > 0">Your roles: {{ roles.join(', ') }}</p>
+
 </div>
 

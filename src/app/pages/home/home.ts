@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -14,6 +15,7 @@ import {jwtDecode} from "jwt-decode";
   selector: 'app-home',
   standalone: true,
   imports: [
+    CommonModule,
     ButtonModule,
     CheckboxModule,
     InputTextModule,
@@ -27,6 +29,8 @@ import {jwtDecode} from "jwt-decode";
 })
 export class Home implements OnInit {
   username: string = '';
+  roles: string[] = [];
+
   constructor(private authService: AuthService) {}
 
     ngOnInit(): void {
@@ -35,6 +39,8 @@ export class Home implements OnInit {
             try {
                 const decoded: any = jwtDecode(token);
                 this.username = decoded.sub;
+                this.roles = decoded.roles || [];
+
             } catch (e) {
                 console.error('Invalid token', e);
             }

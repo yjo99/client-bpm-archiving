@@ -45,7 +45,7 @@ export class AuthService {
             this.tokenSubject.next(null);
             localStorage.removeItem('authToken');
         }
-        this.router.navigate(['/login']);
+        this.router.navigate(['auth/login']);
     }
 
     getToken(): string | null {
