@@ -8,14 +8,10 @@
     <div class="card">
         <div class="font-semibold text-xl">Processes</div>
 
-        <!-- Loading indicator -->
-        <div *ngIf="loading" class="flex justify-center items-center p-6">
-            <p-progressSpinner></p-progressSpinner>
-        </div>
-
         <p-dataview [value]="processes" [layout]="layout" [lazy]="true"
-                    [totalRecords]="totalRecords" (onLazyLoad)="loadProcessesLazy($event)"
+                    [totalRecords]="totalRecords" (onLazyLoad)="loadProcesses()"
                     [loading]="loading">
+
             <ng-template #header>
                 <div class="flex justify-between items-center">
                     <div class="text-sm text-surface-500">
@@ -39,26 +35,40 @@
                             <div class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6">
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div>
-                                        <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{ process.description }}</span>
+                                        <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{ process?.description }}</span>
                                         <div class="text-lg font-medium mt-2"
+                                             (click)="viewInstances(process?.ID, process?.name)"
                                              style="cursor: pointer;">
-                                            {{ process.name }}
+                                            {{ process?.name }}
                                         </div>
                                         <div class="text-sm text-surface-400 mt-1">
-                                            {{ process.shortName }}
+                                            {{ process?.shortName }}
                                         </div>
                                     </div>
-                                    <div class="bg-surface-100 p-1" style="border-radius: 30px">
-                                        <div class="bg-surface-0 flex items-center gap-2 justify-center py-1 px-2"
-                                             style="border-radius: 30px; box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px 0px rgba(0, 0, 0, 0.06);">
-                                            <span class="text-surface-900 font-medium text-sm">{{ process.defaultVersion }}</span>
-                                            <i class="pi pi-info-circle text-blue-500"></i>
+                                    <div class="flex flex-col items-end gap-2">
+                                        <p-tag [value]="getConfigurationText(process.configured)"
+                                               [severity]="getConfigurationSeverity(process.configured)"
+                                               class="text-xs"></p-tag>
+                                        <div class="bg-surface-100 p-1" style="border-radius: 30px">
+                                            <div class="bg-surface-0 flex items-center gap-2 justify-center py-1 px-2"
+                                                 style="border-radius: 30px; box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px 0px rgba(0, 0, 0, 0.06);">
+                                                <span class="text-surface-900 font-medium text-sm">{{ process?.defaultVersion }}</span>
+                                                <i class="pi pi-info-circle text-blue-500"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="flex flex-col md:items-end gap-2">
-                                    <span class="text-sm text-surface-500">Modified by: {{ process.lastModifiedBy }}</span>
-                                    <span class="text-md font-semibold">{{ process.createdDate | date: 'medium' }}</span>
+                                    <span class="text-sm text-surface-500">Modified by: {{ process?.lastModifiedBy }}</span>
+                                    <span class="text-md font-semibold">{{ process?.createdDate | date: 'medium' }}</span>
+                                    <!-- Configure Button for non-configured processes -->
+                                    <button *ngIf="!process.configured"
+                                            pButton
+                                            type="button"
+                                            label="Configure"
+                                            icon="pi pi-cog"
+                                            (click)="configureProcess(process)"
+                                            class="p-button-outlined p-button-sm mt-2"></button>
                                 </div>
                             </div>
                         </div>
@@ -71,30 +81,44 @@
                 <div class="grid grid-cols-12 gap-4">
                     <div *ngFor="let process of processes; let i = index"
                          class="col-span-12 sm:col-span-6 lg:col-span-4 p-2">
-                        <div class="bg-surface-50 flex justify-center rounded p-6 h-full">
+                        <div class="bg-surface-50 flex justify-center rounded p-6 h-full flex-col">
                             <div class="w-full">
-                                <div class="flex flex-row justify-between items-start gap-2">
+                                <div class="flex flex-row justify-between items-start gap-2 mb-4">
                                     <div class="flex-1">
-                                        <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{ process.description }}</span>
+                                        <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{ process?.description }}</span>
                                         <div class="text-lg font-medium mt-2"
+                                             (click)="viewInstances(process?.ID, process?.name)"
                                              style="cursor: pointer;">
-                                            {{ process.name }}
+                                            {{ process?.name }}
                                         </div>
                                         <div class="text-sm text-surface-400 mt-1">
-                                            {{ process.shortName }}
+                                            {{ process?.shortName }}
                                         </div>
                                     </div>
-                                    <div class="bg-surface-100 p-1" style="border-radius: 30px">
-                                        <div class="bg-surface-0 flex items-center gap-2 justify-center py-1 px-2"
-                                             style="border-radius: 30px; box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px 0px rgba(0, 0, 0, 0.06);">
-                                            <span class="text-surface-900 font-medium text-sm">{{ process.defaultVersion }}</span>
-                                            <i class="pi pi-info-circle text-blue-500"></i>
+                                    <div class="flex flex-col items-end gap-2">
+                                        <p-tag [value]="getConfigurationText(process.configured)"
+                                               [severity]="getConfigurationSeverity(process.configured)"
+                                               class="text-xs"></p-tag>
+                                        <div class="bg-surface-100 p-1" style="border-radius: 30px">
+                                            <div class="bg-surface-0 flex items-center gap-2 justify-center py-1 px-2"
+                                                 style="border-radius: 30px; box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px 0px rgba(0, 0, 0, 0.06);">
+                                                <span class="text-surface-900 font-medium text-sm">{{ process?.defaultVersion }}</span>
+                                                <i class="pi pi-info-circle text-blue-500"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-2 mt-4">
-                                    <span class="text-sm text-surface-500">Modified by: {{ process.lastModifiedBy }}</span>
-                                    <span class="text-md font-semibold">{{ process.createdDate | date: 'medium' }}</span>
+                                    <span class="text-sm text-surface-500">Modified by: {{ process?.lastModifiedBy }}</span>
+                                    <span class="text-md font-semibold">{{ process?.createdDate | date: 'medium' }}</span>
+                                    <!-- Configure Button for non-configured processes -->
+                                    <button *ngIf="!process.configured"
+                                            pButton
+                                            type="button"
+                                            label="Configure"
+                                            icon="pi pi-cog"
+                                            (click)="configureProcess(process)"
+                                            class="p-button-outlined p-button-sm mt-2 w-full"></button>
                                 </div>
                             </div>
                         </div>

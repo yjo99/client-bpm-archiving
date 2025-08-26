@@ -10,6 +10,7 @@ import {DbServerFormComponent} from "./ConfigurationManagment/component/DbServer
 import {ProcessesManagement} from "./process/ProcessesManagement";
 import {InstanceListManagement} from "./process/InastanceListManagment";
 import {DynamicViewComponent} from "./process/DynamicViewComponent";
+import {ProcessConfigurationComponent} from "./process/process-configuration.component";
 
 export default [
     { path: 'documentation', component: Documentation },
@@ -22,6 +23,7 @@ export default [
     {path: "processmanagement", component: ProcessesManagement},
     {path: 'process/instance/:processId/instances', component: InstanceListManagement},
     { path: 'process/instance-view/:id', component: DynamicViewComponent },
+    {path: 'pages/process/configure/:id', component: ProcessConfigurationComponent},
     { path: 'empty', component: Empty },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

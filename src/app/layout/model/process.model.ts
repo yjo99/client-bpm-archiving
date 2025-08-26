@@ -7,5 +7,6 @@ export interface ProcessModel {
     lastModifiedBy: string;
     defaultVersion: string;
     lastModified_on: string;
-    createdDate?: Date; // You might want to map lastModified_on to this
+    createdDate?: Date;
+    configured: boolean;
 }

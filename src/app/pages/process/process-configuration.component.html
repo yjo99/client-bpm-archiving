@@ -1,0 +1,48 @@
+<!-- process-configuration.component.html -->
+<div class="p-4">
+    <div class="card">
+        <h1>Configure Process</h1>
+
+        <div *ngIf="process" class="mt-4">
+            <p-card header="Process Details">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <strong>Name:</strong> {{ process.name }}
+                    </div>
+                    <div>
+                        <strong>Short Name:</strong> {{ process.shortName }}
+                    </div>
+                    <div>
+                        <strong>Description:</strong> {{ process.description }}
+                    </div>
+                    <div>
+                        <strong>Version:</strong> {{ process.defaultVersion }}
+                    </div>
+                    <div>
+                        <strong>Last Modified:</strong> {{ process.lastModified_on | date: 'medium' }}
+                    </div>
+                    <div>
+                        <strong>Modified By:</strong> {{ process.lastModifiedBy }}
+                    </div>
+                </div>
+            </p-card>
+
+            <!-- Add your configuration form here -->
+            <div class="card mt-4">
+                <h3>Configuration Settings</h3>
+                <p>Add your configuration form fields here...</p>
+            </div>
+
+            <div class="flex gap-2 mt-4">
+                <button pButton type="button" label="Save" icon="pi pi-check"
+                        (click)="saveConfiguration()" class="p-button-success"></button>
+                <button pButton type="button" label="Cancel" icon="pi pi-times"
+                        (click)="cancel()" class="p-button-secondary"></button>
+            </div>
+        </div>
+
+        <div *ngIf="!process" class="text-center p-4">
+            <p>Loading process data...</p>
+        </div>
+    </div>
+</div>

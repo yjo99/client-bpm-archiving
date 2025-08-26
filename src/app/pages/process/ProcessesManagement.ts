@@ -7,14 +7,15 @@ import { DataView } from "primeng/dataview";
 import { AppFloatingConfigurator } from "../../layout/component/app.floatingconfigurator";
 import { SelectButton } from "primeng/selectbutton";
 import { FormsModule } from "@angular/forms";
-import {CommonModule, DatePipe, NgClass, NgForOf} from "@angular/common";
+import { CommonModule, DatePipe, NgClass } from "@angular/common";
 import { TableModule } from "primeng/table";
 import { ProcessStatus } from "../../layout/model/ProcessStatus";
 import { Router } from "@angular/router";
-import { LazyLoadEvent } from 'primeng/api';
 import { PaginatorModule } from 'primeng/paginator';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import {ProcessResponse} from "../../core/DTO/process.response";
+import { ProcessResponse } from "../../core/DTO/process.response";
+import { TagModule } from 'primeng/tag';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
     selector: 'app-processes',
@@ -27,10 +28,11 @@ import {ProcessResponse} from "../../core/DTO/process.response";
         FormsModule,
         NgClass,
         TableModule,
-        NgForOf,
         DatePipe,
         PaginatorModule,
-        ProgressSpinnerModule
+        ProgressSpinnerModule,
+        TagModule, // Add TagModule
+        ButtonModule // Add ButtonModule
     ],
     providers: [MessageService]
 })
@@ -59,10 +61,9 @@ export class ProcessesManagement implements OnInit {
         this.loading = true;
         this.processService.getProcesses(this.page, this.pageSize).subscribe({
             next: (response: ProcessResponse) => {
-                // Add explicit type annotation to the process parameter
                 this.processes = response.processAppsList.map((process: ProcessModel) => ({
                     ...process,
-                    createdDate: new Date(process.lastModified_on) // Map lastModified_on to createdDate
+                    createdDate: new Date(process.lastModified_on)
                 }));
                 this.totalRecords = response.totalCount || response.processAppsList.length;
                 this.loading = false;
@@ -74,8 +75,6 @@ export class ProcessesManagement implements OnInit {
                     detail: 'Failed to load processes'
                 });
                 this.loading = false;
-
-                // Fallback to mock data for development
                 this.processes = this.processService.getMockProcesses();
                 this.totalRecords = this.processes.length;
             }
@@ -85,13 +84,6 @@ export class ProcessesManagement implements OnInit {
     onPageChange(event: any): void {
         this.page = event.page;
         this.pageSize = event.rows;
-        this.loadProcesses();
-    }
-
-    // Handle lazy loading for DataView (if needed)
-    loadProcessesLazy(event: LazyLoadEvent): void {
-        this.page = (event.first || 0) / (event.rows || 10);
-        this.pageSize = event.rows || 10;
         this.loadProcesses();
     }
 
@@ -106,5 +98,22 @@ export class ProcessesManagement implements OnInit {
         this.router.navigate(['/pages/process/instance', processId, 'instances'], {
             queryParams: { name: processName },
         });
+    }
+
+    // New method to navigate to configuration screen
+    configureProcess(process: ProcessModel): void {
+        this.router.navigate(['/pages/process/configure', process.ID], {
+            state: { processData: process } // Pass process data to configuration screen
+        });
+    }
+
+    // Method to get severity for configuration status tag
+    getConfigurationSeverity(configured: boolean): string {
+        return configured ? 'success' : 'warning';
+    }
+
+    // Method to get configuration status text
+    getConfigurationText(configured: boolean): string {
+        return configured ? 'Configured' : 'Not Configured';
     }
 }
