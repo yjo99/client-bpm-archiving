@@ -26,22 +26,20 @@ export class ProcessConfigurationComponent implements OnInit {
     ngOnInit(): void {
         // Get process data from navigation state
         const navigation = this.router.getCurrentNavigation();
-        if (navigation?.extras.state) {
-            this.process = navigation.extras.state['processData'];
+        const state = navigation?.extras.state as { processData: ProcessModel } | undefined;
+
+        if (state?.processData) {
+            this.process = state.processData;
+            this.processId = this.process.ID; // Set processId from the process data
+        } else {
+            // If no state, redirect back to process management
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Warning',
+                detail: 'Please select a process to configure'
+            });
+            this.router.navigate(['/processmanagement']);
         }
-
-        // Get process ID from route parameters
-        this.processId = this.route.snapshot.paramMap.get('id') || '';
-
-        // If no process data in state, you might want to fetch it from API
-        if (!this.process) {
-            this.fetchProcessData();
-        }
-    }
-
-    fetchProcessData(): void {
-        // Implement API call to fetch process data by ID
-        // this.processService.getProcessById(this.processId).subscribe(...)
     }
 
     saveConfiguration(): void {
