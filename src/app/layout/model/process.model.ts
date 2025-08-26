@@ -1,10 +1,11 @@
-import {InstanceModel} from "./instance.model";
-
 export interface ProcessModel {
-    id: number; // Unique identifier for the process
-    name: string; // Name of the process
-    description: string; // Description of the process
-    version: string; // Version of the process
-    createdDate: Date; // Date when the process was created
-    instances: InstanceModel[]; // List of instances for this process
+    ID: string;
+    name: string;
+    shortName: string;
+    description: string;
+    richDescription?: string;
+    lastModifiedBy: string;
+    defaultVersion: string;
+    lastModified_on: string;
+    createdDate?: Date; // You might want to map lastModified_on to this
 }

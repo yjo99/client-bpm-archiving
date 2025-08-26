@@ -52,7 +52,7 @@ export class InstanceListManagement implements OnInit {
         // Get the processId from the route parameters
         this.route.params.subscribe((params) => {
             this.processId = +params['processId']; // Convert to number
-            this.loadInstances(this.processId);
+            // this.loadInstances(this.processId);
         });
 
         // Get the processName from the query parameters
@@ -62,7 +62,7 @@ export class InstanceListManagement implements OnInit {
     }
 
     loadInstances(processId: number): void {
-        this.instances = this.processService.getInstancesByProcessId(processId);
+        // this.instances = this.processService.getInstancesByProcessId(processId);
     }
 
     onGlobalFilter(table: Table, event: Event): void {
@@ -88,6 +88,6 @@ export class InstanceListManagement implements OnInit {
     }
 
     navigateToInstanceView(instanceId: number): void {
-        this.router.navigate(['/pages/process/instance-view', instanceId]);
+    //     this.router.navigate(['/pages/process/instance-view', instanceId]);
     }
 }
