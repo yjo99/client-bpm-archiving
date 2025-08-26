@@ -9,7 +9,7 @@ import {environment} from "../../../environments/environment";
     providedIn: 'root',
 })
 export class ProcessService {
-    private apiUrl = '/api/processes'; // Update with your actual API endpoint
+    private apiUrl = '/wizard/processes'; // Update with your actual API endpoint
 
     constructor(
         private http: HttpClient
@@ -20,7 +20,7 @@ export class ProcessService {
             .set('page', page.toString())
             .set('pageSize', pageSize.toString());
 
-        return this.http.get<ProcessResponse>(`${environment.apiUrl}/api/processes`, { params });
+        return this.http.get<ProcessResponse>(`${environment.apiUrl}/wizard/processes`, { params });
     }
 
     // Optional: Keep the mock data for development
