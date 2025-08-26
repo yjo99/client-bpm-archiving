@@ -15,7 +15,7 @@ import {ProcessModel} from "../../layout/model/process.model";
 })
 export class ProcessConfigurationComponent implements OnInit {
     process: ProcessModel | null = null;
-    processId: string = '';
+    processId: string | undefined = '';
 
     constructor(
         private route: ActivatedRoute,
@@ -24,21 +24,38 @@ export class ProcessConfigurationComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        // Get process data from navigation state
-        const navigation = this.router.getCurrentNavigation();
-        const state = navigation?.extras.state as { processData: ProcessModel } | undefined;
+        console.log('History state:', history.state);
 
-        if (state?.processData) {
-            this.process = state.processData;
-            this.processId = this.process.ID; // Set processId from the process data
-        } else {
-            // If no state, redirect back to process management
-            this.messageService.add({
-                severity: 'warn',
-                summary: 'Warning',
-                detail: 'Please select a process to configure'
-            });
-            this.router.navigate(['/processmanagement']);
+        // Get process data from history state (works after navigation)
+        if (history.state && history.state.processData) {
+            this.process = history.state.processData;
+            this.processId = this.process?.ID;
+            console.log('Process set from history state:', this.process);
+        }
+        // Try to get from navigation state (works during navigation)
+        else {
+            const navigation = this.router.getCurrentNavigation();
+            console.log('Navigation state:', navigation?.extras.state);
+
+            if (navigation?.extras?.state?.["processData"]) {
+                this.process = navigation.extras.state["processData"];
+                this.processId = this.process?.ID;
+                console.log('Process set from navigation state:', this.process);
+            }
+            // If still no data, show error and redirect back
+            else {
+                console.warn('No process data found in state');
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Process data not available. Please go back and try again.'
+                });
+
+                // Redirect back after a short delay
+                setTimeout(() => {
+                    this.router.navigate(['/pages/process']);
+                }, 2000);
+            }
         }
     }
 
