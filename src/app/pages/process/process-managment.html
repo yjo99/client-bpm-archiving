@@ -6,16 +6,83 @@
 
 <div class="flex flex-col">
     <div class="card">
-        <div class="font-semibold text-xl">Processes</div>
+        <div class="font-semibold text-xl mb-4">Processes</div>
 
-        <p-dataview [value]="processes" [layout]="layout" [lazy]="true"
-                    [totalRecords]="totalRecords" (onLazyLoad)="loadProcesses()"
+        <!-- Filter Controls -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-surface-50 rounded-lg">
+            <!-- Filter Dropdown -->
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-surface-600 mb-2">Filter by Configuration</label>
+                <p-dropdown [options]="filterOptions" [(ngModel)]="selectedFilter"
+                            (onChange)="onFilterChange()" optionLabel="label" optionValue="value"
+                            [showClear]="false" placeholder="Select filter">
+                    <ng-template #valueTemplate let-value="value">
+                        <div class="flex items-center gap-2">
+                            <i [class]="getFilterIcon(value)"></i>
+                            <span>{{ getFilterLabel(value) }}</span>
+                            <span class="bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full">
+                                {{ getFilterCount(value) }}
+                            </span>
+                        </div>
+                    </ng-template>
+                    <ng-template #itemTemplate let-option>
+                        <div class="flex items-center justify-between w-full">
+                            <div class="flex items-center gap-2">
+                                <i [class]="option.icon"></i>
+                                <span>{{ option.label }}</span>
+                            </div>
+                            <span class="bg-surface-200 text-surface-700 text-xs px-2 py-1 rounded-full">
+                                {{ getFilterCount(option.value) }}
+                            </span>
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+            </div>
+
+            <!-- Search Input -->
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-surface-600 mb-2">Search Processes</label>
+                <div class="p-inputgroup">
+                    <span class="p-inputgroup-addon">
+                        <i class="pi pi-search"></i>
+                    </span>
+                    <input type="text" pInputText [(ngModel)]="searchText"
+                           (input)="onSearchChange()" placeholder="Search by name, description..."
+                           class="w-full"/>
+                    <button *ngIf="searchText" pButton type="button" icon="pi pi-times"
+                            (click)="clearSearch()" class="p-button-outlined"></button>
+                </div>
+            </div>
+
+            <!-- Results Count -->
+            <div class="flex items-end">
+                <span class="text-sm text-surface-500">
+                    Showing {{ filteredProcesses.length }} of {{ processes.length }} processes
+                </span>
+            </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div *ngIf="loading" class="flex justify-center items-center p-6">
+            <p-progressSpinner></p-progressSpinner>
+        </div>
+
+        <!-- No results message -->
+        <div *ngIf="!loading && filteredProcesses.length === 0" class="text-center p-8">
+            <i class="pi pi-search text-4xl text-surface-400 mb-4"></i>
+            <h3 class="text-lg font-semibold text-surface-700 mb-2">No processes found</h3>
+            <p class="text-surface-500">Try adjusting your filters or search criteria.</p>
+        </div>
+
+        <!-- Data View -->
+        <p-dataview *ngIf="!loading && filteredProcesses.length > 0"
+                    [value]="filteredProcesses" [layout]="layout"
                     [loading]="loading">
 
             <ng-template #header>
                 <div class="flex justify-between items-center">
                     <div class="text-sm text-surface-500">
-                        Showing {{ processes.length }} of {{ totalRecords }} processes
+                        Showing {{ filteredProcesses.length }} filtered processes
                     </div>
                     <p-select-button [(ngModel)]="layout" [options]="options" [allowEmpty]="false">
                         <ng-template #item let-option>
@@ -37,7 +104,7 @@
                                     <div>
                                         <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{ process?.description }}</span>
                                         <div class="text-lg font-medium mt-2"
-                                             (click)="viewInstances(process?.ID, process?.name)"
+                                             (click)="viewInstances(process.ID, process.name)"
                                              style="cursor: pointer;">
                                             {{ process?.name }}
                                         </div>
@@ -61,7 +128,6 @@
                                 <div class="flex flex-col md:items-end gap-2">
                                     <span class="text-sm text-surface-500">Modified by: {{ process?.lastModifiedBy }}</span>
                                     <span class="text-md font-semibold">{{ process?.createdDate | date: 'medium' }}</span>
-                                    <!-- Configure Button for non-configured processes -->
                                     <button *ngIf="!process.configured"
                                             pButton
                                             type="button"
@@ -87,7 +153,7 @@
                                     <div class="flex-1">
                                         <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{ process?.description }}</span>
                                         <div class="text-lg font-medium mt-2"
-                                             (click)="viewInstances(process?.ID, process?.name)"
+                                             (click)="viewInstances(process.ID, process.name)"
                                              style="cursor: pointer;">
                                             {{ process?.name }}
                                         </div>
@@ -111,7 +177,6 @@
                                 <div class="flex flex-col gap-2 mt-4">
                                     <span class="text-sm text-surface-500">Modified by: {{ process?.lastModifiedBy }}</span>
                                     <span class="text-md font-semibold">{{ process?.createdDate | date: 'medium' }}</span>
-                                    <!-- Configure Button for non-configured processes -->
                                     <button *ngIf="!process.configured"
                                             pButton
                                             type="button"
@@ -123,16 +188,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </ng-template>
-
-            <!-- Pagination footer -->
-            <ng-template #footer>
-                <div class="flex justify-center mt-4">
-                    <p-paginator [rows]="pageSize" [totalRecords]="totalRecords"
-                                 (onPageChange)="onPageChange($event)"
-                                 [rowsPerPageOptions]="[5, 10, 20, 50]">
-                    </p-paginator>
                 </div>
             </ng-template>
         </p-dataview>

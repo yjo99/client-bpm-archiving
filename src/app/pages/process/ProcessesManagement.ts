@@ -16,6 +16,14 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProcessResponse } from "../../core/DTO/process.response";
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
+import { DropdownModule } from 'primeng/dropdown';
+import { InputTextModule } from 'primeng/inputtext';
+
+interface FilterOption {
+    label: string;
+    value: string;
+    icon: string;
+}
 
 @Component({
     selector: 'app-processes',
@@ -31,15 +39,27 @@ import { ButtonModule } from 'primeng/button';
         DatePipe,
         PaginatorModule,
         ProgressSpinnerModule,
-        TagModule, // Add TagModule
-        ButtonModule // Add ButtonModule
+        TagModule,
+        ButtonModule,
+        DropdownModule,
+        InputTextModule
     ],
     providers: [MessageService]
 })
 export class ProcessesManagement implements OnInit {
     processes: ProcessModel[] = [];
+    filteredProcesses: ProcessModel[] = [];
     layout: 'list' | 'grid' = 'list';
     options = ['list', 'grid'];
+
+    // Filter properties
+    filterOptions: FilterOption[] = [
+        { label: 'All Processes', value: 'all', icon: 'pi pi-list' },
+        { label: 'Configured', value: 'configured', icon: 'pi pi-check-circle' },
+        { label: 'Not Configured', value: 'not-configured', icon: 'pi pi-exclamation-circle' }
+    ];
+    selectedFilter: string = 'all';
+    searchText: string = '';
 
     // Pagination properties
     totalRecords: number = 0;
@@ -66,6 +86,7 @@ export class ProcessesManagement implements OnInit {
                     createdDate: new Date(process.lastModified_on)
                 }));
                 this.totalRecords = response.totalCount || response.processAppsList.length;
+                this.applyFilters(); // Apply filters after loading data
                 this.loading = false;
             },
             error: (error) => {
@@ -77,8 +98,47 @@ export class ProcessesManagement implements OnInit {
                 this.loading = false;
                 this.processes = this.processService.getMockProcesses();
                 this.totalRecords = this.processes.length;
+                this.applyFilters(); // Apply filters to mock data
             }
         });
+    }
+
+    // Apply filters based on selected filter and search text
+    applyFilters(): void {
+        let filtered = this.processes;
+
+        // Apply configuration filter
+        if (this.selectedFilter === 'configured') {
+            filtered = filtered.filter(process => process.configured);
+        } else if (this.selectedFilter === 'not-configured') {
+            filtered = filtered.filter(process => !process.configured);
+        }
+
+        // Apply search filter
+        if (this.searchText) {
+            const searchLower = this.searchText.toLowerCase();
+            filtered = filtered.filter(process =>
+                process.name.toLowerCase().includes(searchLower) ||
+                process.description.toLowerCase().includes(searchLower) ||
+                process.shortName.toLowerCase().includes(searchLower) ||
+                process.lastModifiedBy.toLowerCase().includes(searchLower)
+            );
+        }
+
+        this.filteredProcesses = filtered;
+    }
+
+    onFilterChange(): void {
+        this.applyFilters();
+    }
+
+    onSearchChange(): void {
+        this.applyFilters();
+    }
+
+    clearSearch(): void {
+        this.searchText = '';
+        this.applyFilters();
     }
 
     onPageChange(event: any): void {
@@ -100,20 +160,43 @@ export class ProcessesManagement implements OnInit {
         });
     }
 
-    // New method to navigate to configuration screen
     configureProcess(process: ProcessModel): void {
         this.router.navigate(['/pages/process/configure', process.ID], {
-            state: { processData: process } // Pass process data to configuration screen
+            state: { processData: process }
         });
     }
 
-    // Method to get severity for configuration status tag
     getConfigurationSeverity(configured: boolean): string {
         return configured ? 'success' : 'warning';
     }
 
-    // Method to get configuration status text
     getConfigurationText(configured: boolean): string {
         return configured ? 'Configured' : 'Not Configured';
+    }
+
+    // Helper method to get filter icon
+    getFilterIcon(value: string): string {
+        const option = this.filterOptions.find(opt => opt.value === value);
+        return option ? option.icon : 'pi pi-list';
+    }
+
+// Helper method to get filter label
+    getFilterLabel(value: string): string {
+        const option = this.filterOptions.find(opt => opt.value === value);
+        return option ? option.label : 'All Processes';
+    }
+
+// Get count for each filter option
+    getFilterCount(filterValue: string): number {
+        switch (filterValue) {
+            case 'all':
+                return this.processes.length;
+            case 'configured':
+                return this.processes.filter(p => p.configured).length;
+            case 'not-configured':
+                return this.processes.filter(p => !p.configured).length;
+            default:
+                return 0;
+        }
     }
 }
