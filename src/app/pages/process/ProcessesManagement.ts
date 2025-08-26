@@ -20,9 +20,9 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
 
 interface FilterOption {
-    label: string;
-    value: string;
-    icon: string;
+  label: string;
+  value: string;
+  icon: string;
 }
 
 @Component({
@@ -105,7 +105,7 @@ export class ProcessesManagement implements OnInit {
 
     // Apply filters based on selected filter and search text
     applyFilters(): void {
-        let filtered = this.processes;
+        let filtered = [...this.processes]; // Create a copy of the original array
 
         // Apply configuration filter
         if (this.selectedFilter === 'configured') {
@@ -114,14 +114,11 @@ export class ProcessesManagement implements OnInit {
             filtered = filtered.filter(process => !process.configured);
         }
 
-        // Apply search filter
-        if (this.searchText) {
-            const searchLower = this.searchText.toLowerCase();
+        // Apply search filter - ONLY by process name
+        if (this.searchText && this.searchText.trim() !== '') {
+            const searchLower = this.searchText.toLowerCase().trim();
             filtered = filtered.filter(process =>
-                process.name.toLowerCase().includes(searchLower) ||
-                process.description.toLowerCase().includes(searchLower) ||
-                process.shortName.toLowerCase().includes(searchLower) ||
-                process.lastModifiedBy.toLowerCase().includes(searchLower)
+                process.name && process.name.toLowerCase().includes(searchLower)
             );
         }
 
@@ -133,7 +130,10 @@ export class ProcessesManagement implements OnInit {
     }
 
     onSearchChange(): void {
-        this.applyFilters();
+        // Use timeout to avoid excessive filtering on every keystroke
+        setTimeout(() => {
+            this.applyFilters();
+        }, 300);
     }
 
     clearSearch(): void {
@@ -180,13 +180,13 @@ export class ProcessesManagement implements OnInit {
         return option ? option.icon : 'pi pi-list';
     }
 
-// Helper method to get filter label
+    // Helper method to get filter label
     getFilterLabel(value: string): string {
         const option = this.filterOptions.find(opt => opt.value === value);
         return option ? option.label : 'All Processes';
     }
 
-// Get count for each filter option
+    // Get count for each filter option
     getFilterCount(filterValue: string): number {
         switch (filterValue) {
             case 'all':
