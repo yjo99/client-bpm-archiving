@@ -23,7 +23,7 @@ export default [
     {path: "processmanagement", component: ProcessesManagement},
     {path: 'process/instance/:processId/instances', component: InstanceListManagement},
     { path: 'process/instance-view/:id', component: DynamicViewComponent },
-    {path: 'pages/process/configure/:id', component: ProcessConfigurationComponent},
+    {path: 'process/configure/:id', component: ProcessConfigurationComponent},
     { path: 'empty', component: Empty },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;
