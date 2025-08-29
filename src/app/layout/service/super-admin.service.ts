@@ -25,7 +25,9 @@ export class SuperAdminService {
     }
 
     createUser(userRequest: UserRequest): Observable<any> {
-        return this.http.post(`${this.apiUrl}/users`, userRequest);
+        return this.http.post(`${this.apiUrl}/users`, userRequest, {
+            responseType: 'text' // Handle response as text instead of JSON
+        });
     }
 
     updateUserPassword(username: string, newPassword: string): Observable<any> {

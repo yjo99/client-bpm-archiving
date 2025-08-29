@@ -196,11 +196,12 @@ export class UserManagement implements OnInit {
         }
 
         this.superAdminService.createUser(this.userForm).subscribe({
-            next: () => {
+            next: (response: string) => {
+                // Handle string response from backend
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Success',
-                    detail: 'User created successfully'
+                    detail: response // Use the message from backend
                 });
                 this.userDialog = false;
                 this.loadUsers();
@@ -208,10 +209,25 @@ export class UserManagement implements OnInit {
             },
             error: (error: any) => {
                 console.error('Error creating user:', error);
+
+                // Handle different error response formats
+                let errorMessage = 'Failed to create user';
+
+                if (typeof error.error === 'string') {
+                    // Backend returned a string error message
+                    errorMessage = error.error;
+                } else if (error.error && error.error.message) {
+                    // Backend returned JSON with message property
+                    errorMessage = error.error.message;
+                } else if (error.message) {
+                    // HTTP error message
+                    errorMessage = error.message;
+                }
+
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'Failed to create user: ' + error.message
+                    detail: errorMessage
                 });
             }
         });
