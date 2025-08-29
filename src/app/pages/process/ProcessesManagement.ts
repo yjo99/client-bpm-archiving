@@ -89,7 +89,7 @@ export class ProcessesManagement implements OnInit {
                 this.applyFilters(); // Apply filters after loading data
                 this.loading = false;
             },
-            error: (error) => {
+            error: (error: any) => {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',

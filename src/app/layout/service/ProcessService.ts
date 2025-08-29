@@ -1,6 +1,9 @@
 import { ProcessModel } from "../model/process.model";
 import { ProcessResponse } from "../../core/DTO/process.response";
 import { environment } from "../../../environments/environment";
+import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
+import { Observable } from "rxjs";
+import {Injectable} from "@angular/core";
 // DTO Interfaces matching your Java DTOs
 export interface ProcessConfigDto {
     appID: string;

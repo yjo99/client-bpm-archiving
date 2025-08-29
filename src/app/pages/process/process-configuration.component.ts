@@ -11,8 +11,10 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ProcessModel } from "../../layout/model/process.model";
-import { SuperAdminService} from '../../../services/super-admin.service';
-import { ProcessService, ProcessConfigDto } from '../../../services/process.service';
+import {User} from "../../layout/model/user.model";
+import {Group} from "../../layout/model/group.model";
+import {ProcessConfigDto, ProcessService} from "../../layout/service/ProcessService";
+import {SuperAdminService} from "../../layout/service/super-admin.service";
 
 @Component({
     selector: 'app-process-configuration',
@@ -115,7 +117,7 @@ export class ProcessConfigurationComponent implements OnInit {
         if (this.process && this.process.ID) {
             // Check if this process already has a configuration
             this.processService.getProcessAppConfig(this.process.ID).subscribe({
-                next: (config) => {
+                next: (config: ProcessConfigDto) => {
                     if (config) {
                         this.isEditMode = true;
                         this.configurationForm = config;
@@ -123,8 +125,8 @@ export class ProcessConfigurationComponent implements OnInit {
                         this.initializeForm();
                     }
                 },
-                error: (error) => {
-                    console.log('No existing configuration found, creating new one');
+                error: (error: any) => {
+                    console.log('No existing configuration found, creating new one', error);
                     this.initializeForm();
                 }
             });
@@ -196,7 +198,7 @@ export class ProcessConfigurationComponent implements OnInit {
 
         // Call the API service
         this.processService.configProcess(this.configurationForm).subscribe({
-            next: (response) => {
+            next: (response: any) => {
                 this.saving = false;
                 this.messageService.add({
                     severity: 'success',
@@ -209,7 +211,7 @@ export class ProcessConfigurationComponent implements OnInit {
                     this.router.navigate(['/pages/process']);
                 }, 1500);
             },
-            error: (error) => {
+            error: (error: any) => {
                 this.saving = false;
                 this.messageService.add({
                     severity: 'error',
