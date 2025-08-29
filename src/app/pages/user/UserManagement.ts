@@ -516,6 +516,10 @@ export class UserManagement implements OnInit {
         this.groupDialog = true;
     }
 
+// Add these properties to track group operations
+    creatingGroup: boolean = false;
+    deletingGroups: Set<string> = new Set();
+
     createGroup(): void {
         this.groupSubmitted = true;
 
@@ -523,25 +527,35 @@ export class UserManagement implements OnInit {
             return;
         }
 
-        this.superAdminService.createGroup(this.groupForm).subscribe({
-            next: () => {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Group created successfully'
-                });
-                this.groupDialog = false;
-                this.loadGroups();
-            },
-            error: (error: any) => {
-                console.error('Error creating group:', error);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to create group: ' + error.message
-                });
-            }
-        });
+        this.creatingGroup = true;
+
+        this.superAdminService.createGroup(this.groupForm)
+            .pipe(
+                finalize(() => this.creatingGroup = false)
+            )
+            .subscribe({
+                next: (message) => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Group Created',
+                        detail: message,
+                        life: 5000,
+                        icon: 'pi pi-check-circle'
+                    });
+                    this.groupDialog = false;
+                    this.loadGroups();
+                },
+                error: (error) => {
+                    console.error('Error creating group:', error);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Create Failed',
+                        detail: error.message,
+                        life: 7000,
+                        icon: 'pi pi-exclamation-circle'
+                    });
+                }
+            });
     }
 
     deleteGroup(group: Group): void {
@@ -554,11 +568,7 @@ export class UserManagement implements OnInit {
             header: 'Confirm Group Deletion',
             icon: 'pi pi-exclamation-triangle',
             acceptButtonStyleClass: 'p-button-danger',
-            rejectButtonStyleClass: 'p-button-text p-button-plain',
-            acceptIcon: 'pi pi-trash',
-            rejectIcon: 'pi pi-times',
-            defaultFocus: 'reject',
-
+            rejectButtonStyleClass: 'p-button-text',
             accept: () => {
                 this.executeGroupDeletion(group);
             },
@@ -575,29 +585,44 @@ export class UserManagement implements OnInit {
 
     private executeGroupDeletion(group: Group): void {
         const groupName = group.name!;
+        this.deletingGroups.add(groupName);
 
-        this.superAdminService.deleteGroup(groupName).subscribe({
-            next: () => {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Group Deleted',
-                    detail: `Group "${groupName}" deleted successfully`,
-                    life: 5000,
-                    icon: 'pi pi-check-circle'
-                });
-                this.loadGroups();
-            },
-            error: (error: any) => {
-                console.error('Error deleting group:', error);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Delete Failed',
-                    detail: 'Failed to delete group: ' + error.message,
-                    life: 7000,
-                    icon: 'pi pi-exclamation-circle'
-                });
-            }
-        });
+        this.superAdminService.deleteGroup(groupName)
+            .pipe(
+                finalize(() => this.deletingGroups.delete(groupName))
+            )
+            .subscribe({
+                next: (message) => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Group Deleted',
+                        detail: message,
+                        life: 5000,
+                        icon: 'pi pi-check-circle'
+                    });
+                    this.loadGroups();
+
+                    // Clear selection if the deleted group was selected
+                    if (this.selectedGroup?.name === groupName) {
+                        this.selectedGroup = null;
+                    }
+                },
+                error: (error) => {
+                    console.error('Error deleting group:', error);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Delete Failed',
+                        detail: error.message,
+                        life: 7000,
+                        icon: 'pi pi-exclamation-circle'
+                    });
+                }
+            });
+    }
+
+// Helper method to check if a group is being deleted
+    isGroupBeingDeleted(group: Group): boolean {
+        return group.name ? this.deletingGroups.has(group.name) : false;
     }
 
     // Assignment Methods

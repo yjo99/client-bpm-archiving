@@ -377,18 +377,24 @@
         </ng-template>
     </p-dialog>
     <!-- Group Dialog -->
+    <!-- Group Dialog -->
     <p-dialog [(visible)]="groupDialog" [style]="{width: '350px'}" header="Add New Group">
         <div class="p-fluid">
             <div class="field">
-                <label for="name">Group Name *</label>
-                <input id="groupName" pInputText [(ngModel)]="groupForm.name" required />
+                <label for="groupName">Group Name *</label>
+                <input id="groupName" pInputText [(ngModel)]="groupForm.name" required
+                       [class]="groupSubmitted && !groupForm.name ? 'ng-invalid ng-dirty' : ''" />
+                <small *ngIf="groupSubmitted && !groupForm.name" class="p-error">Group name is required</small>
             </div>
         </div>
         <ng-template pTemplate="footer">
             <button pButton type="button" label="Cancel" icon="pi pi-times"
-                    (click)="groupDialog = false" class="p-button-text"></button>
+                    (click)="groupDialog = false; groupSubmitted = false;"
+                    class="p-button-text"></button>
             <button pButton type="button" label="Create" icon="pi pi-check"
-                    (click)="createGroup()" class="p-button-success"></button>
+                    (click)="createGroup()"
+                    [loading]="creatingGroup"
+                    class="p-button-success"></button>
         </ng-template>
     </p-dialog>
 
