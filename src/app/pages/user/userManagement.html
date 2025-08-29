@@ -146,7 +146,10 @@
                                             class="p-button-info p-button-sm p-button-outlined"></button>
                                     <button pButton type="button" icon="pi pi-trash" pTooltip="Delete User"
                                             (click)="deleteUser(user)"
-                                            class="p-button-danger p-button-sm p-button-outlined"></button>
+                                            [loading]="deletingUser"
+                                            [disabled]="deletingUser"
+                                            class="p-button-danger p-button-sm p-button-outlined">
+                                    </button>
                                 </div>
                             </td>
                         </tr>

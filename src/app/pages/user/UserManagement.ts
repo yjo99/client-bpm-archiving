@@ -375,27 +375,58 @@ export class UserManagement implements OnInit {
         }
     }
 
-    deleteUser(user: User): void {
-        if (!user.username) return;
+    // Add this property to track delete operation
+    deletingUser: boolean = false;
 
-        this.superAdminService.deleteUser(user.username).subscribe({
-            next: () => {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'User deleted successfully'
-                });
-                this.loadUsers();
-            },
-            error: (error: any) => {
-                console.error('Error deleting user:', error);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to delete user: ' + error.message
-                });
-            }
-        });
+    deleteUser(user: User): void {
+        if (!user.username) {
+            console.error('No username provided for deletion');
+            return;
+        }
+
+        const username = user.username;
+
+        // Confirmation dialog
+        if (!confirm(`Are you sure you want to delete user '${username}'? This action cannot be undone.`)) {
+            return;
+        }
+
+        this.deletingUser = true;
+
+        this.superAdminService.deleteUser(username)
+            .pipe(
+                finalize(() => this.deletingUser = false)
+            )
+            .subscribe({
+                next: (message) => {
+                    // Success message
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: message,
+                        life: 5000
+                    });
+
+                    // Refresh the users list
+                    this.loadUsers();
+
+                    // Clear selection if the deleted user was selected
+                    if (this.selectedUser?.username === username) {
+                        this.selectedUser = null;
+                        this.userGroups = [];
+                    }
+                },
+                error: (error) => {
+                    // Error message
+                    console.error('Error deleting user:', error);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Delete Failed',
+                        detail: error.message,
+                        life: 7000
+                    });
+                }
+            });
     }
 
     // Group Methods
