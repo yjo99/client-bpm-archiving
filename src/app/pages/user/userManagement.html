@@ -26,6 +26,56 @@
     .max-h-32 {
         max-height: 8rem;
     }
+    /* Improved dialog styling */
+    ::ng-deep .assignment-dialog .p-dialog-content {
+        overflow-y: auto !important;
+        padding: 1.5rem !important;
+    }
+
+    ::ng-deep .assignment-dialog .p-multiselect-panel {
+        max-height: 200px !important;
+        min-width: 300px !important;
+    }
+
+    ::ng-deep .assignment-dialog .p-multiselect {
+        min-height: 44px;
+    }
+
+    .selected-groups-container {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        ::ng-deep .assignment-dialog .p-dialog {
+            width: 95vw !important;
+            margin: 1rem !important;
+        }
+
+        ::ng-deep .assignment-dialog .p-dialog-content {
+            padding: 1rem !important;
+        }
+    }
+
+    /* Better tag styling */
+    ::ng-deep .assignment-dialog .p-tag {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.25rem !important;
+    }
+
+    ::ng-deep .assignment-dialog .p-tag .pi-times {
+        font-size: 0.75rem !important;
+        padding: 0.125rem !important;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    ::ng-deep .assignment-dialog .p-tag .pi-times:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+    }
 </style>
 <div class="p-4">
     <p-toast></p-toast>
@@ -275,51 +325,75 @@
     </p-dialog>
 
     <!-- Assignment Dialog -->
-    <p-dialog [(visible)]="assignmentDialog" [style]="{width: '600px', height: '600px'}"
-              header="Assign Groups to {{ selectedUser?.username }}" [modal]="true">
-        <div class="p-fluid h-full flex flex-col">
+    <!-- Assignment Dialog -->
+    <p-dialog [(visible)]="assignmentDialog" [style]="{ width: '90vw', maxWidth: '600px' }"
+              [contentStyle]="{ 'max-height': '70vh' }" [breakpoints]="{ '960px': '90vw', '640px': '95vw' }"
+              header="Assign Groups to {{ selectedUser?.username }}" [modal]="true" [draggable]="false" [resizable]="false">
+
+        <div class="p-fluid flex flex-col gap-4" style="min-height: 300px;">
             <!-- Selected Groups List -->
-            <div class="mb-4" *ngIf="selectedGroupsForAssignment.length > 0">
-                <h4 class="font-semibold mb-2">Selected Groups:</h4>
-                <div class="selected-groups-container border rounded p-3 max-h-32 overflow-y-auto">
-                    <p-tag *ngFor="let group of selectedGroupsForAssignment"
-                           [value]="group.name"
-                           severity="success"
-                           class="mr-2 mb-2">
-                        <i class="pi pi-times ml-2 cursor-pointer"
-                           (click)="removeGroupFromSelection(group)"></i>
-                    </p-tag>
+            <div *ngIf="selectedGroupsForAssignment.length > 0" class="flex flex-col">
+                <h4 class="font-semibold mb-2">Selected Groups ({{ selectedGroupsForAssignment.length }}):</h4>
+                <div class="selected-groups-container border border-surface-200 rounded p-3 bg-surface-50 max-h-32 overflow-y-auto">
+                    <div class="flex flex-wrap gap-2">
+                        <p-tag *ngFor="let group of selectedGroupsForAssignment"
+                               [value]="group.name"
+                               severity="success"
+                               styleClass="text-sm py-1">
+                            <i class="pi pi-times ml-2 cursor-pointer text-xs"
+                               (click)="removeGroupFromSelection(group)"></i>
+                        </p-tag>
+                    </div>
                 </div>
             </div>
 
             <!-- Group Selection -->
-            <div class="field flex-1">
-                <label>Select Groups</label>
+            <div class="field flex flex-col flex-1 min-h-48">
+                <label class="font-medium mb-2">Select Groups</label>
                 <p-multiSelect [options]="groups" [(ngModel)]="selectedGroupsForAssignment"
-                               optionLabel="name" placeholder="Select groups"
+                               optionLabel="name" placeholder="Select groups..."
                                [filter]="true" filterPlaceholder="Search groups..."
                                [virtualScroll]="true" [showToggleAll]="false"
-                               class="w-full h-full">
+                               [maxSelectedLabels]="3" [selectedItemsLabel]="'{0} groups selected'"
+                               class="w-full">
                     <ng-template let-group pTemplate="item">
-                        <div class="flex items-center justify-between">
-                            <span>{{ group.name }}</span>
-                            <small class="text-surface-500">({{ group.memberCount || 0 }} members)</small>
+                        <div class="flex items-center justify-between p-2">
+                            <span class="font-medium">{{ group.name }}</span>
+                            <small class="text-surface-500 text-xs">({{ group.memberCount || 0 }} members)</small>
                         </div>
                     </ng-template>
                 </p-multiSelect>
             </div>
 
-            <!-- Available Groups Count -->
-            <div class="text-sm text-surface-500 mt-2">
-                {{ groups.length }} groups available
+            <!-- Statistics -->
+            <div class="grid grid-cols-2 gap-4 text-sm text-surface-600">
+                <div class="text-center p-2 bg-surface-100 rounded">
+                    <div class="font-semibold text-lg">{{ groups.length }}</div>
+                    <div>Total Groups</div>
+                </div>
+                <div class="text-center p-2 bg-surface-100 rounded">
+                    <div class="font-semibold text-lg">{{ selectedGroupsForAssignment.length }}</div>
+                    <div>Selected</div>
+                </div>
             </div>
         </div>
+
         <ng-template pTemplate="footer">
-            <button pButton type="button" label="Cancel" icon="pi pi-times"
-                    (click)="assignmentDialog = false" class="p-button-text"></button>
-            <button pButton type="button" label="Assign Selected Groups" icon="pi pi-check"
-                    (click)="assignGroupsToUser()" class="p-button-success"
-                    [disabled]="selectedGroupsForAssignment.length === 0"></button>
+            <div class="flex justify-between items-center w-full">
+            <span class="text-sm text-surface-500" *ngIf="selectedGroupsForAssignment.length > 0">
+                {{ selectedGroupsForAssignment.length }} group(s) selected
+            </span>
+                <span class="text-sm text-surface-500" *ngIf="selectedGroupsForAssignment.length === 0">
+                No groups selected
+            </span>
+                <div class="flex gap-2">
+                    <button pButton type="button" label="Cancel" icon="pi pi-times"
+                            (click)="assignmentDialog = false" class="p-button-text p-button-sm"></button>
+                    <button pButton type="button" label="Assign" icon="pi pi-check"
+                            (click)="assignGroupsToUser()" class="p-button-success p-button-sm"
+                            [disabled]="selectedGroupsForAssignment.length === 0"></button>
+                </div>
+            </div>
         </ng-template>
     </p-dialog>
 </div>
