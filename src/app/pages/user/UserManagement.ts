@@ -25,6 +25,7 @@ import {CreateGroupRequest} from "../../layout/model/create.group.model";
 import {UserRequest} from "../../layout/model/user.request.model";
 import {User} from "../../layout/model/user.model";
 import {SuperAdminService} from "../../layout/service/super-admin.service";
+import {ProgressSpinnerModule} from "primeng/progressspinner";
 
 @Component({
     selector: 'app-user-management',
@@ -48,7 +49,8 @@ import {SuperAdminService} from "../../layout/service/super-admin.service";
         AccordionModule,
         InputGroupModule,
         InputGroupAddonModule,
-        AppFloatingConfigurator
+        AppFloatingConfigurator,
+        ProgressSpinnerModule
     ],
     templateUrl: './userManagement.html',
     providers: [MessageService]
@@ -93,6 +95,8 @@ export class UserManagement implements OnInit {
     pageSize: number = 10;
     passwordErrors: string[] = [];
     emailError: string = '';
+    userGroupsLoading: boolean = false;
+    userGroups: Group[] = [];
 
     onPageSizeChange(): void {
         // This will trigger the table to update with new page size
@@ -150,6 +154,56 @@ export class UserManagement implements OnInit {
             user.lastName?.toLowerCase().includes(searchText) ||
             user.email?.toLowerCase().includes(searchText)
         );
+    }
+
+    // Add this method to load user groups
+    loadUserGroups(username: string): void {
+        if (!username) return;
+
+        this.userGroupsLoading = true;
+        this.superAdminService.getUserGroups(username).subscribe({
+            next: (groups: Group[]) => {
+                this.userGroups = groups;
+                this.userGroupsLoading = false;
+            },
+            error: (error: any) => {
+                console.error('Error loading user groups:', error);
+                this.userGroupsLoading = false;
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to load user groups'
+                });
+            }
+        });
+    }
+    // Add this method to remove user from group
+    removeUserFromGroup(group: Group): void {
+        if (!this.selectedUser?.username || !group.name) return;
+
+        if (confirm(`Remove user '${this.selectedUser.username}' from group '${group.name}'?`)) {
+            this.superAdminService.removeUserFromGroup(group.name, this.selectedUser.username).subscribe({
+                next: () => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: `User removed from group '${group.name}'`
+                    });
+                    // Refresh the groups list
+                    this.loadUserGroups(this.selectedUser!.username);
+                    // Also refresh the main users list to update group counts
+                    this.loadUsers();
+                },
+                error: (error: any) => {
+                    console.error('Error removing user from group:', error);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to remove user from group: ' + error.message
+                    });
+                }
+            });
+        }
     }
 
     clearUserSearch(): void {
@@ -427,6 +481,7 @@ export class UserManagement implements OnInit {
         this.assignmentDialog = true;
     }
 
+    // Update the assignGroupsToUser method to refresh groups after assignment
     assignGroupsToUser(): void {
         if (!this.selectedUser?.username || this.selectedGroupsForAssignment.length === 0) {
             return;
@@ -443,7 +498,10 @@ export class UserManagement implements OnInit {
                 detail: 'User assigned to groups successfully'
             });
             this.assignmentDialog = false;
-            this.loadUsers(); // Refresh to show updated groups
+
+            // Refresh both the user groups and main users list
+            this.loadUserGroups(this.selectedUser!.username);
+            this.loadUsers();
         }).catch(error => {
             console.error('Error assigning groups:', error);
             this.messageService.add({
@@ -455,13 +513,19 @@ export class UserManagement implements OnInit {
     }
 
     onUserSelect(event: any): void {
-        // Use a different variable name to avoid conflict with User type
         const userData = event && event.data ? event.data : event;
 
         if (userData && typeof userData === 'object' && 'username' in userData) {
             this.selectedUser = userData;
+            this.loadUserGroups(userData.username); // Load groups for selected user
         } else {
             this.selectedUser = null;
+            this.userGroups = []; // Clear groups when no user is selected
+        }
+    }
+    refreshUserGroups(): void {
+        if (this.selectedUser?.username) {
+            this.loadUserGroups(this.selectedUser.username);
         }
     }
 

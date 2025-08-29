@@ -48,6 +48,10 @@ export class SuperAdminService {
         return this.http.get<User[]>(`${this.apiUrl}/groups/${groupName}/users`);
     }
 
+    getUserGroups(username: string): Observable<Group[]> {
+        return this.http.get<Group[]>(`${this.apiUrl}/users/${username}/groups`);
+    }
+
     createGroup(groupRequest: CreateGroupRequest): Observable<any> {
         return this.http.post(`${this.apiUrl}/groups`, groupRequest);
     }

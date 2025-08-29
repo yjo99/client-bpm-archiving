@@ -168,8 +168,14 @@
 
             <!-- Selected User Details -->
             <div *ngIf="selectedUser" class="card mt-4">
-                <h3>User Details: {{ selectedUser.username }}</h3>
-                <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3>User Details: {{ selectedUser.username }}</h3>
+                    <button pButton type="button" icon="pi pi-refresh" label="Refresh Groups"
+                            (click)="refreshUserGroups()" [loading]="userGroupsLoading"
+                            class="p-button-outlined p-button-sm"></button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <strong>Username:</strong> {{ selectedUser.username }}
                     </div>
@@ -178,6 +184,44 @@
                     </div>
                     <div>
                         <strong>Email:</strong> {{ selectedUser.email }}
+                    </div>
+                    <div>
+                        <strong>Total Groups:</strong> {{ userGroups.length }}
+                    </div>
+                </div>
+
+                <!-- User Groups Section -->
+                <div class="mt-4">
+                    <h4 class="font-semibold mb-3">Assigned Groups</h4>
+
+                    <!-- Loading state -->
+                    <div *ngIf="userGroupsLoading" class="flex justify-center items-center p-4">
+                        <p-progressSpinner styleClass="w-6 h-6"></p-progressSpinner>
+                        <span class="ml-2">Loading groups...</span>
+                    </div>
+
+                    <!-- No groups state -->
+                    <div *ngIf="!userGroupsLoading && userGroups.length === 0" class="text-center p-4 bg-surface-50 rounded">
+                        <i class="pi pi-users text-2xl text-surface-300 mb-2"></i>
+                        <p class="text-surface-500">No groups assigned to this user</p>
+                    </div>
+
+                    <!-- Groups list -->
+                    <div *ngIf="!userGroupsLoading && userGroups.length > 0" class="grid gap-2">
+                        <div *ngFor="let group of userGroups" class="flex items-center justify-between p-3 border border-surface-200 rounded">
+                            <div class="flex items-center gap-3">
+                                <i class="pi pi-users text-primary-500"></i>
+                                <div>
+                                    <div class="font-medium">{{ group.name }}</div>
+                                    <div class="text-sm text-surface-500">{{ group.memberCount || 0 }} members</div>
+                                </div>
+                            </div>
+                            <button pButton type="button" icon="pi pi-times"
+                                    (click)="removeUserFromGroup(group)"
+                                    class="p-button-danger p-button-text p-button-sm"
+                                    pTooltip="Remove from group">
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
