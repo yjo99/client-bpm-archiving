@@ -1,5 +1,152 @@
+<!-- userManagement.html -->
 <app-floating-configurator />
-<div class="card">
-    <h1>User Managements Screen</h1>
-</div>
+<div class="p-4">
+    <p-toast></p-toast>
 
+    <div class="card">
+        <h1>User Management Screen</h1>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <!-- Users Section -->
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <h2>Users</h2>
+                <button pButton type="button" icon="pi pi-plus" label="Add User"
+                        (click)="openNewUser()" class="p-button-success"></button>
+            </div>
+
+            <p-table [value]="users" [rows]="10" [paginator]="true" [loading]="loading"
+                     [rowsPerPageOptions]="[5, 10, 20]" selectionMode="single"
+                     [(selection)]="selectedUsers" dataKey="username">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Groups</th>
+                        <th>Actions</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-user>
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.firstName }} {{ user.lastName }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <p-tag *ngFor="let group of user.groups" value="{{ group.groupName }}"
+                                   severity="info" class="mr-1 mb-1"></p-tag>
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button pButton type="button" icon="pi pi-users"
+                                        (click)="openAssignmentDialog(user)"
+                                        class="p-button-info p-button-sm"></button>
+                                <button pButton type="button" icon="pi pi-trash"
+                                        (click)="deleteUser(user)"
+                                        class="p-button-danger p-button-sm"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <!-- Groups Section -->
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <h2>Groups</h2>
+                <button pButton type="button" icon="pi pi-plus" label="Add Group"
+                        (click)="openNewGroup()" class="p-button-success"></button>
+            </div>
+
+            <p-table [value]="groups" [rows]="10" [paginator]="true" [loading]="loading"
+                     [rowsPerPageOptions]="[5, 10, 20]">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Group Name</th>
+                        <th>Member Count</th>
+                        <th>Actions</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-group>
+                    <tr>
+                        <td>{{ group.groupName }}</td>
+                        <td>{{ group.memberCount || 0 }}</td>
+                        <td>
+                            <button pButton type="button" icon="pi pi-trash"
+                                    (click)="deleteGroup(group)"
+                                    class="p-button-danger p-button-sm"></button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+
+    <!-- User Dialog -->
+    <p-dialog [(visible)]="userDialog" [style]="{width: '450px'}" header="Add New User">
+        <div class="p-fluid">
+            <div class="field">
+                <label for="username">Username *</label>
+                <input id="username" pInputText [(ngModel)]="userForm.username" required />
+            </div>
+            <div class="field">
+                <label for="password">Password *</label>
+                <p-password id="password" [(ngModel)]="userForm.password" required />
+            </div>
+            <div class="field">
+                <label for="firstName">First Name</label>
+                <input id="firstName" pInputText [(ngModel)]="userForm.firstName" />
+            </div>
+            <div class="field">
+                <label for="lastName">Last Name</label>
+                <input id="lastName" pInputText [(ngModel)]="userForm.lastName" />
+            </div>
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" pInputText [(ngModel)]="userForm.email" type="email" />
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <button pButton type="button" label="Cancel" icon="pi pi-times"
+                    (click)="userDialog = false" class="p-button-text"></button>
+            <button pButton type="button" label="Create" icon="pi pi-check"
+                    (click)="createUser()" class="p-button-success"></button>
+        </ng-template>
+    </p-dialog>
+
+    <!-- Group Dialog -->
+    <p-dialog [(visible)]="groupDialog" [style]="{width: '350px'}" header="Add New Group">
+        <div class="p-fluid">
+            <div class="field">
+                <label for="groupName">Group Name *</label>
+                <input id="groupName" pInputText [(ngModel)]="groupForm.groupName" required />
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <button pButton type="button" label="Cancel" icon="pi pi-times"
+                    (click)="groupDialog = false" class="p-button-text"></button>
+            <button pButton type="button" label="Create" icon="pi pi-check"
+                    (click)="createGroup()" class="p-button-success"></button>
+        </ng-template>
+    </p-dialog>
+
+    <!-- Assignment Dialog -->
+    <p-dialog [(visible)]="assignmentDialog" [style]="{width: '500px'}"
+              header="Assign Groups to {{ selectedUserForAssignment?.username }}">
+        <div class="p-fluid">
+            <div class="field">
+                <label>Select Groups</label>
+                <p-multiSelect [options]="groups" [(ngModel)]="selectedGroupsForAssignment"
+                               optionLabel="groupName" placeholder="Select groups" />
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <button pButton type="button" label="Cancel" icon="pi pi-times"
+                    (click)="assignmentDialog = false" class="p-button-text"></button>
+            <button pButton type="button" label="Assign" icon="pi pi-check"
+                    (click)="assignGroupsToUser()" class="p-button-success"></button>
+        </ng-template>
+    </p-dialog>
+</div>
