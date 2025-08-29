@@ -564,7 +564,7 @@ export class UserManagement implements OnInit {
         const groupName = group.name;
 
         this.confirmationService.confirm({
-            message: `Are you sure you want to delete group <strong>"${groupName}"</strong>? This will remove all user associations.`,
+            message: `Are you sure you want to delete group <strong>"${groupName}"</strong>?`,
             header: 'Confirm Group Deletion',
             icon: 'pi pi-exclamation-triangle',
             acceptButtonStyleClass: 'p-button-danger',
