@@ -126,7 +126,7 @@ export class UserManagement implements OnInit {
                 detail: 'You require SUPER_ADMIN privileges to access this page',
                 life: 5000
             });
-            this.router.navigate(['/']);
+            this.router.navigate(['/auth/login']);
             return;
         }
         this.loadUsers();

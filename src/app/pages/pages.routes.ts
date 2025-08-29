@@ -22,7 +22,7 @@ export default [
     {path: 'dataconfig/bpmform', component: BpmServerFormComponent},
     {path: 'dataconfig/ecmform', component: EcmServerFormComponent},
     {path: 'dataconfig/dbform', component: DbServerFormComponent},
-    {path: "usermanagement", component: UserManagement, canActivate: [SuperAdminGuard]},
+    {path: "usermanagement", component: UserManagement},
     {path: "processmanagement", component: ProcessesManagement},
     {path: 'process/instance/:processId/instances', component: InstanceListManagement},
     {path: 'process/snapshots/:id', component: ProcessSnapshotsComponent},

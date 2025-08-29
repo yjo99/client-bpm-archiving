@@ -64,7 +64,7 @@ export class AppMenu implements OnInit {
 
     private isSuperAdmin(): boolean {
         // Get token from localStorage
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('authToken');
         console.log("token is")
         console.log(token)
         if (!token) return false;
@@ -72,11 +72,7 @@ export class AppMenu implements OnInit {
         try {
             // Decode JWT token to check roles
             const payload = this.decodeJwtToken(token);
-            console.log("payload is")
-            console.log(payload)
             const roles = this.extractRolesFromPayload(payload);
-            console.log("roles is")
-            console.log(roles)
             // Check if SUPER_ADMIN role exists
             return roles.includes('SUPER_ADMIN');
         } catch (error) {
