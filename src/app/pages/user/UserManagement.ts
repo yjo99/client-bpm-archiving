@@ -12,7 +12,7 @@ import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { MessageService } from 'primeng/api';
+import {ConfirmationService, MessageService} from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -28,6 +28,7 @@ import {SuperAdminService} from "../../layout/service/super-admin.service";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {catchError, concatMap, finalize, forkJoin, from, of} from "rxjs";
 import {map} from "rxjs/operators";
+import { ConfirmDialogModule } from "primeng/confirmdialog";
 
 @Component({
     selector: 'app-user-management',
@@ -52,10 +53,11 @@ import {map} from "rxjs/operators";
         InputGroupModule,
         InputGroupAddonModule,
         AppFloatingConfigurator,
-        ProgressSpinnerModule
+        ProgressSpinnerModule,
+        ConfirmDialogModule,
     ],
     templateUrl: './userManagement.html',
-    providers: [MessageService]
+    providers: [MessageService, ConfirmationService],
 })
 export class UserManagement implements OnInit {
     // Users
@@ -108,7 +110,8 @@ export class UserManagement implements OnInit {
 
     constructor(
         private superAdminService: SuperAdminService,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private confirmationService: ConfirmationService
     ) {}
 
     ngOnInit(): void {
@@ -185,17 +188,36 @@ export class UserManagement implements OnInit {
     removingFromGroup: boolean = false;
 
     removeUserFromGroup(group: Group): void {
-        if (!this.selectedUser?.username || !group.name) {
-            return;
-        }
+        if (!this.selectedUser?.username || !group.name) return;
 
         const username = this.selectedUser.username;
         const groupName = group.name;
 
-        if (!confirm(`Remove user '${username}' from group '${groupName}'?`)) {
-            return;
-        }
+        this.confirmationService.confirm({
+            message: `Remove user <strong>"${username}"</strong> from group <strong>"${groupName}"</strong>?`,
+            header: 'Confirm Removal',
+            icon: 'pi pi-users',
+            acceptButtonStyleClass: 'p-button-warning',
+            rejectButtonStyleClass: 'p-button-text p-button-plain',
+            acceptIcon: 'pi pi-user-minus',
+            rejectIcon: 'pi pi-times',
+            defaultFocus: 'reject',
 
+            accept: () => {
+                this.executeRemoveFromGroup(groupName, username);
+            },
+            reject: () => {
+                this.messageService.add({
+                    severity: 'info',
+                    summary: 'Cancelled',
+                    detail: 'Removal cancelled',
+                    life: 3000
+                });
+            }
+        });
+    }
+
+    private executeRemoveFromGroup(groupName: string, username: string): void {
         this.removingFromGroup = true;
 
         this.superAdminService.removeUserFromGroup(groupName, username)
@@ -206,9 +228,10 @@ export class UserManagement implements OnInit {
                 next: (message) => {
                     this.messageService.add({
                         severity: 'success',
-                        summary: 'Success',
+                        summary: 'Removed Successfully',
                         detail: message,
-                        life: 5000
+                        life: 5000,
+                        icon: 'pi pi-check-circle'
                     });
 
                     this.loadUserGroups(username);
@@ -218,9 +241,10 @@ export class UserManagement implements OnInit {
                     console.error('Error removing user from group:', error);
                     this.messageService.add({
                         severity: 'error',
-                        summary: `Failed to remove from ${groupName}`,
+                        summary: 'Removal Failed',
                         detail: error.message,
-                        life: 7000
+                        life: 7000,
+                        icon: 'pi pi-exclamation-circle'
                     });
                 }
             });
@@ -379,51 +403,70 @@ export class UserManagement implements OnInit {
     deletingUser: boolean = false;
 
     deleteUser(user: User): void {
-        if (!user.username) {
-            console.error('No username provided for deletion');
-            return;
-        }
+        if (!user.username) return;
 
         const username = user.username;
 
-        // Confirmation dialog
-        if (!confirm(`Are you sure you want to delete user '${username}'? This action cannot be undone.`)) {
-            return;
-        }
+        this.confirmationService.confirm({
+            message: `Are you sure you want to delete user <strong>"${username}"</strong>?`,
+            header: 'Confirm User Deletion',
+            icon: 'pi pi-exclamation-triangle',
+            acceptButtonStyleClass: 'p-button-danger',
+            rejectButtonStyleClass: 'p-button-text p-button-plain',
+            acceptIcon: 'pi pi-trash',
+            rejectIcon: 'pi pi-times',
+            defaultFocus: 'reject',
 
-        this.deletingUser = true;
+            accept: () => {
+                // User clicked Yes
+                this.executeUserDeletion(user);
+            },
+            reject: () => {
+                // User clicked No
+                this.messageService.add({
+                    severity: 'info',
+                    summary: 'Cancelled',
+                    detail: 'User deletion cancelled',
+                    life: 3000
+                });
+            }
+        });
+    }
+    deletingUsers: Set<string> = new Set();
+
+    private executeUserDeletion(user: User): void {
+        const username = user.username!;
+        this.deletingUsers.add(username);
 
         this.superAdminService.deleteUser(username)
             .pipe(
-                finalize(() => this.deletingUser = false)
+                finalize(() => this.deletingUsers.delete(username))
             )
             .subscribe({
                 next: (message) => {
-                    // Success message
                     this.messageService.add({
                         severity: 'success',
-                        summary: 'Success',
+                        summary: 'User Deleted',
                         detail: message,
-                        life: 5000
+                        life: 5000,
+                        icon: 'pi pi-check-circle'
                     });
 
-                    // Refresh the users list
                     this.loadUsers();
 
-                    // Clear selection if the deleted user was selected
                     if (this.selectedUser?.username === username) {
                         this.selectedUser = null;
                         this.userGroups = [];
                     }
                 },
                 error: (error) => {
-                    // Error message
                     console.error('Error deleting user:', error);
                     this.messageService.add({
                         severity: 'error',
                         summary: 'Delete Failed',
                         detail: error.message,
-                        life: 7000
+                        life: 7000,
+                        icon: 'pi pi-exclamation-circle'
                     });
                 }
             });
@@ -504,12 +547,43 @@ export class UserManagement implements OnInit {
     deleteGroup(group: Group): void {
         if (!group.name) return;
 
-        this.superAdminService.deleteGroup(group.name).subscribe({
+        const groupName = group.name;
+
+        this.confirmationService.confirm({
+            message: `Are you sure you want to delete group <strong>"${groupName}"</strong>? This will remove all user associations.`,
+            header: 'Confirm Group Deletion',
+            icon: 'pi pi-exclamation-triangle',
+            acceptButtonStyleClass: 'p-button-danger',
+            rejectButtonStyleClass: 'p-button-text p-button-plain',
+            acceptIcon: 'pi pi-trash',
+            rejectIcon: 'pi pi-times',
+            defaultFocus: 'reject',
+
+            accept: () => {
+                this.executeGroupDeletion(group);
+            },
+            reject: () => {
+                this.messageService.add({
+                    severity: 'info',
+                    summary: 'Cancelled',
+                    detail: 'Group deletion cancelled',
+                    life: 3000
+                });
+            }
+        });
+    }
+
+    private executeGroupDeletion(group: Group): void {
+        const groupName = group.name!;
+
+        this.superAdminService.deleteGroup(groupName).subscribe({
             next: () => {
                 this.messageService.add({
                     severity: 'success',
-                    summary: 'Success',
-                    detail: 'Group deleted successfully'
+                    summary: 'Group Deleted',
+                    detail: `Group "${groupName}" deleted successfully`,
+                    life: 5000,
+                    icon: 'pi pi-check-circle'
                 });
                 this.loadGroups();
             },
@@ -517,8 +591,10 @@ export class UserManagement implements OnInit {
                 console.error('Error deleting group:', error);
                 this.messageService.add({
                     severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to delete group: ' + error.message
+                    summary: 'Delete Failed',
+                    detail: 'Failed to delete group: ' + error.message,
+                    life: 7000,
+                    icon: 'pi pi-exclamation-circle'
                 });
             }
         });

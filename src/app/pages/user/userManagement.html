@@ -76,6 +76,25 @@
     ::ng-deep .assignment-dialog .p-tag .pi-times:hover {
         background: rgba(255, 255, 255, 0.3) !important;
     }
+    ::ng-deep .p-confirm-dialog {
+        border-radius: 12px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    ::ng-deep .p-confirm-dialog .p-dialog-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    ::ng-deep .p-confirm-dialog .p-dialog-content {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    ::ng-deep .custom-confirm-dialog .p-confirm-dialog-message {
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
 </style>
 <div class="p-4">
     <p-toast></p-toast>
@@ -444,4 +463,14 @@
             </div>
         </ng-template>
     </p-dialog>
+    <!-- Add this at the bottom of your HTML file -->
+    <!-- Replace your custom p-confirmDialog with this -->
+    <p-confirmDialog
+            [style]="{width: '450px'}"
+            [baseZIndex]="10000"
+            [closeOnEscape]="true"
+            [dismissableMask]="true"
+            acceptButtonStyleClass="p-button-danger"
+            rejectButtonStyleClass="p-button-text">
+    </p-confirmDialog>
 </div>
