@@ -143,6 +143,9 @@
             </div>
         </p-accordionTab>
 
+        <!-- Spacer -->
+        <div style="height: 5cm; background: transparent;"></div>
+
         <!-- Groups Section -->
         <p-accordionTab header="Groups Management">
             <div class="mb-4">
@@ -260,8 +263,7 @@
     </p-dialog>
 
     <!-- Assignment Dialog -->
-    <!-- Assignment Dialog -->
-    <p-dialog [(visible)]="assignmentDialog" [style]="{width: '600px', height: '500px'}"
+    <p-dialog [(visible)]="assignmentDialog" [style]="{width: '600px', height: '1000px'}"
               header="Assign Groups to {{ selectedUser?.username }}" [modal]="true">
         <div class="p-fluid h-full flex flex-col">
             <!-- Selected Groups List -->
