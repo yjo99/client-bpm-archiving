@@ -2,25 +2,66 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
+import { InputTextModule } from 'primeng/inputtext';
+import { CalendarModule } from 'primeng/calendar';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { MessageService } from 'primeng/api';
-import {ProcessModel} from "../../layout/model/process.model";
+import { ToastModule } from 'primeng/toast';
+import { ProcessModel } from "../../layout/model/process.model";
+import { SuperAdminService} from '../../../services/super-admin.service';
+import { ProcessService, ProcessConfigDto } from '../../../services/process.service';
 
 @Component({
     selector: 'app-process-configuration',
     templateUrl: './process-configuration.component.html',
-    imports: [CommonModule, ButtonModule, CardModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ButtonModule,
+        CardModule,
+        InputTextModule,
+        CalendarModule,
+        MultiSelectModule,
+        ToastModule
+    ],
     providers: [MessageService]
 })
 export class ProcessConfigurationComponent implements OnInit {
     process: ProcessModel | null = null;
     processId: string | undefined = '';
 
+    // Form model
+    configurationForm: ProcessConfigDto = {
+        appID: '',
+        acronym: '',
+        name: '',
+        retentionStartDate: '',
+        numberPeriodArch: '',
+        instanceArchNumber: '',
+        assignedGroups: [],
+        assignedUsers: [],
+        isConfigured: true
+    };
+
+    // Data for dropdowns
+    allUsers: User[] = [];
+    allGroups: Group[] = [];
+
+    // Loading states
+    loadingUsers = false;
+    loadingGroups = false;
+    saving = false;
+    isEditMode = false;
+
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private superAdminService: SuperAdminService,
+        private processService: ProcessService
     ) {}
 
     ngOnInit(): void {
@@ -31,6 +72,9 @@ export class ProcessConfigurationComponent implements OnInit {
             this.process = history.state.processData;
             this.processId = this.process?.ID;
             console.log('Process set from history state:', this.process);
+
+            // Check if we're editing an existing configuration
+            this.checkIfEditMode();
         }
         // Try to get from navigation state (works during navigation)
         else {
@@ -41,6 +85,9 @@ export class ProcessConfigurationComponent implements OnInit {
                 this.process = navigation.extras.state["processData"];
                 this.processId = this.process?.ID;
                 console.log('Process set from navigation state:', this.process);
+
+                // Check if we're editing an existing configuration
+                this.checkIfEditMode();
             }
             // If still no data, show error and redirect back
             else {
@@ -55,22 +102,154 @@ export class ProcessConfigurationComponent implements OnInit {
                 setTimeout(() => {
                     this.router.navigate(['/pages/process']);
                 }, 2000);
+                return;
             }
+        }
+
+        // Load users and groups for selection
+        this.loadUsers();
+        this.loadGroups();
+    }
+
+    checkIfEditMode(): void {
+        if (this.process && this.process.ID) {
+            // Check if this process already has a configuration
+            this.processService.getProcessAppConfig(this.process.ID).subscribe({
+                next: (config) => {
+                    if (config) {
+                        this.isEditMode = true;
+                        this.configurationForm = config;
+                    } else {
+                        this.initializeForm();
+                    }
+                },
+                error: (error) => {
+                    console.log('No existing configuration found, creating new one');
+                    this.initializeForm();
+                }
+            });
         }
     }
 
-    saveConfiguration(): void {
-        // Implement save configuration logic
-        this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Process configuration saved successfully'
-        });
+    initializeForm(): void {
+        if (this.process) {
+            this.configurationForm = {
+                appID: this.process.ID || '',
+                acronym: this.process.shortName || '',
+                name: this.process.name || '',
+                retentionStartDate: '',
+                numberPeriodArch: '',
+                instanceArchNumber: '',
+                assignedGroups: [],
+                assignedUsers: [],
+                isConfigured: true
+            };
+        }
+    }
 
-        // Navigate back to processes list
-        setTimeout(() => {
-            this.router.navigate(['/pages/process']);
-        }, 1500);
+    loadUsers(): void {
+        this.loadingUsers = true;
+        this.superAdminService.getAllUsers().subscribe({
+            next: (users) => {
+                this.allUsers = users;
+                this.loadingUsers = false;
+            },
+            error: (error) => {
+                console.error('Error loading users:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to load users'
+                });
+                this.loadingUsers = false;
+            }
+        });
+    }
+
+    loadGroups(): void {
+        this.loadingGroups = true;
+        this.superAdminService.getAllGroups().subscribe({
+            next: (groups) => {
+                this.allGroups = groups;
+                this.loadingGroups = false;
+            },
+            error: (error) => {
+                console.error('Error loading groups:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to load groups'
+                });
+                this.loadingGroups = false;
+            }
+        });
+    }
+
+    saveConfiguration(): void {
+        this.saving = true;
+
+        // Validate form
+        if (!this.isFormValid()) {
+            this.saving = false;
+            return;
+        }
+
+        // Call the API service
+        this.processService.configProcess(this.configurationForm).subscribe({
+            next: (response) => {
+                this.saving = false;
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Process configuration saved successfully'
+                });
+
+                // Navigate back to processes list
+                setTimeout(() => {
+                    this.router.navigate(['/pages/process']);
+                }, 1500);
+            },
+            error: (error) => {
+                this.saving = false;
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to save configuration: ' + error.message
+                });
+                console.error('Error saving configuration:', error);
+            }
+        });
+    }
+
+    isFormValid(): boolean {
+        if (!this.configurationForm.appID) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: 'Application ID is required'
+            });
+            return false;
+        }
+
+        if (!this.configurationForm.acronym) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: 'Acronym is required'
+            });
+            return false;
+        }
+
+        if (!this.configurationForm.name) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: 'Name is required'
+            });
+            return false;
+        }
+
+        return true;
     }
 
     cancel(): void {
