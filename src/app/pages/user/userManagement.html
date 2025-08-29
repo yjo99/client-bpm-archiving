@@ -3,86 +3,160 @@
 <div class="p-4">
     <p-toast></p-toast>
 
-    <div class="card">
+    <div class="card mb-6">
         <h1>User Management Screen</h1>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+    <p-accordion [activeIndex]="activeIndex">
         <!-- Users Section -->
-        <div class="card">
-            <div class="flex justify-between items-center mb-4">
-                <h2>Users</h2>
-                <button pButton type="button" icon="pi pi-plus" label="Add User"
-                        (click)="openNewUser()" class="p-button-success"></button>
+        <p-accordionTab header="Users Management">
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2>Users</h2>
+                    <button pButton type="button" icon="pi pi-plus" label="Add User"
+                            (click)="openNewUser()" class="p-button-success"></button>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="p-inputgroup mb-4">
+                    <span class="p-inputgroup-addon">
+                        <i class="pi pi-search"></i>
+                    </span>
+                    <input type="text" pInputText [(ngModel)]="userSearchText"
+                           (input)="filterUsers()" placeholder="Search users..." class="w-full"/>
+                    <button pButton type="button" icon="pi pi-times" *ngIf="userSearchText"
+                            (click)="clearUserSearch()" class="p-button-outlined"></button>
+                </div>
+
+                <!-- Users Table -->
+                <p-table [value]="filteredUsers" [rows]="10" [paginator]="true" [loading]="loading"
+                         [rowsPerPageOptions]="[5, 10, 20]" selectionMode="single"
+                         [(selection)]="selectedUser" dataKey="username"
+                         (onRowSelect)="onUserSelect($event.data)">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Groups</th>
+                            <th>Actions</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-user>
+                        <tr [pSelectableRow]="user">
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.firstName }} {{ user.lastName }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <p-tag *ngFor="let group of user.groups" value="{{ group.name }}"
+                                       severity="info" class="mr-1 mb-1"></p-tag>
+                            </td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <button pButton type="button" icon="pi pi-users"
+                                            (click)="openAssignmentDialog(user)"
+                                            class="p-button-info p-button-sm"></button>
+                                    <button pButton type="button" icon="pi pi-trash"
+                                            (click)="deleteUser(user)"
+                                            class="p-button-danger p-button-sm"></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="5" class="text-center p-4">
+                                No users found
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
             </div>
 
-            <p-table [value]="users" [rows]="10" [paginator]="true" [loading]="loading"
-                     [rowsPerPageOptions]="[5, 10, 20]" selectionMode="single"
-                     [(selection)]="selectedUsers" dataKey="username">
-                <ng-template pTemplate="header">
-                    <tr>
-                        <th>Username</th>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Groups</th>
-                        <th>Actions</th>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-user>
-                    <tr>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.firstName }} {{ user.lastName }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>
-                            <p-tag *ngFor="let group of user.groups" value="{{ group.groupName }}"
-                                   severity="info" class="mr-1 mb-1"></p-tag>
-                        </td>
-                        <td>
-                            <div class="flex gap-2">
-                                <button pButton type="button" icon="pi pi-users"
-                                        (click)="openAssignmentDialog(user)"
-                                        class="p-button-info p-button-sm"></button>
-                                <button pButton type="button" icon="pi pi-trash"
-                                        (click)="deleteUser(user)"
-                                        class="p-button-danger p-button-sm"></button>
-                            </div>
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </div>
+            <!-- Selected User Details -->
+            <div *ngIf="selectedUser" class="card mt-4">
+                <h3>User Details: {{ selectedUser.username }}</h3>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <strong>Username:</strong> {{ selectedUser.username }}
+                    </div>
+                    <div>
+                        <strong>Full Name:</strong> {{ selectedUser.firstName }} {{ selectedUser.lastName }}
+                    </div>
+                    <div>
+                        <strong>Email:</strong> {{ selectedUser.email }}
+                    </div>
+                </div>
+            </div>
+        </p-accordionTab>
 
         <!-- Groups Section -->
-        <div class="card">
-            <div class="flex justify-between items-center mb-4">
-                <h2>Groups</h2>
-                <button pButton type="button" icon="pi pi-plus" label="Add Group"
-                        (click)="openNewGroup()" class="p-button-success"></button>
+        <p-accordionTab header="Groups Management">
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2>Groups</h2>
+                    <button pButton type="button" icon="pi pi-plus" label="Add Group"
+                            (click)="openNewGroup()" class="p-button-success"></button>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="p-inputgroup mb-4">
+                    <span class="p-inputgroup-addon">
+                        <i class="pi pi-search"></i>
+                    </span>
+                    <input type="text" pInputText [(ngModel)]="groupSearchText"
+                           (input)="filterGroups()" placeholder="Search groups..." class="w-full"/>
+                    <button pButton type="button" icon="pi pi-times" *ngIf="groupSearchText"
+                            (click)="clearGroupSearch()" class="p-button-outlined"></button>
+                </div>
+
+                <!-- Groups Table -->
+                <p-table [value]="filteredGroups" [rows]="10" [paginator]="true" [loading]="loading"
+                         [rowsPerPageOptions]="[5, 10, 20]" selectionMode="single"
+                         [(selection)]="selectedGroup" dataKey="groupName"
+                         (onRowSelect)="onGroupSelect($event.data)">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Group Name</th>
+                            <th>Member Count</th>
+                            <th>Actions</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-group>
+                        <tr [pSelectableRow]="group">
+                            <td>{{ group.name }}</td>
+                            <td>{{ group.memberCount || 0 }}</td>
+                            <td>
+                                <button pButton type="button" icon="pi pi-trash"
+                                        (click)="deleteGroup(group)"
+                                        class="p-button-danger p-button-sm"></button>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="3" class="text-center p-4">
+                                No groups found
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
             </div>
 
-            <p-table [value]="groups" [rows]="10" [paginator]="true" [loading]="loading"
-                     [rowsPerPageOptions]="[5, 10, 20]">
-                <ng-template pTemplate="header">
-                    <tr>
-                        <th>Group Name</th>
-                        <th>Member Count</th>
-                        <th>Actions</th>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-group>
-                    <tr>
-                        <td>{{ group.groupName }}</td>
-                        <td>{{ group.memberCount || 0 }}</td>
-                        <td>
-                            <button pButton type="button" icon="pi pi-trash"
-                                    (click)="deleteGroup(group)"
-                                    class="p-button-danger p-button-sm"></button>
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </div>
-    </div>
+            <!-- Selected Group Details -->
+            <div *ngIf="selectedGroup" class="card mt-4">
+                <h3>Group Details: {{ selectedGroup.name }}</h3>
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <strong>Group Name:</strong> {{ selectedGroup.name }}
+                    </div>
+                    <div>
+                        <strong>Member Count:</strong> {{ selectedGroup.memberCount || 0 }}
+                    </div>
+                </div>
+            </div>
+        </p-accordionTab>
+    </p-accordion>
 
     <!-- User Dialog -->
     <p-dialog [(visible)]="userDialog" [style]="{width: '450px'}" header="Add New User">
@@ -134,7 +208,7 @@
 
     <!-- Assignment Dialog -->
     <p-dialog [(visible)]="assignmentDialog" [style]="{width: '500px'}"
-              header="Assign Groups to {{ selectedUserForAssignment?.username }}">
+              header="Assign Groups to {{ selectedUser?.username }}">
         <div class="p-fluid">
             <div class="field">
                 <label>Select Groups</label>

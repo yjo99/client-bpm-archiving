@@ -16,12 +16,15 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { ToolbarModule } from 'primeng/toolbar';
+import { AccordionModule } from 'primeng/accordion';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
-import {User} from "../../layout/model/user.model";
-import {CreateGroupRequest} from "../../layout/model/create.group.model";
-import {SuperAdminService} from "../../layout/service/super-admin.service";
 import {Group} from "../../layout/model/group.model";
+import {CreateGroupRequest} from "../../layout/model/create.group.model";
 import {UserRequest} from "../../layout/model/user.request.model";
+import {User} from "../../layout/model/user.model";
+import {SuperAdminService} from "../../layout/service/super-admin.service";
 
 @Component({
     selector: 'app-user-management',
@@ -42,6 +45,9 @@ import {UserRequest} from "../../layout/model/user.request.model";
         ToastModule,
         TagModule,
         ToolbarModule,
+        AccordionModule,
+        InputGroupModule,
+        InputGroupAddonModule,
         AppFloatingConfigurator
     ],
     templateUrl: './userManagement.html',
@@ -50,19 +56,9 @@ import {UserRequest} from "../../layout/model/user.request.model";
 export class UserManagement implements OnInit {
     // Users
     users: User[] = [];
-    selectedUsers: User[] = [];
+    filteredUsers: User[] = [];
+    selectedUser: User | null = null;
     userDialog: boolean = false;
-    user: User = {} as User;
-    submitted: boolean = false;
-
-    // Groups
-    groups: Group[] = [];
-    selectedGroups: Group[] = [];
-    groupDialog: boolean = false;
-    group: Group = {} as Group;
-    groupSubmitted: boolean = false;
-
-    // User Form
     userForm: UserRequest = {
         username: '',
         password: '',
@@ -71,17 +67,28 @@ export class UserManagement implements OnInit {
         email: ''
     };
 
-    // Group Form
+    // Groups
+    groups: Group[] = [];
+    filteredGroups: Group[] = [];
+    selectedGroup: Group | null = null;
+    groupDialog: boolean = false;
     groupForm: CreateGroupRequest = {
         groupName: ''
     };
 
     // Assignment
     assignmentDialog: boolean = false;
-    selectedUserForAssignment: User | null = null;
     selectedGroupsForAssignment: Group[] = [];
 
+    // Search
+    userSearchText: string = '';
+    groupSearchText: string = '';
+
+    // UI State
     loading: boolean = false;
+    activeIndex: number = 0;
+    submitted: boolean = false;
+    groupSubmitted: boolean = false;
 
     constructor(
         private superAdminService: SuperAdminService,
@@ -99,6 +106,7 @@ export class UserManagement implements OnInit {
         this.superAdminService.getAllUsers().subscribe({
             next: (users: any) => {
                 this.users = users;
+                this.filteredUsers = users;
                 this.loading = false;
             },
             error: (error: any) => {
@@ -111,6 +119,26 @@ export class UserManagement implements OnInit {
                 this.loading = false;
             }
         });
+    }
+
+    filterUsers(): void {
+        if (!this.userSearchText) {
+            this.filteredUsers = this.users;
+            return;
+        }
+
+        const searchText = this.userSearchText.toLowerCase();
+        this.filteredUsers = this.users.filter(user =>
+            user.username?.toLowerCase().includes(searchText) ||
+            user.firstName?.toLowerCase().includes(searchText) ||
+            user.lastName?.toLowerCase().includes(searchText) ||
+            user.email?.toLowerCase().includes(searchText)
+        );
+    }
+
+    clearUserSearch(): void {
+        this.userSearchText = '';
+        this.filterUsers();
     }
 
     openNewUser(): void {
@@ -182,6 +210,7 @@ export class UserManagement implements OnInit {
         this.superAdminService.getAllGroups().subscribe({
             next: (groups: any) => {
                 this.groups = groups;
+                this.filteredGroups = groups;
                 this.loading = false;
             },
             error: (error: any) => {
@@ -194,6 +223,23 @@ export class UserManagement implements OnInit {
                 this.loading = false;
             }
         });
+    }
+
+    filterGroups(): void {
+        if (!this.groupSearchText) {
+            this.filteredGroups = this.groups;
+            return;
+        }
+
+        const searchText = this.groupSearchText.toLowerCase();
+        this.filteredGroups = this.groups.filter(group =>
+            group.name?.toLowerCase().includes(searchText)
+        );
+    }
+
+    clearGroupSearch(): void {
+        this.groupSearchText = '';
+        this.filterGroups();
     }
 
     openNewGroup(): void {
@@ -255,18 +301,18 @@ export class UserManagement implements OnInit {
 
     // Assignment Methods
     openAssignmentDialog(user: User): void {
-        this.selectedUserForAssignment = user;
+        this.selectedUser = user;
         this.selectedGroupsForAssignment = [];
         this.assignmentDialog = true;
     }
 
     assignGroupsToUser(): void {
-        if (!this.selectedUserForAssignment?.username || this.selectedGroupsForAssignment.length === 0) {
+        if (!this.selectedUser?.username || this.selectedGroupsForAssignment.length === 0) {
             return;
         }
 
         const assignments = this.selectedGroupsForAssignment.map(group =>
-            this.superAdminService.assignUserToGroup(group.name!, this.selectedUserForAssignment!.username!)
+            this.superAdminService.assignUserToGroup(group.name!, this.selectedUser!.username!)
         );
 
         Promise.all(assignments).then(() => {
@@ -276,6 +322,7 @@ export class UserManagement implements OnInit {
                 detail: 'User assigned to groups successfully'
             });
             this.assignmentDialog = false;
+            this.loadUsers(); // Refresh to show updated groups
         }).catch(error => {
             console.error('Error assigning groups:', error);
             this.messageService.add({
@@ -286,9 +333,25 @@ export class UserManagement implements OnInit {
         });
     }
 
-    // // Helper Methods
-    // getUserGroups(user: User): string {
-    //     // This would need to be implemented based on your data structure
-    //     return user.groups?.map(g => g.name).join(', ') || 'No groups';
-    // }
+    onUserSelect(event: any): void {
+        // Use a different variable name to avoid conflict with User type
+        const userData = event && event.data ? event.data : event;
+
+        if (userData && typeof userData === 'object' && 'username' in userData) {
+            this.selectedUser = userData;
+        } else {
+            this.selectedUser = null;
+        }
+    }
+
+    onGroupSelect(event: any): void {
+        // Rename the variable from 'group' to something else like 'selectedGroup'
+        const selectedGroup = event && event.data ? event.data : event;
+
+        if (selectedGroup && typeof selectedGroup === 'object' && 'name' in selectedGroup) {
+            this.selectedGroup = selectedGroup;
+        } else {
+            this.selectedGroup = null;
+        }
+    }
 }
