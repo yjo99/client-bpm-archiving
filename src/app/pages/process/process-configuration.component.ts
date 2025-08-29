@@ -62,6 +62,10 @@ export class ProcessConfigurationComponent implements OnInit {
     saving = false;
     isEditMode = false;
 
+    // Date validation properties
+    minDate: Date = new Date();
+    retentionDateError: string = '';
+
     constructor(
         private route: ActivatedRoute,
         private router: Router,
@@ -106,7 +110,7 @@ export class ProcessConfigurationComponent implements OnInit {
 
                 // Redirect back after a short delay
                 setTimeout(() => {
-                    this.router.navigate(['/pages/process']);
+                    this.router.navigate(['/pages/processmanagement']);
                 }, 2000);
                 return;
             }
@@ -125,6 +129,8 @@ export class ProcessConfigurationComponent implements OnInit {
                     if (config) {
                         this.isEditMode = true;
                         this.configurationForm = config;
+                        // Validate existing date when loading in edit mode
+                        this.validateRetentionDate();
                     } else {
                         this.initializeForm();
                     }
@@ -176,6 +182,7 @@ export class ProcessConfigurationComponent implements OnInit {
         this.loadingGroups = true;
         this.superAdminService.getAllGroups().subscribe({
             next: (groups) => {
+                console.log(groups)
                 this.allGroups = groups;
                 this.loadingGroups = false;
             },
@@ -191,8 +198,67 @@ export class ProcessConfigurationComponent implements OnInit {
         });
     }
 
+    // Date validation method
+    validateRetentionDate(): void {
+        this.retentionDateError = '';
+
+        if (this.configurationForm.retentionStartDate) {
+            const selectedDate = new Date(this.configurationForm.retentionStartDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time part for accurate comparison
+
+            // Create date without time for comparison
+            const selectedDateWithoutTime = new Date(selectedDate);
+            selectedDateWithoutTime.setHours(0, 0, 0, 0);
+
+            if (selectedDateWithoutTime < today) {
+                this.retentionDateError = 'Retention start date cannot be before today';
+            }
+        }
+    }
+
+    // Handle date selection change
+    onDateChange(): void {
+        this.validateRetentionDate();
+    }
+
+    // Handle date input (manual typing)
+    onDateInput(): void {
+        this.validateRetentionDate();
+    }
+
+    // Handle date clear
+    onDateClear(): void {
+        this.retentionDateError = '';
+    }
+
+    // Prepare the data for submission - extract only group names and usernames
+    prepareSubmissionData(): ProcessConfigDto {
+        return {
+            ...this.configurationForm,
+            assignedGroups: this.configurationForm.assignedGroups.map((group: any) =>
+                typeof group === 'string' ? group : group.name || group.groupName || group
+            ),
+            assignedUsers: this.configurationForm.assignedUsers.map((user: any) =>
+                typeof user === 'string' ? user : user.username || user
+            )
+        };
+    }
+
     saveConfiguration(): void {
         this.saving = true;
+
+        // Validate retention date first
+        this.validateRetentionDate();
+        if (this.retentionDateError) {
+            this.saving = false;
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: this.retentionDateError
+            });
+            return;
+        }
 
         // Validate form
         if (!this.isFormValid()) {
@@ -200,8 +266,12 @@ export class ProcessConfigurationComponent implements OnInit {
             return;
         }
 
+        // Prepare the data for submission
+        const submissionData = this.prepareSubmissionData();
+        console.log('Submitting data:', submissionData);
+
         // Call the API service
-        this.processService.configProcess(this.configurationForm).subscribe({
+        this.processService.configProcess(submissionData).subscribe({
             next: (response: any) => {
                 this.saving = false;
                 this.messageService.add({
@@ -212,7 +282,7 @@ export class ProcessConfigurationComponent implements OnInit {
 
                 // Navigate back to processes list
                 setTimeout(() => {
-                    this.router.navigate(['/pages/process']);
+                    this.router.navigate(['/pages/processmanagement']);
                 }, 1500);
             },
             error: (error: any) => {
@@ -228,37 +298,97 @@ export class ProcessConfigurationComponent implements OnInit {
     }
 
     isFormValid(): boolean {
-        if (!this.configurationForm.appID) {
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Validation Error',
-                detail: 'Application ID is required'
-            });
-            return false;
-        }
+    // Validate required fields
+    if (!this.configurationForm.appID) {
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Application ID is required'
+        });
+        return false;
+    }
 
-        if (!this.configurationForm.acronym) {
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Validation Error',
-                detail: 'Acronym is required'
-            });
-            return false;
-        }
+    if (!this.configurationForm.acronym) {
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Acronym is required'
+        });
+        return false;
+    }
 
-        if (!this.configurationForm.name) {
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Validation Error',
-                detail: 'Name is required'
-            });
-            return false;
-        }
+    if (!this.configurationForm.name) {
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Name is required'
+        });
+        return false;
+    }
+
+    // Validate retention start date
+    if (!this.configurationForm.retentionStartDate) {
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Retention start date is required'
+        });
+        return false;
+    }
+
+    // Validate date is not before today (already handled in validateRetentionDate but double-check)
+    this.validateRetentionDate();
+    if (this.retentionDateError) {
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: this.retentionDateError
+        });
+        return false;
+    }
+
+    // Validate Archive Period Number
+    if (!this.configurationForm.numberPeriodArch) {
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Archive Period Number is required'
+        });
+        return false;
+    }
+
+    if (isNaN(Number(this.configurationForm.numberPeriodArch)) || Number(this.configurationForm.numberPeriodArch) <= 0) {
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Archive Period Number must be a positive number'
+        });
+        return false;
+    }
+
+    // Validate Instance Archive Number
+    if (!this.configurationForm.instanceArchNumber) {
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Instance Archive Number is required'
+        });
+        return false;
+    }
+
+    if (isNaN(Number(this.configurationForm.instanceArchNumber)) || Number(this.configurationForm.instanceArchNumber) <= 0) {
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Instance Archive Number must be a positive number'
+        });
+        return false;
+    }
 
         return true;
     }
 
     cancel(): void {
-        this.router.navigate(['/pages/process']);
+        this.router.navigate(['/pages/processmanagement']);
     }
 }

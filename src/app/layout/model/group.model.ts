@@ -1,4 +1,5 @@
 export interface Group {
-    groupName: string;
+    name: string;
+    memberCount: String
     // Add other group properties as needed
 }

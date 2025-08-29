@@ -1,6 +1,5 @@
 <!-- process-configuration.component.html -->
 <style>
-    /* process-configuration.component.css */
     .field {
         margin-bottom: 1.5rem;
     }
@@ -24,13 +23,38 @@
         padding-top: 1rem;
         border-top: 1px solid #e5e7eb;
     }
+
+    .configuration-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #3b82f6;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 0.5rem;
+    }
+
+    .error-message {
+        color: #e24c4c;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .p-invalid .p-calendar {
+        border-color: #e24c4c;
+    }
 </style>
 
 <div class="p-4">
     <p-toast></p-toast>
 
     <div class="card">
-        <h1>{{ isEditMode ? 'Edit' : 'Configure' }} Process</h1>
+        <h1>Configure Process</h1>
 
         <div *ngIf="process" class="mt-4">
             <p-card header="Process Details" class="mb-4">
@@ -60,139 +84,142 @@
             <div class="card mt-4">
                 <h3 class="mb-4">Configuration Settings</h3>
 
-                <form (ngSubmit)="saveConfiguration()" class="p-fluid grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Application ID -->
-                    <div class="field">
-                        <label for="appID">Application ID *</label>
-                        <input
-                                id="appID"
-                                type="text"
-                                pInputText
-                                [(ngModel)]="configurationForm.appID"
-                                name="appID"
-                                required
-                                [disabled]="isEditMode"
-                                class="w-full" />
+                <form (ngSubmit)="saveConfiguration()" class="p-fluid">
+                    <!-- Basic Information Section -->
+                    <div class="section-title">Basic Information</div>
+                    <div class="configuration-grid">
+                        <!-- Acronym -->
+                        <div class="field">
+                            <label for="acronym">Acronym *</label>
+                            <input
+                                    id="acronym"
+                                    type="text"
+                                    pInputText
+                                    [(ngModel)]="configurationForm.acronym"
+                                    name="acronym"
+                                    required
+                                    class="w-full"
+                                    placeholder="Enter process acronym" />
+                        </div>
+
+                        <!-- Name -->
+                        <div class="field">
+                            <label for="name">Name *</label>
+                            <input
+                                    id="name"
+                                    type="text"
+                                    pInputText
+                                    [(ngModel)]="configurationForm.name"
+                                    name="name"
+                                    required
+                                    class="w-full"
+                                    placeholder="Enter process name" />
+                        </div>
                     </div>
 
-                    <!-- Acronym -->
-                    <div class="field">
-                        <label for="acronym">Acronym *</label>
-                        <input
-                                id="acronym"
-                                type="text"
-                                pInputText
-                                [(ngModel)]="configurationForm.acronym"
-                                name="acronym"
-                                required
-                                class="w-full" />
+                    <!-- Archive Settings Section -->
+                    <div class="section-title mt-6">Archive Settings</div>
+                    <div class="configuration-grid">
+                        <!-- Retention Start Date -->
+                        <div class="field">
+                            <label for="retentionStartDate">Retention Start Date *</label>
+                            <p-calendar
+                                    id="retentionStartDate"
+                                    [(ngModel)]="configurationForm.retentionStartDate"
+                                    name="retentionStartDate"
+                                    dateFormat="yy-mm-dd"
+                                    [showIcon]="true"
+                                    [minDate]="minDate"
+                                    [readonlyInput]="true"
+                                    placeholder="Select start date"
+                                    [class]="retentionDateError ? 'p-invalid' : ''"
+                                    class="w-full"
+                                    (onSelect)="validateRetentionDate()"
+                                    (onInput)="validateRetentionDate()"
+                                    (onClear)="validateRetentionDate()">
+                            </p-calendar>
+                            <div *ngIf="retentionDateError" class="error-message">
+                                {{ retentionDateError }}
+                            </div>
+                        </div>
+
+                        <!-- Number Period Archive -->
+                        <div class="field">
+                            <label for="numberPeriodArch">Archive Period Number</label>
+                            <input
+                                    id="numberPeriodArch"
+                                    type="number"
+                                    pInputText
+                                    [(ngModel)]="configurationForm.numberPeriodArch"
+                                    name="numberPeriodArch"
+                                    class="w-full"
+                                    placeholder="Enter period number" />
+                        </div>
+
+                        <!-- Instance Archive Number -->
+                        <div class="field">
+                            <label for="instanceArchNumber">Instance Archive Number</label>
+                            <input
+                                    id="instanceArchNumber"
+                                    type="number"
+                                    pInputText
+                                    [(ngModel)]="configurationForm.instanceArchNumber"
+                                    name="instanceArchNumber"
+                                    class="w-full"
+                                    placeholder="Enter instance number" />
+                        </div>
                     </div>
 
-                    <!-- Name -->
-                    <div class="field md:col-span-2">
-                        <label for="name">Name *</label>
-                        <input
-                                id="name"
-                                type="text"
-                                pInputText
-                                [(ngModel)]="configurationForm.name"
-                                name="name"
-                                required
-                                class="w-full" />
-                    </div>
+                    <!-- Access Control Section -->
+                    <div class="section-title mt-6">Access Control</div>
+                    <div class="configuration-grid">
+                        <!-- Assigned Groups -->
+                        <div class="field">
+                            <label for="assignedGroups">Assigned Groups</label>
+                            <p-multiSelect
+                                    id="assignedGroups"
+                                    [(ngModel)]="configurationForm.assignedGroups"
+                                    name="assignedGroups"
+                                    [options]="allGroups"
+                                    optionLabel="name"
+                                    [loading]="loadingGroups"
+                                    placeholder="Select groups"
+                                    display="chip"
+                                    class="w-full">
+                                <ng-template pTemplate="header">
+                                    <div class="p-2">
+                                        <div>Available Groups</div>
+                                        <div *ngIf="loadingGroups" class="text-sm text-500">Loading groups...</div>
+                                    </div>
+                                </ng-template>
+                            </p-multiSelect>
+                        </div>
 
-                    <!-- Retention Start Date -->
-                    <div class="field">
-                        <label for="retentionStartDate">Retention Start Date</label>
-                        <p-calendar
-                                id="retentionStartDate"
-                                [(ngModel)]="configurationForm.retentionStartDate"
-                                name="retentionStartDate"
-                                dateFormat="yy-mm-dd"
-                                [showIcon]="true"
-                                class="w-full"></p-calendar>
-                    </div>
-
-                    <!-- Number Period Archive -->
-                    <div class="field">
-                        <label for="numberPeriodArch">Number Period Archive</label>
-                        <input
-                                id="numberPeriodArch"
-                                type="text"
-                                pInputText
-                                [(ngModel)]="configurationForm.numberPeriodArch"
-                                name="numberPeriodArch"
-                                class="w-full" />
-                    </div>
-
-                    <!-- Instance Archive Number -->
-                    <div class="field">
-                        <label for="instanceArchNumber">Instance Archive Number</label>
-                        <input
-                                id="instanceArchNumber"
-                                type="text"
-                                pInputText
-                                [(ngModel)]="configurationForm.instanceArchNumber"
-                                name="instanceArchNumber"
-                                class="w-full" />
-                    </div>
-
-                    <!-- Assigned Groups -->
-                    <div class="field">
-                        <label for="assignedGroups">Assigned Groups</label>
-                        <p-multiSelect
-                                id="assignedGroups"
-                                [(ngModel)]="configurationForm.assignedGroups"
-                                name="assignedGroups"
-                                [options]="allGroups"
-                                optionLabel="groupName"
-                                [loading]="loadingGroups"
-                                placeholder="Select groups"
-                                display="chip"
-                                class="w-full">
-                            <ng-template pTemplate="header">
-                                <div class="p-2">
-                                    <div>Available Groups</div>
-                                    <div *ngIf="loadingGroups" class="text-sm text-500">Loading groups...</div>
-                                </div>
-                            </ng-template>
-                        </p-multiSelect>
-                    </div>
-
-                    <!-- Assigned Users -->
-                    <div class="field">
-                        <label for="assignedUsers">Assigned Users</label>
-                        <p-multiSelect
-                                id="assignedUsers"
-                                [(ngModel)]="configurationForm.assignedUsers"
-                                name="assignedUsers"
-                                [options]="allUsers"
-                                optionLabel="username"
-                                [loading]="loadingUsers"
-                                placeholder="Select users"
-                                display="chip"
-                                class="w-full">
-                            <ng-template pTemplate="header">
-                                <div class="p-2">
-                                    <div>Available Users</div>
-                                    <div *ngIf="loadingUsers" class="text-sm text-500">Loading users...</div>
-                                </div>
-                            </ng-template>
-                        </p-multiSelect>
-                    </div>
-
-                    <!-- Is Configured -->
-                    <div class="field md:col-span-2">
-                        <p-checkbox
-                                [(ngModel)]="configurationForm.isConfigured"
-                                name="isConfigured"
-                                [binary]="true"
-                                label="Is Configured">
-                        </p-checkbox>
+                        <!-- Assigned Users -->
+                        <div class="field">
+                            <label for="assignedUsers">Assigned Users</label>
+                            <p-multiSelect
+                                    id="assignedUsers"
+                                    [(ngModel)]="configurationForm.assignedUsers"
+                                    name="assignedUsers"
+                                    [options]="allUsers"
+                                    optionLabel="username"
+                                    [loading]="loadingUsers"
+                                    placeholder="Select users"
+                                    display="chip"
+                                    class="w-full">
+                                <ng-template pTemplate="header">
+                                    <div class="p-2">
+                                        <div>Available Users</div>
+                                        <div *ngIf="loadingUsers" class="text-sm text-500">Loading users...</div>
+                                    </div>
+                                </ng-template>
+                            </p-multiSelect>
+                        </div>
                     </div>
 
                     <!-- Form Actions -->
-                    <div class="field md:col-span-2 flex gap-2 justify-content-end">
+                    <div class="field mt-6 flex gap-2 justify-content-end">
                         <button
                                 pButton
                                 type="button"
@@ -203,10 +230,10 @@
                         <button
                                 pButton
                                 type="submit"
-                                label="{{ isEditMode ? 'Update' : 'Save' }}"
-                                icon="pi pi-check"
+                                label="Configure"
+                                icon="pi pi-cog"
                                 [loading]="saving"
-                                class="p-button-success"></button>
+                                class="p-button-primary"></button>
                     </div>
                 </form>
             </div>
