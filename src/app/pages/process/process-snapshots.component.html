@@ -28,6 +28,32 @@
             </div>
         </div>
 
+        <!-- Selection Actions -->
+        <div *ngIf="selectedSnapshots.length > 0" class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="font-semibold text-blue-800">{{ selectedSnapshots.length }} snapshot(s) selected</span>
+                </div>
+                <div class="flex gap-2">
+                    <button
+                            pButton
+                            type="button"
+                            label="Configure Selected"
+                            icon="pi pi-cog"
+                            (click)="configureSelectedSnapshots()"
+                            [loading]="configuring"
+                            class="p-button-success"></button>
+                    <button
+                            pButton
+                            type="button"
+                            label="Clear Selection"
+                            icon="pi pi-times"
+                            (click)="selectedSnapshots = []"
+                            class="p-button-outlined p-button-secondary"></button>
+                </div>
+            </div>
+        </div>
+
         <!-- Loading indicator -->
         <div *ngIf="loading" class="flex justify-center items-center p-6">
             <p-progressSpinner></p-progressSpinner>
@@ -44,17 +70,24 @@
         <!-- Snapshots table -->
         <div *ngIf="!loading && snapshots.length > 0">
             <p-table [value]="snapshots" [rows]="10" [paginator]="true"
-                     [rowsPerPageOptions]="[5, 10, 20, 50]" [loading]="loading">
+                     [rowsPerPageOptions]="[5, 10, 20, 50]" [loading]="loading"
+                     [(selection)]="selectedSnapshots" dataKey="ID">
                 <ng-template pTemplate="header">
                     <tr>
+                        <th style="width: 3rem">
+                            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                        </th>
                         <th *ngFor="let col of cols" [pSortableColumn]="col.field">
                             {{ col.header }}
                             <p-sortIcon [field]="col.field"></p-sortIcon>
                         </th>
                     </tr>
                 </ng-template>
-                <ng-template pTemplate="body" let-snapshot>
-                    <tr>
+                <ng-template pTemplate="body" let-snapshot let-rowIndex="rowIndex">
+                    <tr [class.bg-blue-50]="isSelected(snapshot)">
+                        <td>
+                            <p-tableCheckbox [value]="snapshot"></p-tableCheckbox>
+                        </td>
                         <td>{{ snapshot.name || 'N/A' }}</td>
                         <td>{{ snapshot.acronym || 'N/A' }}</td>
                         <td>
@@ -72,7 +105,7 @@
                 </ng-template>
                 <ng-template pTemplate="emptymessage">
                     <tr>
-                        <td [colSpan]="cols.length" class="text-center p-4">
+                        <td [colSpan]="cols.length + 1" class="text-center p-4">
                             No snapshots found
                         </td>
                     </tr>
@@ -82,7 +115,7 @@
 
         <!-- Summary -->
         <div *ngIf="snapshots.length > 0" class="mt-4 p-4 bg-surface-50 rounded-lg">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="text-center">
                     <div class="text-2xl font-bold text-primary-600">{{ snapshots.length }}</div>
                     <div class="text-sm text-surface-500">Total Snapshots</div>
@@ -98,6 +131,12 @@
                         {{ getSnapshotTipCount() }}
                     </div>
                     <div class="text-sm text-surface-500">Snapshot Tips</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-orange-600">
+                        {{ selectedSnapshots.length }}
+                    </div>
+                    <div class="text-sm text-surface-500">Selected</div>
                 </div>
             </div>
         </div>

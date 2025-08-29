@@ -9,7 +9,7 @@ import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import {ProcessService, InstalledSnapshots} from "../../layout/service/ProcessService";
+import { ProcessService, InstalledSnapshots, SnapshotDto } from "../../layout/service/ProcessService";
 
 @Component({
     selector: 'app-process-snapshots',
@@ -29,7 +29,9 @@ export class ProcessSnapshotsComponent implements OnInit {
     processId: string = '';
     processName: string = '';
     snapshots: InstalledSnapshots[] = [];
+    selectedSnapshots: InstalledSnapshots[] = [];
     loading: boolean = false;
+    configuring: boolean = false;
 
     // Table columns
     cols = [
@@ -92,17 +94,31 @@ export class ProcessSnapshotsComponent implements OnInit {
         });
     }
 
-    getStatusSeverity(status: string): string {
-        if (!status) return 'info';
+    getStatusSeverity(status: any): string {
+        if (status === null || status === undefined) return 'info';
 
-        switch (status.toLowerCase()) {
-            case 'active':
-                return 'success';
-            case 'inactive':
-                return 'warning';
-            default:
-                return 'info';
+        // Handle boolean values
+        if (typeof status === 'boolean') {
+            return status ? 'success' : 'warning';
         }
+
+        // Handle string values
+        if (typeof status === 'string') {
+            const lowerStatus = status.toLowerCase();
+            if (lowerStatus === 'true' || lowerStatus === 'active') {
+                return 'success';
+            } else if (lowerStatus === 'false' || lowerStatus === 'inactive') {
+                return 'warning';
+            }
+            return 'info';
+        }
+
+        // Handle numeric values
+        if (typeof status === 'number') {
+            return status === 1 ? 'success' : 'warning';
+        }
+
+        return 'info';
     }
 
     getStatusText(status: any): string {
@@ -152,11 +168,65 @@ export class ProcessSnapshotsComponent implements OnInit {
         return this.snapshots.filter(s => s.snapshotTip).length;
     }
 
+    // Prepare snapshot data for configuration
+    prepareSnapshotConfiguration(): SnapshotDto[] {
+        return this.selectedSnapshots.map(snapshot => ({
+            snapshotID: snapshot.ID || '',
+            branchID: snapshot.branchID || '',
+            acronym: snapshot.acronym || '',
+            isActive: snapshot.active || 'false',
+            activeSince: '', // You might need to adjust this based on your data
+            createdOn: snapshot.createdOn || '',
+            ID: 0 // This might need to be populated if you have an ID field
+        }));
+    }
+
+    // Configure selected snapshots
+    configureSelectedSnapshots(): void {
+        if (this.selectedSnapshots.length === 0) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Warning',
+                detail: 'Please select at least one snapshot to configure'
+            });
+            return;
+        }
+
+        this.configuring = true;
+        const snapshotConfigs = this.prepareSnapshotConfiguration();
+
+        this.processService.snapshotConfiguration(snapshotConfigs).subscribe({
+            next: (response: any) => {
+                this.configuring = false;
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Snapshots configured successfully'
+                });
+                this.selectedSnapshots = []; // Clear selection after success
+            },
+            error: (error: any) => {
+                this.configuring = false;
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to configure snapshots: ' + error.message
+                });
+                console.error('Error configuring snapshots:', error);
+            }
+        });
+    }
+
     goBack(): void {
-        this.router.navigate(['/pages/processmanagement']);
+        this.router.navigate(['/pages/process']);
     }
 
     refreshSnapshots(): void {
         this.loadSnapshots();
+        this.selectedSnapshots = []; // Clear selection on refresh
+    }
+
+    isSelected(snapshot: InstalledSnapshots): boolean {
+        return this.selectedSnapshots.some(s => s.ID === snapshot.ID);
     }
 }
