@@ -1,12 +1,13 @@
 // src/app/services/super-admin.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import {catchError, Observable, tap, throwError} from 'rxjs';
+import {HttpClient, HttpErrorResponse, HttpParams} from '@angular/common/http';
+import {catchError, delay, Observable, tap, throwError} from 'rxjs';
 import {environment} from "../../../environments/environment";
 import {User} from "../model/user.model";
 import {UserRequest} from "../model/user.request.model";
 import {CreateGroupRequest} from "../model/create.group.model";
 import {Group} from "../model/group.model";
+import {map, retry} from "rxjs/operators";
 
 @Injectable({
     providedIn: 'root'
@@ -60,20 +61,77 @@ export class SuperAdminService {
         return this.http.delete(`${this.apiUrl}/groups/${groupName}`);
     }
 
-    assignUserToGroup(groupName: string, username: string): Observable<any> {
+    assignUserToGroup(groupName: string, username: string): Observable<string> {
         console.log('Sending request to assign user', username, 'to group', groupName);
         const url = `${this.apiUrl}/groups/${groupName}/users/${username}`;
         console.log('Request URL:', url);
 
         return this.http.post(url, null, {
-            observe: 'response' // Get full response for debugging
+            responseType: 'text', // Expect text response
+            observe: 'response'   // Get full response
         }).pipe(
             tap(response => {
                 console.log('Response received:', response.status, response.body);
             }),
-            catchError(error => {
+            map(response => {
+                // For successful responses (200-299), return the success message
+                if (response.status >= 200 && response.status < 300) {
+                    return response.body || 'User assigned to group successfully';
+                }
+                // For error responses, throw an error with the message
+                throw new Error(response.body || 'Unknown error occurred');
+            }),
+            catchError((error: HttpErrorResponse) => {
                 console.error('Error in assignUserToGroup:', error);
-                return throwError(() => error);
+
+                let errorMessage = 'Failed to assign user to group';
+
+                // Handle different error scenarios
+                if (error.error && typeof error.error === 'string') {
+                    // Backend returned a string error message
+                    errorMessage = error.error;
+                } else if (error.status === 0) {
+                    // Network error
+                    errorMessage = 'Network error: Unable to connect to server';
+                } else if (error.status >= 400 && error.status < 500) {
+                    // Client error (bad request, not found, etc.)
+                    errorMessage = error.error || `Server error: ${error.status}`;
+                } else if (error.status >= 500) {
+                    // Server error
+                    errorMessage = 'Server error: Please try again later';
+                }
+
+                return throwError(() => new Error(errorMessage));
+            })
+        );
+    }
+
+    assignUserToGroupWithRetry(groupName: string, username: string): Observable<string> {
+        return this.http.post(`${this.apiUrl}/groups/${groupName}/users/${username}`, null, {
+            responseType: 'text',
+            observe: 'response'
+        }).pipe(
+            retry(2), // Retry up to 2 times on failure
+            delay(1000), // Wait 1 second between retries
+            map(response => {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.body || 'Success';
+                }
+                throw new Error(response.body || 'Unknown error');
+            }),
+            catchError((error: HttpErrorResponse) => {
+                // Enhanced error handling
+                let errorMessage = 'Failed to assign user to group';
+
+                if (error.error && typeof error.error === 'string') {
+                    errorMessage = error.error;
+                } else if (error.status === 404) {
+                    errorMessage = 'Resource not found';
+                } else if (error.status === 400) {
+                    errorMessage = 'Bad request - check user and group names';
+                }
+
+                return throwError(() => new Error(errorMessage));
             })
         );
     }

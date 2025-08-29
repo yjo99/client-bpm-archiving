@@ -433,7 +433,7 @@
                     <button pButton type="button" label="Cancel" icon="pi pi-times"
                             (click)="assignmentDialog = false" class="p-button-text p-button-sm"></button>
                     <button pButton type="button" label="Assign" icon="pi pi-check"
-                            (click)="assignGroupsToUser()" class="p-button-success p-button-sm"
+                            (click)="assignGroupsToUserSequentially()" class="p-button-success p-button-sm"
                             [disabled]="selectedGroupsForAssignment.length === 0"></button>
                 </div>
             </div>

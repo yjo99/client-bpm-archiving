@@ -26,7 +26,8 @@ import {UserRequest} from "../../layout/model/user.request.model";
 import {User} from "../../layout/model/user.model";
 import {SuperAdminService} from "../../layout/service/super-admin.service";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
-import {forkJoin} from "rxjs";
+import {catchError, concatMap, finalize, forkJoin, from, of} from "rxjs";
+import {map} from "rxjs/operators";
 
 @Component({
     selector: 'app-user-management',
@@ -485,48 +486,64 @@ export class UserManagement implements OnInit {
     }
 
     // Update the assignGroupsToUser method to refresh groups after assignment
-    assignGroupsToUser(): void {
+    assignGroupsToUserSequentially(): void {
         if (!this.selectedUser?.username || this.selectedGroupsForAssignment.length === 0) {
             return;
         }
 
-        console.log('Starting group assignment...');
-        console.log('User:', this.selectedUser.username);
-        console.log('Groups to assign:', this.selectedGroupsForAssignment.map(g => g.name));
+        this.loading = true;
+        const results: any[] = [];
 
-        const assignments = this.selectedGroupsForAssignment.map(group =>
-            this.superAdminService.assignUserToGroup(group.name!, this.selectedUser!.username!)
-        );
-
-        console.log('Assignment observables created:', assignments.length);
-
-        // Use forkJoin instead of Promise.all for Observables
-        forkJoin(assignments).subscribe({
-            next: (responses) => {
-                console.log('Assignment successful, responses:', responses);
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'User assigned to groups successfully'
-                });
-                this.assignmentDialog = false;
-
-                // Refresh both the user groups and main users list
-                this.loadUserGroups(this.selectedUser!.username);
-                this.loadUsers();
-            },
-            error: (error: any) => {
-                console.error('Error assigning groups:', error);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to assign groups: ' + error.message
-                });
-            },
-            complete: () => {
-                console.log('Assignment process completed');
-            }
+        from(this.selectedGroupsForAssignment).pipe(
+            concatMap(group =>
+                this.superAdminService.assignUserToGroup(group.name!, this.selectedUser!.username!)
+                    .pipe(
+                        map(message => ({
+                            success: true,
+                            group: group.name,
+                            message: message
+                        })),
+                        catchError(error => of({
+                            success: false,
+                            group: group.name,
+                            message: error.message
+                        }))
+                    )
+            ),
+            finalize(() => {
+                this.loading = false;
+                this.processAssignmentResults(results);
+            })
+        ).subscribe(result => {
+            results.push(result);
         });
+    }
+
+    private processAssignmentResults(results: any[]): void {
+        const successful = results.filter(r => r.success);
+        const failed = results.filter(r => !r.success);
+
+        if (successful.length > 0) {
+            this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `User assigned to ${successful.length} group(s) successfully`
+            });
+        }
+
+        failed.forEach(failure => {
+            this.messageService.add({
+                severity: 'warn',
+                summary: `Failed to assign to ${failure.group}`,
+                detail: failure.message
+            });
+        });
+
+        if (successful.length > 0) {
+            this.assignmentDialog = false;
+            this.loadUserGroups(this.selectedUser!.username);
+            this.loadUsers();
+        }
     }
 
     onUserSelect(event: any): void {
