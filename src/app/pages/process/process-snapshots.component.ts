@@ -9,6 +9,7 @@ import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import {ProcessService, InstalledSnapshots} from "../../layout/service/ProcessService";
 
 @Component({
     selector: 'app-process-snapshots',
@@ -75,7 +76,7 @@ export class ProcessSnapshotsComponent implements OnInit {
 
         this.loading = true;
         this.processService.getInstalledSnapshots(this.processId).subscribe({
-            next: (snapshots: InstalledSnapshots[]) => {
+            next: (snapshots: any) => {
                 this.snapshots = snapshots;
                 this.loading = false;
             },
@@ -92,7 +93,9 @@ export class ProcessSnapshotsComponent implements OnInit {
     }
 
     getStatusSeverity(status: string): string {
-        switch (status?.toLowerCase()) {
+        if (!status) return 'info';
+
+        switch (status.toLowerCase()) {
             case 'active':
                 return 'success';
             case 'inactive':
@@ -103,12 +106,27 @@ export class ProcessSnapshotsComponent implements OnInit {
     }
 
     getStatusText(status: string): string {
-        return status?.charAt(0).toUpperCase() + status?.slice(1).toLowerCase() || 'Unknown';
+        if (!status) return 'Unknown';
+        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
     }
 
     formatDate(dateString: string): string {
         if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleDateString();
+        try {
+            return new Date(dateString).toLocaleDateString();
+        } catch (error) {
+            return 'Invalid Date';
+        }
+    }
+
+    getActiveSnapshotCount(): number {
+        if (!this.snapshots || this.snapshots.length === 0) return 0;
+        return this.snapshots.filter(s => s.active && s.active.toLowerCase() === 'active').length;
+    }
+
+    getSnapshotTipCount(): number {
+        if (!this.snapshots || this.snapshots.length === 0) return 0;
+        return this.snapshots.filter(s => s.snapshotTip).length;
     }
 
     goBack(): void {
