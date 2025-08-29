@@ -1,9 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
-import { Home } from '../../pages/home/home';
 
 @Component({
     selector: 'app-menu',
@@ -16,10 +15,14 @@ import { Home } from '../../pages/home/home';
         </ng-container>
     </ul> `
 })
-export class AppMenu {
+export class AppMenu implements OnInit {
     model: MenuItem[] = [];
 
     ngOnInit() {
+        this.buildMenu();
+    }
+
+    private buildMenu() {
         this.model = [
             {
                 label: 'Home',
@@ -29,10 +32,8 @@ export class AppMenu {
                 label: 'Configuration',
                 items: [{ label: 'Datasource Management', icon: 'pi pi-fw pi-cog', routerLink: ['/pages/dataconfig'] }]
             },
-            {
-                label: 'User',
-                items: [{ label: 'Users Management', icon: 'pi pi-fw pi-users', routerLink: ['/pages/usermanagement'] }]
-            },
+            // Conditionally add User menu section
+            ...this.getUserMenuSection(),
             {
                 label: 'Process',
                 items: [{ label: 'Process Management', icon: 'pi pi-fw pi-share-alt', routerLink: ['/pages/processmanagement'] }]
@@ -40,135 +41,71 @@ export class AppMenu {
             {
                 label: 'System',
                 items: [{ label: 'System Dashboard', icon: 'pi pi-fw pi-tablet', routerLink: ['/pages/empty'] }]
-            },
-            // {
-            //     label: 'UI Components',
-            //     items: [
-            //         { label: 'Form Layout', icon: 'pi pi-fw pi-id-card', routerLink: ['/uikit/formlayout'] },
-            //         { label: 'Input', icon: 'pi pi-fw pi-check-square', routerLink: ['/uikit/input'] },
-            //         { label: 'Button', icon: 'pi pi-fw pi-mobile', class: 'rotated-icon', routerLink: ['/uikit/button'] },
-            //         { label: 'Table', icon: 'pi pi-fw pi-table', routerLink: ['/uikit/table'] },
-            //         { label: 'List', icon: 'pi pi-fw pi-list', routerLink: ['/uikit/list'] },
-            //         { label: 'Tree', icon: 'pi pi-fw pi-share-alt', routerLink: ['/uikit/tree'] },
-            //         { label: 'Panel', icon: 'pi pi-fw pi-tablet', routerLink: ['/uikit/panel'] },
-            //         { label: 'Overlay', icon: 'pi pi-fw pi-clone', routerLink: ['/uikit/overlay'] },
-            //         { label: 'Media', icon: 'pi pi-fw pi-image', routerLink: ['/uikit/media'] },
-            //         { label: 'Menu', icon: 'pi pi-fw pi-bars', routerLink: ['/uikit/menu'] },
-            //         { label: 'Message', icon: 'pi pi-fw pi-comment', routerLink: ['/uikit/message'] },
-            //         { label: 'File', icon: 'pi pi-fw pi-file', routerLink: ['/uikit/file'] },
-            //         { label: 'Chart', icon: 'pi pi-fw pi-chart-bar', routerLink: ['/uikit/charts'] },
-            //         { label: 'Timeline', icon: 'pi pi-fw pi-calendar', routerLink: ['/uikit/timeline'] },
-            //         { label: 'Misc', icon: 'pi pi-fw pi-circle', routerLink: ['/uikit/misc'] }
-            //     ]
-            // },
-            // {
-            //     label: 'Pages',
-            //     icon: 'pi pi-fw pi-briefcase',
-            //     routerLink: ['/pages'],
-            //     items: [
-            //         {
-            //             label: 'Landing',
-            //             icon: 'pi pi-fw pi-globe',
-            //             routerLink: ['/landing']
-            //         },
-            //         {
-            //             label: 'Auth',
-            //             icon: 'pi pi-fw pi-user',
-            //             items: [
-            //                 {
-            //                     label: 'Login',
-            //                     icon: 'pi pi-fw pi-sign-in',
-            //                     routerLink: ['/auth/login']
-            //                 },
-            //                 {
-            //                     label: 'Error',
-            //                     icon: 'pi pi-fw pi-times-circle',
-            //                     routerLink: ['/auth/error']
-            //                 },
-            //                 {
-            //                     label: 'Access Denied',
-            //                     icon: 'pi pi-fw pi-lock',
-            //                     routerLink: ['/auth/access']
-            //                 }
-            //             ]
-            //         },
-            //         {
-            //             label: 'Crud',
-            //             icon: 'pi pi-fw pi-pencil',
-            //             routerLink: ['/pages/crud']
-            //         },
-            //         {
-            //             label: 'Not Found',
-            //             icon: 'pi pi-fw pi-exclamation-circle',
-            //             routerLink: ['/pages/notfound']
-            //         },
-            //         {
-            //             label: 'Empty',
-            //             icon: 'pi pi-fw pi-circle-off',
-            //             routerLink: ['/pages/empty']
-            //         }
-            //     ]
-            // },
-            // {
-            //     label: 'Hierarchy',
-            //     items: [
-            //         {
-            //             label: 'Submenu 1',
-            //             icon: 'pi pi-fw pi-bookmark',
-            //             items: [
-            //                 {
-            //                     label: 'Submenu 1.1',
-            //                     icon: 'pi pi-fw pi-bookmark',
-            //                     items: [
-            //                         { label: 'Submenu 1.1.1', icon: 'pi pi-fw pi-bookmark' },
-            //                         { label: 'Submenu 1.1.2', icon: 'pi pi-fw pi-bookmark' },
-            //                         { label: 'Submenu 1.1.3', icon: 'pi pi-fw pi-bookmark' }
-            //                     ]
-            //                 },
-            //                 {
-            //                     label: 'Submenu 1.2',
-            //                     icon: 'pi pi-fw pi-bookmark',
-            //                     items: [{ label: 'Submenu 1.2.1', icon: 'pi pi-fw pi-bookmark' }]
-            //                 }
-            //             ]
-            //         },
-            //         {
-            //             label: 'Submenu 2',
-            //             icon: 'pi pi-fw pi-bookmark',
-            //             items: [
-            //                 {
-            //                     label: 'Submenu 2.1',
-            //                     icon: 'pi pi-fw pi-bookmark',
-            //                     items: [
-            //                         { label: 'Submenu 2.1.1', icon: 'pi pi-fw pi-bookmark' },
-            //                         { label: 'Submenu 2.1.2', icon: 'pi pi-fw pi-bookmark' }
-            //                     ]
-            //                 },
-            //                 {
-            //                     label: 'Submenu 2.2',
-            //                     icon: 'pi pi-fw pi-bookmark',
-            //                     items: [{ label: 'Submenu 2.2.1', icon: 'pi pi-fw pi-bookmark' }]
-            //                 }
-            //             ]
-            //         }
-            //     ]
-            // },
-            // {
-            //     label: 'Get Started',
-            //     items: [
-            //         {
-            //             label: 'Documentation',
-            //             icon: 'pi pi-fw pi-book',
-            //             routerLink: ['/documentation']
-            //         },
-            //         {
-            //             label: 'View Source',
-            //             icon: 'pi pi-fw pi-github',
-            //             url: 'https://github.com/primefaces/sakai-ng',
-            //             target: '_blank'
-            //         }
-            //     ]
-            // }
+            }
         ];
+    }
+
+    private getUserMenuSection(): MenuItem[] {
+        // Check if user has SUPER_ADMIN role
+        if (this.isSuperAdmin()) {
+            return [
+                {
+                    label: 'User',
+                    items: [{
+                        label: 'Users Management',
+                        icon: 'pi pi-fw pi-users',
+                        routerLink: ['/pages/usermanagement']
+                    }]
+                }
+            ];
+        }
+        return [];
+    }
+
+    private isSuperAdmin(): boolean {
+        // Get token from localStorage
+        const token = localStorage.getItem('auth_token');
+        if (!token) return false;
+
+        try {
+            // Decode JWT token to check roles
+            const payload = this.decodeJwtToken(token);
+            const roles = this.extractRolesFromPayload(payload);
+
+            // Check if SUPER_ADMIN role exists
+            return roles.includes('SUPER_ADMIN');
+        } catch (error) {
+            console.error('Error checking user role:', error);
+            return false;
+        }
+    }
+
+    private decodeJwtToken(token: string): any {
+        try {
+            // JWT tokens are in format: header.payload.signature
+            const payloadBase64 = token.split('.')[1];
+            // Base64 decode and parse JSON
+            const payloadJson = atob(payloadBase64);
+            return JSON.parse(payloadJson);
+        } catch (error) {
+            console.error('Error decoding JWT token:', error);
+            return null;
+        }
+    }
+
+    private extractRolesFromPayload(payload: any): string[] {
+        if (!payload) return [];
+
+        // Handle different possible role claim names
+        const roles = payload.roles || payload.role || payload.authorities || payload.scope || [];
+
+        // Normalize to array of strings
+        if (Array.isArray(roles)) {
+            return roles.map(role => role.toUpperCase());
+        } else if (typeof roles === 'string') {
+            return [roles.toUpperCase()];
+        }
+
+        return [];
     }
 }

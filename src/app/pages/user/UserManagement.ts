@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import {Router, RouterModule} from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
@@ -29,6 +29,7 @@ import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {catchError, concatMap, finalize, forkJoin, from, of} from "rxjs";
 import {map} from "rxjs/operators";
 import { ConfirmDialogModule } from "primeng/confirmdialog";
+import {AuthService} from "../../core/services/auth.service";
 
 @Component({
     selector: 'app-user-management',
@@ -111,10 +112,23 @@ export class UserManagement implements OnInit {
     constructor(
         private superAdminService: SuperAdminService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private authService: AuthService,
+        private router: Router
     ) {}
 
     ngOnInit(): void {
+        // Check if user has SUPER_ADMIN role
+        if (!this.authService.isSuperAdmin()) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Access Denied',
+                detail: 'You require SUPER_ADMIN privileges to access this page',
+                life: 5000
+            });
+            this.router.navigate(['/']);
+            return;
+        }
         this.loadUsers();
         this.loadGroups();
 
