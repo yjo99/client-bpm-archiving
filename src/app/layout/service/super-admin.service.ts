@@ -136,8 +136,49 @@ export class SuperAdminService {
         );
     }
 
-    removeUserFromGroup(groupName: string, username: string): Observable<any> {
-        return this.http.delete(`${this.apiUrl}/groups/${groupName}/users/${username}`);
+    removeUserFromGroup(groupName: string, username: string): Observable<string> {
+        console.log('Sending request to remove user', username, 'from group', groupName);
+        const url = `${this.apiUrl}/groups/${groupName}/users/${username}`;
+        console.log('Request URL:', url);
+
+        return this.http.delete(url, {
+            responseType: 'text', // Expect text response
+            observe: 'response'   // Get full response
+        }).pipe(
+            tap(response => {
+                console.log('Response received:', response.status, response.body);
+            }),
+            map(response => {
+                // For successful responses (200-299), return the success message
+                if (response.status >= 200 && response.status < 300) {
+                    return response.body || 'User removed from group successfully';
+                }
+                // For error responses, throw an error with the message
+                throw new Error(response.body || 'Unknown error occurred');
+            }),
+            catchError((error: HttpErrorResponse) => {
+                console.error('Error in removeUserFromGroup:', error);
+
+                let errorMessage = 'Failed to remove user from group';
+
+                // Handle different error scenarios
+                if (error.error && typeof error.error === 'string') {
+                    // Backend returned a string error message
+                    errorMessage = error.error;
+                } else if (error.status === 0) {
+                    // Network error
+                    errorMessage = 'Network error: Unable to connect to server';
+                } else if (error.status >= 400 && error.status < 500) {
+                    // Client error (bad request, not found, etc.)
+                    errorMessage = error.error || `Server error: ${error.status}`;
+                } else if (error.status >= 500) {
+                    // Server error
+                    errorMessage = 'Server error: Please try again later';
+                }
+
+                return throwError(() => new Error(errorMessage));
+            })
+        );
     }
 
     // Bulk Operations

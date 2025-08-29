@@ -218,8 +218,10 @@
                             </div>
                             <button pButton type="button" icon="pi pi-times"
                                     (click)="removeUserFromGroup(group)"
+                                    [loading]="removingFromGroup"
                                     class="p-button-danger p-button-text p-button-sm"
-                                    pTooltip="Remove from group">
+                                    pTooltip="Remove from group"
+                                    [disabled]="removingFromGroup">
                             </button>
                         </div>
                     </div>

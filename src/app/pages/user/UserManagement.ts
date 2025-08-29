@@ -182,34 +182,49 @@ export class UserManagement implements OnInit {
         });
     }
     // Add this method to remove user from group
-    removeUserFromGroup(group: Group): void {
-        if (!this.selectedUser?.username || !group.name) return;
+    removingFromGroup: boolean = false;
 
-        if (confirm(`Remove user '${this.selectedUser.username}' from group '${group.name}'?`)) {
-            this.superAdminService.removeUserFromGroup(group.name, this.selectedUser.username).subscribe({
-                next: () => {
+    removeUserFromGroup(group: Group): void {
+        if (!this.selectedUser?.username || !group.name) {
+            return;
+        }
+
+        const username = this.selectedUser.username;
+        const groupName = group.name;
+
+        if (!confirm(`Remove user '${username}' from group '${groupName}'?`)) {
+            return;
+        }
+
+        this.removingFromGroup = true;
+
+        this.superAdminService.removeUserFromGroup(groupName, username)
+            .pipe(
+                finalize(() => this.removingFromGroup = false)
+            )
+            .subscribe({
+                next: (message) => {
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Success',
-                        detail: `User removed from group '${group.name}'`
+                        detail: message,
+                        life: 5000
                     });
-                    // Refresh the groups list
-                    this.loadUserGroups(this.selectedUser!.username);
-                    // Also refresh the main users list to update group counts
+
+                    this.loadUserGroups(username);
                     this.loadUsers();
                 },
-                error: (error: any) => {
+                error: (error) => {
                     console.error('Error removing user from group:', error);
                     this.messageService.add({
                         severity: 'error',
-                        summary: 'Error',
-                        detail: 'Failed to remove user from group: ' + error.message
+                        summary: `Failed to remove from ${groupName}`,
+                        detail: error.message,
+                        life: 7000
                     });
                 }
             });
-        }
     }
-
     clearUserSearch(): void {
         this.userSearchText = '';
         this.filterUsers();
