@@ -66,14 +66,14 @@
                          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
 
                     <!-- Paginator Template -->
-                    <ng-template pTemplate="paginatorleft">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-surface-500">Show:</span>
-                            <p-dropdown [options]="[5, 10, 20, 50]" [(ngModel)]="pageSize"
-                                        (onChange)="onPageSizeChange()" styleClass="w-16"></p-dropdown>
-                            <span class="text-sm text-surface-500">entries</span>
-                        </div>
-                    </ng-template>
+<!--                    <ng-template pTemplate="paginatorleft">-->
+<!--                        <div class="flex items-center gap-2">-->
+<!--                            <span class="text-sm text-surface-500">Show:</span>-->
+<!--                            <p-dropdown [options]="[5, 10, 20, 50]" [(ngModel)]="pageSize"-->
+<!--                                        (onChange)="onPageSizeChange()" styleClass="w-16"></p-dropdown>-->
+<!--                            <span class="text-sm text-surface-500">entries</span>-->
+<!--                        </div>-->
+<!--                    </ng-template>-->
 
                     <ng-template pTemplate="header">
                         <tr>
@@ -87,7 +87,7 @@
                     <ng-template pTemplate="body" let-user let-rowIndex="rowIndex">
                         <tr [pSelectableRow]="user">
                             <td>{{ user.username }}</td>
-                            <td>{{ user.firstName }} {{ user.lastName }}</td>
+                            <td>{{ user.fullName}}</td>
                             <td>{{ user.email }}</td>
                             <td>
                                 <div class="flex gap-1">
