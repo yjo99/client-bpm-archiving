@@ -205,37 +205,59 @@
     </p-accordion>
 
     <!-- User Dialog -->
-    <p-dialog [(visible)]="userDialog" [style]="{width: '450px'}" header="Add New User">
+    <p-dialog [(visible)]="userDialog" [style]="{width: '500px'}" header="Add New User">
         <div class="p-fluid">
             <div class="field">
                 <label for="username">Username *</label>
-                <input id="username" pInputText [(ngModel)]="userForm.username" required />
+                <input id="username" pInputText [(ngModel)]="userForm.username" required
+                       [class]="submitted && !userForm.username ? 'ng-invalid ng-dirty' : ''" />
+                <small *ngIf="submitted && !userForm.username" class="p-error">Username is required</small>
             </div>
+
             <div class="field">
                 <label for="password">Password *</label>
-                <p-password id="password" [(ngModel)]="userForm.password" required />
+                <p-password id="password" [(ngModel)]="userForm.password" required
+                            [feedback]="true" [toggleMask]="true"
+                            (onInput)="onPasswordInput()"
+                            [class]="submitted && passwordErrors.length > 0 ? 'ng-invalid ng-dirty' : ''" />
+
+                <!-- Password validation errors -->
+                <div *ngIf="passwordErrors.length > 0" class="p-error text-sm mt-2">
+                    <div *ngFor="let error of passwordErrors" class="flex items-center gap-2 mb-1">
+                        <i class="pi pi-times text-red-500"></i>
+                        <span>{{ error }}</span>
+                    </div>
+                </div>
+
+                <!-- Password requirements hint -->
+                <small class="text-surface-500">Must include: 8+ characters, uppercase, lowercase, number, special character</small>
             </div>
+
+            <div class="field">
+                <label for="email">Email *</label>
+                <input id="email" pInputText [(ngModel)]="userForm.email" type="email" required
+                       (input)="onEmailInput()"
+                       [class]="submitted && emailError ? 'ng-invalid ng-dirty' : ''" />
+                <small *ngIf="emailError" class="p-error">{{ emailError }}</small>
+            </div>
+
             <div class="field">
                 <label for="firstName">First Name</label>
                 <input id="firstName" pInputText [(ngModel)]="userForm.firstName" />
             </div>
+
             <div class="field">
                 <label for="lastName">Last Name</label>
                 <input id="lastName" pInputText [(ngModel)]="userForm.lastName" />
             </div>
-            <div class="field">
-                <label for="email">Email</label>
-                <input id="email" pInputText [(ngModel)]="userForm.email" type="email" />
-            </div>
         </div>
         <ng-template pTemplate="footer">
             <button pButton type="button" label="Cancel" icon="pi pi-times"
-                    (click)="userDialog = false" class="p-button-text"></button>
+                    (click)="userDialog = false; resetForm();" class="p-button-text"></button>
             <button pButton type="button" label="Create" icon="pi pi-check"
                     (click)="createUser()" class="p-button-success"></button>
         </ng-template>
     </p-dialog>
-
     <!-- Group Dialog -->
     <p-dialog [(visible)]="groupDialog" [style]="{width: '350px'}" header="Add New Group">
         <div class="p-fluid">

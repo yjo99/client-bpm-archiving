@@ -91,7 +91,8 @@ export class UserManagement implements OnInit {
     groupSubmitted: boolean = false;
 
     pageSize: number = 10;
-
+    passwordErrors: string[] = [];
+    emailError: string = '';
 
     onPageSizeChange(): void {
         // This will trigger the table to update with new page size
@@ -170,8 +171,27 @@ export class UserManagement implements OnInit {
 
     createUser(): void {
         this.submitted = true;
+        this.passwordErrors = [];
+        this.emailError = '';
 
-        if (!this.userForm.username || !this.userForm.password) {
+        // Basic validation
+        if (!this.userForm.username || !this.userForm.password || !this.userForm.email) {
+            if (!this.userForm.email) {
+                this.emailError = 'Email is required';
+            }
+            return;
+        }
+
+        // Email validation
+        if (!this.isValidEmail(this.userForm.email)) {
+            this.emailError = 'Please enter a valid email address';
+            return;
+        }
+
+        // Password validation
+        const passwordValidation = this.validatePassword(this.userForm.password);
+        if (!passwordValidation.isValid) {
+            this.passwordErrors = passwordValidation.errors;
             return;
         }
 
@@ -184,6 +204,7 @@ export class UserManagement implements OnInit {
                 });
                 this.userDialog = false;
                 this.loadUsers();
+                this.resetForm();
             },
             error: (error: any) => {
                 console.error('Error creating user:', error);
@@ -194,6 +215,75 @@ export class UserManagement implements OnInit {
                 });
             }
         });
+    }
+
+// Password validation method
+    validatePassword(password: string): { isValid: boolean; errors: string[] } {
+        const errors: string[] = [];
+
+        if (password.length < 8) {
+            errors.push('Password must be at least 8 characters long');
+        }
+
+        if (!/(?=.*[a-z])/.test(password)) {
+            errors.push('Password must contain at least one lowercase letter');
+        }
+
+        if (!/(?=.*[A-Z])/.test(password)) {
+            errors.push('Password must contain at least one uppercase letter');
+        }
+
+        if (!/(?=.*\d)/.test(password)) {
+            errors.push('Password must contain at least one number');
+        }
+
+        if (!/(?=.*[@$!%*?&])/.test(password)) {
+            errors.push('Password must contain at least one special character (@$!%*?&)');
+        }
+
+        return {
+            isValid: errors.length === 0,
+            errors: errors
+        };
+    }
+
+// Email validation method
+    isValidEmail(email: string): boolean {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+    }
+
+// Reset form method
+    resetForm(): void {
+        this.userForm = {
+            username: '',
+            password: '',
+            firstName: '',
+            lastName: '',
+            email: ''
+        };
+        this.submitted = false;
+        this.passwordErrors = [];
+        this.emailError = '';
+    }
+
+// Optional: Real-time password validation
+    onPasswordInput(): void {
+        if (this.userForm.password) {
+            const validation = this.validatePassword(this.userForm.password);
+            this.passwordErrors = validation.errors;
+        } else {
+            this.passwordErrors = [];
+        }
+    }
+
+// Optional: Real-time email validation
+    onEmailInput(): void {
+        if (this.userForm.email) {
+            this.emailError = this.isValidEmail(this.userForm.email) ? '' : 'Please enter a valid email address';
+        } else {
+            this.emailError = '';
+        }
     }
 
     deleteUser(user: User): void {
