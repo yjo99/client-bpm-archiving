@@ -15,6 +15,8 @@ import {User} from "../../layout/model/user.model";
 import {Group} from "../../layout/model/group.model";
 import {ProcessConfigDto, ProcessService} from "../../layout/service/ProcessService";
 import {SuperAdminService} from "../../layout/service/super-admin.service";
+import { CheckboxModule } from 'primeng/checkbox';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
     selector: 'app-process-configuration',
@@ -27,7 +29,9 @@ import {SuperAdminService} from "../../layout/service/super-admin.service";
         InputTextModule,
         CalendarModule,
         MultiSelectModule,
-        ToastModule
+        ToastModule,
+        CheckboxModule,
+        ProgressSpinnerModule
     ],
     providers: [MessageService]
 })

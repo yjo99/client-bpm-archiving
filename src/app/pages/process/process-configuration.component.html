@@ -1,10 +1,39 @@
 <!-- process-configuration.component.html -->
+<style>
+    /* process-configuration.component.css */
+    .field {
+        margin-bottom: 1.5rem;
+    }
+
+    .field label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .p-multiselect {
+        width: 100%;
+    }
+
+    .p-calendar {
+        width: 100%;
+    }
+
+    .flex.justify-content-end {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+</style>
+
 <div class="p-4">
+    <p-toast></p-toast>
+
     <div class="card">
-        <h1>Configure Process</h1>
+        <h1>{{ isEditMode ? 'Edit' : 'Configure' }} Process</h1>
 
         <div *ngIf="process" class="mt-4">
-            <p-card header="Process Details">
+            <p-card header="Process Details" class="mb-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <strong>Name:</strong> {{ process.name }}
@@ -27,22 +56,165 @@
                 </div>
             </p-card>
 
-            <!-- Add your configuration form here -->
+            <!-- Configuration Form -->
             <div class="card mt-4">
-                <h3>Configuration Settings</h3>
-                <p>Add your configuration form fields here...</p>
-            </div>
+                <h3 class="mb-4">Configuration Settings</h3>
 
-            <div class="flex gap-2 mt-4">
-                <button pButton type="button" label="Save" icon="pi pi-check"
-                        (click)="saveConfiguration()" class="p-button-success"></button>
-                <button pButton type="button" label="Cancel" icon="pi pi-times"
-                        (click)="cancel()" class="p-button-secondary"></button>
+                <form (ngSubmit)="saveConfiguration()" class="p-fluid grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Application ID -->
+                    <div class="field">
+                        <label for="appID">Application ID *</label>
+                        <input
+                                id="appID"
+                                type="text"
+                                pInputText
+                                [(ngModel)]="configurationForm.appID"
+                                name="appID"
+                                required
+                                [disabled]="isEditMode"
+                                class="w-full" />
+                    </div>
+
+                    <!-- Acronym -->
+                    <div class="field">
+                        <label for="acronym">Acronym *</label>
+                        <input
+                                id="acronym"
+                                type="text"
+                                pInputText
+                                [(ngModel)]="configurationForm.acronym"
+                                name="acronym"
+                                required
+                                class="w-full" />
+                    </div>
+
+                    <!-- Name -->
+                    <div class="field md:col-span-2">
+                        <label for="name">Name *</label>
+                        <input
+                                id="name"
+                                type="text"
+                                pInputText
+                                [(ngModel)]="configurationForm.name"
+                                name="name"
+                                required
+                                class="w-full" />
+                    </div>
+
+                    <!-- Retention Start Date -->
+                    <div class="field">
+                        <label for="retentionStartDate">Retention Start Date</label>
+                        <p-calendar
+                                id="retentionStartDate"
+                                [(ngModel)]="configurationForm.retentionStartDate"
+                                name="retentionStartDate"
+                                dateFormat="yy-mm-dd"
+                                [showIcon]="true"
+                                class="w-full"></p-calendar>
+                    </div>
+
+                    <!-- Number Period Archive -->
+                    <div class="field">
+                        <label for="numberPeriodArch">Number Period Archive</label>
+                        <input
+                                id="numberPeriodArch"
+                                type="text"
+                                pInputText
+                                [(ngModel)]="configurationForm.numberPeriodArch"
+                                name="numberPeriodArch"
+                                class="w-full" />
+                    </div>
+
+                    <!-- Instance Archive Number -->
+                    <div class="field">
+                        <label for="instanceArchNumber">Instance Archive Number</label>
+                        <input
+                                id="instanceArchNumber"
+                                type="text"
+                                pInputText
+                                [(ngModel)]="configurationForm.instanceArchNumber"
+                                name="instanceArchNumber"
+                                class="w-full" />
+                    </div>
+
+                    <!-- Assigned Groups -->
+                    <div class="field">
+                        <label for="assignedGroups">Assigned Groups</label>
+                        <p-multiSelect
+                                id="assignedGroups"
+                                [(ngModel)]="configurationForm.assignedGroups"
+                                name="assignedGroups"
+                                [options]="allGroups"
+                                optionLabel="groupName"
+                                [loading]="loadingGroups"
+                                placeholder="Select groups"
+                                display="chip"
+                                class="w-full">
+                            <ng-template pTemplate="header">
+                                <div class="p-2">
+                                    <div>Available Groups</div>
+                                    <div *ngIf="loadingGroups" class="text-sm text-500">Loading groups...</div>
+                                </div>
+                            </ng-template>
+                        </p-multiSelect>
+                    </div>
+
+                    <!-- Assigned Users -->
+                    <div class="field">
+                        <label for="assignedUsers">Assigned Users</label>
+                        <p-multiSelect
+                                id="assignedUsers"
+                                [(ngModel)]="configurationForm.assignedUsers"
+                                name="assignedUsers"
+                                [options]="allUsers"
+                                optionLabel="username"
+                                [loading]="loadingUsers"
+                                placeholder="Select users"
+                                display="chip"
+                                class="w-full">
+                            <ng-template pTemplate="header">
+                                <div class="p-2">
+                                    <div>Available Users</div>
+                                    <div *ngIf="loadingUsers" class="text-sm text-500">Loading users...</div>
+                                </div>
+                            </ng-template>
+                        </p-multiSelect>
+                    </div>
+
+                    <!-- Is Configured -->
+                    <div class="field md:col-span-2">
+                        <p-checkbox
+                                [(ngModel)]="configurationForm.isConfigured"
+                                name="isConfigured"
+                                [binary]="true"
+                                label="Is Configured">
+                        </p-checkbox>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="field md:col-span-2 flex gap-2 justify-content-end">
+                        <button
+                                pButton
+                                type="button"
+                                label="Cancel"
+                                icon="pi pi-times"
+                                (click)="cancel()"
+                                class="p-button-secondary"></button>
+                        <button
+                                pButton
+                                type="submit"
+                                label="{{ isEditMode ? 'Update' : 'Save' }}"
+                                icon="pi pi-check"
+                                [loading]="saving"
+                                class="p-button-success"></button>
+                    </div>
+                </form>
             </div>
         </div>
 
         <div *ngIf="!process" class="text-center p-4">
             <p>Loading process data...</p>
+            <p-progressSpinner *ngIf="!process"></p-progressSpinner>
         </div>
     </div>
 </div>
