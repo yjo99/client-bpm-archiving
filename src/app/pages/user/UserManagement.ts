@@ -26,6 +26,7 @@ import {UserRequest} from "../../layout/model/user.request.model";
 import {User} from "../../layout/model/user.model";
 import {SuperAdminService} from "../../layout/service/super-admin.service";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
+import {forkJoin} from "rxjs";
 
 @Component({
     selector: 'app-user-management',
@@ -163,6 +164,8 @@ export class UserManagement implements OnInit {
         this.userGroupsLoading = true;
         this.superAdminService.getUserGroups(username).subscribe({
             next: (groups: Group[]) => {
+                console.log("groups of user ")
+                console.log(groups)
                 this.userGroups = groups;
                 this.userGroupsLoading = false;
             },
@@ -483,35 +486,46 @@ export class UserManagement implements OnInit {
 
     // Update the assignGroupsToUser method to refresh groups after assignment
     assignGroupsToUser(): void {
-        console.log(this.selectedUser)
-        console.log(this.selectedGroupsForAssignment)
         if (!this.selectedUser?.username || this.selectedGroupsForAssignment.length === 0) {
             return;
         }
 
+        console.log('Starting group assignment...');
+        console.log('User:', this.selectedUser.username);
+        console.log('Groups to assign:', this.selectedGroupsForAssignment.map(g => g.name));
+
         const assignments = this.selectedGroupsForAssignment.map(group =>
             this.superAdminService.assignUserToGroup(group.name!, this.selectedUser!.username!)
         );
-        console.log(assignments)
 
-        Promise.all(assignments).then(() => {
-            this.messageService.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'User assigned to groups successfully'
-            });
-            this.assignmentDialog = false;
+        console.log('Assignment observables created:', assignments.length);
 
-            // Refresh both the user groups and main users list
-            this.loadUserGroups(this.selectedUser!.username);
-            this.loadUsers();
-        }).catch(error => {
-            console.error('Error assigning groups:', error);
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to assign groups: ' + error.message
-            });
+        // Use forkJoin instead of Promise.all for Observables
+        forkJoin(assignments).subscribe({
+            next: (responses) => {
+                console.log('Assignment successful, responses:', responses);
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'User assigned to groups successfully'
+                });
+                this.assignmentDialog = false;
+
+                // Refresh both the user groups and main users list
+                this.loadUserGroups(this.selectedUser!.username);
+                this.loadUsers();
+            },
+            error: (error: any) => {
+                console.error('Error assigning groups:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to assign groups: ' + error.message
+                });
+            },
+            complete: () => {
+                console.log('Assignment process completed');
+            }
         });
     }
 

@@ -1,7 +1,7 @@
 // src/app/services/super-admin.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {catchError, Observable, tap, throwError} from 'rxjs';
 import {environment} from "../../../environments/environment";
 import {User} from "../model/user.model";
 import {UserRequest} from "../model/user.request.model";
@@ -61,9 +61,21 @@ export class SuperAdminService {
     }
 
     assignUserToGroup(groupName: string, username: string): Observable<any> {
-        console.log(groupName)
-        console.log(username)
-        return this.http.post(`${this.apiUrl}/groups/${groupName}/users/${username}`, null);
+        console.log('Sending request to assign user', username, 'to group', groupName);
+        const url = `${this.apiUrl}/groups/${groupName}/users/${username}`;
+        console.log('Request URL:', url);
+
+        return this.http.post(url, null, {
+            observe: 'response' // Get full response for debugging
+        }).pipe(
+            tap(response => {
+                console.log('Response received:', response.status, response.body);
+            }),
+            catchError(error => {
+                console.error('Error in assignUserToGroup:', error);
+                return throwError(() => error);
+            })
+        );
     }
 
     removeUserFromGroup(groupName: string, username: string): Observable<any> {
