@@ -31,10 +31,52 @@ export class SuperAdminService {
         });
     }
 
-    updateUserPassword(username: string, newPassword: string): Observable<any> {
-        return this.http.put(`${this.apiUrl}/users/${username}/password`, newPassword, {
+    updateUserPassword(username: string, newPassword: string): Observable<string> {
+        console.log('Sending request to update password for user:', username);
+        const url = `${this.apiUrl}/users/${username}/password`;
+        console.log('Request URL:', url);
+
+        return this.http.put(url, newPassword, {
+            responseType: 'text', // Expect text response
+            observe: 'response',  // Get full response
             headers: { 'Content-Type': 'text/plain' }
-        });
+        }).pipe(
+            tap(response => {
+                console.log('Response received:', response.status, response.body);
+            }),
+            map(response => {
+                // For successful responses (200-299), return the success message
+                if (response.status >= 200 && response.status < 300) {
+                    return response.body || 'Password updated successfully';
+                }
+                // For error responses, throw an error with the message
+                throw new Error(response.body || 'Unknown error occurred');
+            }),
+            catchError((error: HttpErrorResponse) => {
+                console.error('Error in updateUserPassword:', error);
+
+                let errorMessage = 'Failed to update password';
+
+                // Handle different error scenarios
+                if (error.error && typeof error.error === 'string') {
+                    // Backend returned a string error message
+                    errorMessage = error.error;
+                } else if (error.status === 0) {
+                    // Network error
+                    errorMessage = 'Network error: Unable to connect to server';
+                } else if (error.status === 404) {
+                    errorMessage = `User '${username}' not found`;
+                } else if (error.status >= 400 && error.status < 500) {
+                    // Client error
+                    errorMessage = error.error || `Server error: ${error.status}`;
+                } else if (error.status >= 500) {
+                    // Server error
+                    errorMessage = 'Server error: Please try again later';
+                }
+
+                return throwError(() => new Error(errorMessage));
+            })
+        );
     }
 
     deleteUser(username: string): Observable<string> {

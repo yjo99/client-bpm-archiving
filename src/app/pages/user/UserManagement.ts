@@ -727,4 +727,94 @@ export class UserManagement implements OnInit {
             g => g.name !== group.name
         );
     }
+
+    // Add these properties to your component
+    passwordUpdateDialog: boolean = false;
+    passwordUpdateUser: User | null = null;
+    newPassword: string = '';
+    confirmPassword: string = '';
+    updatingPassword: boolean = false;
+    passwordUpdateErrors: string[] = [];
+
+// Add this method to open password update dialog
+    openPasswordUpdateDialog(user: User): void {
+        this.passwordUpdateUser = user;
+        this.newPassword = '';
+        this.confirmPassword = '';
+        this.passwordUpdateErrors = [];
+        this.passwordUpdateDialog = true;
+    }
+
+// Add this method to update password
+    updatePassword(): void {
+        if (!this.passwordUpdateUser?.username) return;
+
+        this.passwordUpdateErrors = [];
+
+        // Validate passwords
+        if (!this.newPassword) {
+            this.passwordUpdateErrors.push('New password is required');
+            return;
+        }
+
+        if (!this.confirmPassword) {
+            this.passwordUpdateErrors.push('Please confirm your password');
+            return;
+        }
+
+        if (this.newPassword !== this.confirmPassword) {
+            this.passwordUpdateErrors.push('Passwords do not match');
+            return;
+        }
+
+        // Validate password complexity
+        const passwordValidation = this.validatePassword(this.newPassword);
+        if (!passwordValidation.isValid) {
+            this.passwordUpdateErrors = passwordValidation.errors;
+            return;
+        }
+
+        this.updatingPassword = true;
+
+        this.superAdminService.updateUserPassword(this.passwordUpdateUser.username, this.newPassword)
+            .pipe(
+                finalize(() => this.updatingPassword = false)
+            )
+            .subscribe({
+                next: (message) => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Password Updated',
+                        detail: message,
+                        life: 5000,
+                        icon: 'pi pi-check-circle'
+                    });
+                    this.passwordUpdateDialog = false;
+                    this.resetPasswordForm();
+                },
+                error: (error) => {
+                    console.error('Error updating password:', error);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Update Failed',
+                        detail: error.message,
+                        life: 7000,
+                        icon: 'pi pi-exclamation-circle'
+                    });
+                }
+            });
+    }
+
+// Add this method to reset password form
+    resetPasswordForm(): void {
+        this.newPassword = '';
+        this.confirmPassword = '';
+        this.passwordUpdateErrors = [];
+    }
+
+// Add this method to close password dialog
+    closePasswordDialog(): void {
+        this.passwordUpdateDialog = false;
+        this.resetPasswordForm();
+    }
 }

@@ -160,9 +160,17 @@
                             <td>{{ user.email }}</td>
                             <td>
                                 <div class="flex gap-1">
+                                    <!-- Password Update Button -->
+                                    <button pButton type="button" icon="pi pi-key" pTooltip="Update Password"
+                                            (click)="openPasswordUpdateDialog(user)"
+                                            class="p-button-warning p-button-sm p-button-outlined"></button>
+
+                                    <!-- Assign Groups Button -->
                                     <button pButton type="button" icon="pi pi-users" pTooltip="Assign Groups"
                                             (click)="openAssignmentDialog(user)"
                                             class="p-button-info p-button-sm p-button-outlined"></button>
+
+                                    <!-- Delete User Button -->
                                     <button pButton type="button" icon="pi pi-trash" pTooltip="Delete User"
                                             (click)="deleteUser(user)"
                                             [loading]="deletingUser"
@@ -397,6 +405,50 @@
                     class="p-button-success"></button>
         </ng-template>
     </p-dialog>
+    <!-- Password Update Dialog -->
+    <p-dialog [(visible)]="passwordUpdateDialog" [style]="{width: '450px'}" header="Update Password for {{ passwordUpdateUser?.username }}">
+        <div class="p-fluid">
+            <!-- New Password -->
+            <div class="field">
+                <label for="newPassword">New Password *</label>
+                <p-password id="newPassword" [(ngModel)]="newPassword" required
+                            [feedback]="true" [toggleMask]="true"
+                            (onInput)="onPasswordInput()"
+                            class="w-full" />
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="field">
+                <label for="confirmPassword">Confirm Password *</label>
+                <p-password id="confirmPassword" [(ngModel)]="confirmPassword" required
+                            [toggleMask]="true"
+                            class="w-full" />
+            </div>
+
+            <!-- Password validation errors -->
+            <div *ngIf="passwordUpdateErrors.length > 0" class="p-error text-sm mt-2">
+                <div *ngFor="let error of passwordUpdateErrors" class="flex items-center gap-2 mb-1">
+                    <i class="pi pi-times text-red-500"></i>
+                    <span>{{ error }}</span>
+                </div>
+            </div>
+
+            <!-- Password requirements hint -->
+            <small class="text-surface-500 block mt-2">
+                Password must include: 8+ characters, uppercase, lowercase, number, special character
+            </small>
+        </div>
+        <ng-template pTemplate="footer">
+            <button pButton type="button" label="Cancel" icon="pi pi-times"
+                    (click)="closePasswordDialog()"
+                    class="p-button-text"></button>
+            <button pButton type="button" label="Update" icon="pi pi-key"
+                    (click)="updatePassword()"
+                    [loading]="updatingPassword"
+                    [disabled]="updatingPassword || !newPassword || !confirmPassword"
+                    class="p-button-warning"></button>
+        </ng-template>
+        </p-dialog>
 
     <!-- Assignment Dialog -->
     <p-dialog [(visible)]="assignmentDialog" [style]="{ width: '90vw', maxWidth: '600px' }"
