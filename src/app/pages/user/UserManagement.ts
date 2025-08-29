@@ -483,6 +483,8 @@ export class UserManagement implements OnInit {
 
     // Update the assignGroupsToUser method to refresh groups after assignment
     assignGroupsToUser(): void {
+        console.log(this.selectedUser)
+        console.log(this.selectedGroupsForAssignment)
         if (!this.selectedUser?.username || this.selectedGroupsForAssignment.length === 0) {
             return;
         }
@@ -490,6 +492,7 @@ export class UserManagement implements OnInit {
         const assignments = this.selectedGroupsForAssignment.map(group =>
             this.superAdminService.assignUserToGroup(group.name!, this.selectedUser!.username!)
         );
+        console.log(assignments)
 
         Promise.all(assignments).then(() => {
             this.messageService.add({

@@ -61,6 +61,8 @@ export class SuperAdminService {
     }
 
     assignUserToGroup(groupName: string, username: string): Observable<any> {
+        console.log(groupName)
+        console.log(username)
         return this.http.post(`${this.apiUrl}/groups/${groupName}/users/${username}`, null);
     }
 
