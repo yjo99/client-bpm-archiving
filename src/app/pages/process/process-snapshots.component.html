@@ -1,0 +1,137 @@
+<!-- pages/process/snapshots/process-snapshots.component.html -->
+<style>
+    /* pages/process/snapshots/process-snapshots.component.css */
+    :host {
+        display: block;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-active {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+
+    .status-inactive {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-unknown {
+        background-color: #e0e7ff;
+        color: #3730a3;
+    }
+</style>
+<div class="p-4">
+    <p-toast></p-toast>
+
+    <div class="card">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1>Snapshots for: {{ processName }}</h1>
+                <p class="text-surface-500">Process ID: {{ processId }}</p>
+            </div>
+            <div class="flex gap-2">
+                <button
+                        pButton
+                        type="button"
+                        label="Refresh"
+                        icon="pi pi-refresh"
+                        (click)="refreshSnapshots()"
+                        [loading]="loading"
+                        class="p-button-outlined"></button>
+                <button
+                        pButton
+                        type="button"
+                        label="Back to Processes"
+                        icon="pi pi-arrow-left"
+                        (click)="goBack()"
+                        class="p-button-secondary"></button>
+            </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div *ngIf="loading" class="flex justify-center items-center p-6">
+            <p-progressSpinner></p-progressSpinner>
+            <span class="ml-3">Loading snapshots...</span>
+        </div>
+
+        <!-- No snapshots message -->
+        <div *ngIf="!loading && snapshots.length === 0" class="text-center p-8">
+            <i class="pi pi-database text-4xl text-surface-400 mb-4"></i>
+            <h3 class="text-lg font-semibold text-surface-700 mb-2">No snapshots found</h3>
+            <p class="text-surface-500">No snapshots are available for this process.</p>
+        </div>
+
+        <!-- Snapshots table -->
+        <div *ngIf="!loading && snapshots.length > 0">
+            <p-table [value]="snapshots" [rows]="10" [paginator]="true"
+                     [rowsPerPageOptions]="[5, 10, 20, 50]" [loading]="loading">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th *ngFor="let col of cols" [pSortableColumn]="col.field">
+                            {{ col.header }}
+                            <p-sortIcon [field]="col.field"></p-sortIcon>
+                        </th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-snapshot>
+                    <tr>
+                        <td>{{ snapshot.name || 'N/A' }}</td>
+                        <td>{{ snapshot.acronym || 'N/A' }}</td>
+                        <td>
+                            <p-tag [value]="getStatusText(snapshot.active)"
+                                   [severity]="getStatusSeverity(snapshot.active)"></p-tag>
+                        </td>
+                        <td>{{ formatDate(snapshot.createdOn) }}</td>
+                        <td>
+                            <i class="pi"
+                               [ngClass]="snapshot.snapshotTip ? 'pi-check-circle text-green-500' : 'pi-times-circle text-red-500'"></i>
+                            {{ snapshot.snapshotTip ? 'Yes' : 'No' }}
+                        </td>
+                        <td>{{ snapshot.branchName || 'N/A' }}</td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td [colSpan]="cols.length" class="text-center p-4">
+                            No snapshots found
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <!-- Summary -->
+        <div *ngIf="snapshots.length > 0" class="mt-4 p-4 bg-surface-50 rounded-lg">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-primary-600">{{ snapshots.length }}</div>
+                    <div class="text-sm text-surface-500">Total Snapshots</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600">
+                        {{ snapshots.filter(s => s.active?.toLowerCase() === 'active').length }}
+                    </div>
+                    <div class="text-sm text-surface-500">Active Snapshots</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600">
+                        {{ snapshots.filter(s => s.snapshotTip).length }}
+                    </div>
+                    <div class="text-sm text-surface-500">Snapshot Tips</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
