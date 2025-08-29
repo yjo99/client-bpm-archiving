@@ -12,6 +12,7 @@ import {InstanceListManagement} from "./process/InastanceListManagment";
 import {DynamicViewComponent} from "./process/DynamicViewComponent";
 import {ProcessConfigurationComponent} from "./process/process-configuration.component";
 import {ProcessSnapshotsComponent} from "./process/process-snapshots.component";
+import {SuperAdminGuard} from "../core/guards/super-admin.guard";
 
 
 export default [
@@ -21,7 +22,7 @@ export default [
     {path: 'dataconfig/bpmform', component: BpmServerFormComponent},
     {path: 'dataconfig/ecmform', component: EcmServerFormComponent},
     {path: 'dataconfig/dbform', component: DbServerFormComponent},
-    {path: "usermanagement", component: UserManagement},
+    {path: "usermanagement", component: UserManagement, canActivate: [SuperAdminGuard]},
     {path: "processmanagement", component: ProcessesManagement},
     {path: 'process/instance/:processId/instances', component: InstanceListManagement},
     {path: 'process/snapshots/:id', component: ProcessSnapshotsComponent},

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import {environment} from "../../../environments/environment";
+import {JwtHelperService} from "@auth0/angular-jwt";
 
 @Injectable({
     providedIn: 'root'
@@ -12,6 +13,8 @@ export class AuthService {
     private tokenSubject = new BehaviorSubject<string | null>(null);
     public token$ = this.tokenSubject.asObservable();
     private bypassAuth = environment.bypassAuth;
+    private jwtHelper = new JwtHelperService();
+
 
     constructor(private http: HttpClient, private router: Router) {
         if (!this.bypassAuth) {
@@ -67,5 +70,47 @@ export class AuthService {
     clearToken(): void {
       localStorage.removeItem('token');  // or however you store it
       this.tokenSubject.next(null);      // reset BehaviorSubject
+    }
+
+    getDecodedToken(): any {
+        const token = this.getToken();
+        if (!token) return null;
+
+        try {
+            return this.jwtHelper.decodeToken(token);
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            return null;
+        }
+    }
+
+    getUserRoles(): string[] {
+        const decodedToken = this.getDecodedToken();
+        if (!decodedToken || !decodedToken.roles) return [];
+
+        // Handle both string and array roles
+        if (Array.isArray(decodedToken.roles)) {
+            return decodedToken.roles;
+        } else if (typeof decodedToken.roles === 'string') {
+            return [decodedToken.roles];
+        }
+
+        return [];
+    }
+
+    hasRole(role: string): boolean {
+        const roles = this.getUserRoles();
+        return roles.includes(role);
+    }
+
+    isSuperAdmin(): boolean {
+        return this.hasRole('SUPER_ADMIN');
+    }
+
+    isTokenExpired(): boolean {
+        const token = this.getToken();
+        if (!token) return true;
+
+        return this.jwtHelper.isTokenExpired(token);
     }
 }
