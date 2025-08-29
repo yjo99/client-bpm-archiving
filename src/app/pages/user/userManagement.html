@@ -36,7 +36,7 @@
 
     <p-accordion [activeIndex]="activeIndex">
         <!-- Users Section -->
-        <p-accordionTab header="Users Management">
+        <p-accordionTab header="Users Management" style="margin-bottom: 2cm">
             <div class="mb-4">
                 <div class="flex justify-between items-center mb-4">
                     <h2>Users</h2>
@@ -80,7 +80,6 @@
                             <th style="width: 120px">Username</th>
                             <th style="width: 150px">Full Name</th>
                             <th style="width: 200px">Email</th>
-                            <th>Groups</th>
                             <th style="width: 120px">Actions</th>
                         </tr>
                     </ng-template>
@@ -90,15 +89,6 @@
                             <td>{{ user.username }}</td>
                             <td>{{ user.firstName }} {{ user.lastName }}</td>
                             <td>{{ user.email }}</td>
-                            <td>
-                                <div class="flex flex-wrap gap-1">
-                                    <p-tag *ngFor="let group of user.groups" value="{{ group.groupName }}"
-                                           severity="info" styleClass="text-xs"></p-tag>
-                                    <span *ngIf="!user.groups || user.groups.length === 0" class="text-surface-400 text-sm">
-                        No groups
-                    </span>
-                                </div>
-                            </td>
                             <td>
                                 <div class="flex gap-1">
                                     <button pButton type="button" icon="pi pi-users" pTooltip="Assign Groups"
@@ -144,10 +134,10 @@
         </p-accordionTab>
 
         <!-- Spacer -->
-        <div style="height: 5cm; background: transparent;"></div>
+<!--        <div style="height: 5cm; background: transparent;"></div>-->
 
         <!-- Groups Section -->
-        <p-accordionTab header="Groups Management">
+        <p-accordionTab header="Groups Management" style="margin-bottom: 2cm">
             <div class="mb-4">
                 <div class="flex justify-between items-center mb-4">
                     <h2>Groups</h2>
