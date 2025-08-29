@@ -73,7 +73,7 @@ export class UserManagement implements OnInit {
     selectedGroup: Group | null = null;
     groupDialog: boolean = false;
     groupForm: CreateGroupRequest = {
-        groupName: ''
+        name: ''
     };
 
     // Assignment
@@ -90,6 +90,15 @@ export class UserManagement implements OnInit {
     submitted: boolean = false;
     groupSubmitted: boolean = false;
 
+    pageSize: number = 10;
+
+
+    onPageSizeChange(): void {
+        // This will trigger the table to update with new page size
+        // You might want to save this preference to local storage
+        localStorage.setItem('userManagementPageSize', this.pageSize.toString());
+    }
+
     constructor(
         private superAdminService: SuperAdminService,
         private messageService: MessageService
@@ -98,6 +107,12 @@ export class UserManagement implements OnInit {
     ngOnInit(): void {
         this.loadUsers();
         this.loadGroups();
+
+        // Load saved page size
+        const savedPageSize = localStorage.getItem('userManagementPageSize');
+        if (savedPageSize) {
+            this.pageSize = parseInt(savedPageSize, 10);
+        }
     }
 
     // User Methods
@@ -243,7 +258,7 @@ export class UserManagement implements OnInit {
     }
 
     openNewGroup(): void {
-        this.groupForm = { groupName: '' };
+        this.groupForm = { name: '' };
         this.groupSubmitted = false;
         this.groupDialog = true;
     }
@@ -251,7 +266,7 @@ export class UserManagement implements OnInit {
     createGroup(): void {
         this.groupSubmitted = true;
 
-        if (!this.groupForm.groupName) {
+        if (!this.groupForm.name) {
             return;
         }
 
@@ -353,5 +368,12 @@ export class UserManagement implements OnInit {
         } else {
             this.selectedGroup = null;
         }
+    }
+
+    // Add this method to your component
+    removeGroupFromSelection(group: Group): void {
+        this.selectedGroupsForAssignment = this.selectedGroupsForAssignment.filter(
+            g => g.name !== group.name
+        );
     }
 }

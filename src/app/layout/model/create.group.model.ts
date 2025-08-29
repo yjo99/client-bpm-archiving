@@ -1,3 +1,3 @@
 export interface CreateGroupRequest {
-    groupName: string;
+    name: string;
 }

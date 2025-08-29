@@ -1,5 +1,32 @@
 <!-- userManagement.html -->
 <app-floating-configurator />
+<style>
+    /* Add to your component's CSS */
+    .selected-groups-container {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+    }
+
+    ::ng-deep .p-dialog-content {
+        overflow-y: auto !important;
+    }
+
+    ::ng-deep .p-multiselect-panel {
+        max-height: 200px !important;
+    }
+
+    .flex-wrap {
+        flex-wrap: wrap;
+    }
+
+    .gap-1 {
+        gap: 0.25rem;
+    }
+
+    .max-h-32 {
+        max-height: 8rem;
+    }
+</style>
 <div class="p-4">
     <p-toast></p-toast>
 
@@ -29,44 +56,70 @@
                 </div>
 
                 <!-- Users Table -->
-                <p-table [value]="filteredUsers" [rows]="10" [paginator]="true" [loading]="loading"
-                         [rowsPerPageOptions]="[5, 10, 20]" selectionMode="single"
+                <!-- Users Table -->
+                <p-table [value]="filteredUsers" [rows]="pageSize" [paginator]="true" [loading]="loading"
+                         [rowsPerPageOptions]="[5, 10, 20, 50]" selectionMode="single"
                          [(selection)]="selectedUser" dataKey="username"
-                         (onRowSelect)="onUserSelect($event.data)">
+                         (onRowSelect)="onUserSelect($event.data)"
+                         [totalRecords]="filteredUsers.length"
+                         [showCurrentPageReport]="true"
+                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+
+                    <!-- Paginator Template -->
+                    <ng-template pTemplate="paginatorleft">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-surface-500">Show:</span>
+                            <p-dropdown [options]="[5, 10, 20, 50]" [(ngModel)]="pageSize"
+                                        (onChange)="onPageSizeChange()" styleClass="w-16"></p-dropdown>
+                            <span class="text-sm text-surface-500">entries</span>
+                        </div>
+                    </ng-template>
+
                     <ng-template pTemplate="header">
                         <tr>
-                            <th>Username</th>
-                            <th>Full Name</th>
-                            <th>Email</th>
+                            <th style="width: 120px">Username</th>
+                            <th style="width: 150px">Full Name</th>
+                            <th style="width: 200px">Email</th>
                             <th>Groups</th>
-                            <th>Actions</th>
+                            <th style="width: 120px">Actions</th>
                         </tr>
                     </ng-template>
-                    <ng-template pTemplate="body" let-user>
+
+                    <ng-template pTemplate="body" let-user let-rowIndex="rowIndex">
                         <tr [pSelectableRow]="user">
                             <td>{{ user.username }}</td>
                             <td>{{ user.firstName }} {{ user.lastName }}</td>
                             <td>{{ user.email }}</td>
                             <td>
-                                <p-tag *ngFor="let group of user.groups" value="{{ group.name }}"
-                                       severity="info" class="mr-1 mb-1"></p-tag>
+                                <div class="flex flex-wrap gap-1">
+                                    <p-tag *ngFor="let group of user.groups" value="{{ group.groupName }}"
+                                           severity="info" styleClass="text-xs"></p-tag>
+                                    <span *ngIf="!user.groups || user.groups.length === 0" class="text-surface-400 text-sm">
+                        No groups
+                    </span>
+                                </div>
                             </td>
                             <td>
-                                <div class="flex gap-2">
-                                    <button pButton type="button" icon="pi pi-users"
+                                <div class="flex gap-1">
+                                    <button pButton type="button" icon="pi pi-users" pTooltip="Assign Groups"
                                             (click)="openAssignmentDialog(user)"
-                                            class="p-button-info p-button-sm"></button>
-                                    <button pButton type="button" icon="pi pi-trash"
+                                            class="p-button-info p-button-sm p-button-outlined"></button>
+                                    <button pButton type="button" icon="pi pi-trash" pTooltip="Delete User"
                                             (click)="deleteUser(user)"
-                                            class="p-button-danger p-button-sm"></button>
+                                            class="p-button-danger p-button-sm p-button-outlined"></button>
                                 </div>
                             </td>
                         </tr>
                     </ng-template>
+
                     <ng-template pTemplate="emptymessage">
                         <tr>
-                            <td colspan="5" class="text-center p-4">
-                                No users found
+                            <td colspan="5" class="text-center p-6">
+                                <i class="pi pi-users text-4xl text-surface-300 mb-3"></i>
+                                <p class="text-surface-500">No users found</p>
+                                <p class="text-surface-400 text-sm mt-1" *ngIf="userSearchText">
+                                    No users match "{{ userSearchText }}"
+                                </p>
                             </td>
                         </tr>
                     </ng-template>
@@ -113,7 +166,7 @@
                 <!-- Groups Table -->
                 <p-table [value]="filteredGroups" [rows]="10" [paginator]="true" [loading]="loading"
                          [rowsPerPageOptions]="[5, 10, 20]" selectionMode="single"
-                         [(selection)]="selectedGroup" dataKey="groupName"
+                         [(selection)]="selectedGroup" dataKey="name"
                          (onRowSelect)="onGroupSelect($event.data)">
                     <ng-template pTemplate="header">
                         <tr>
@@ -194,8 +247,8 @@
     <p-dialog [(visible)]="groupDialog" [style]="{width: '350px'}" header="Add New Group">
         <div class="p-fluid">
             <div class="field">
-                <label for="groupName">Group Name *</label>
-                <input id="groupName" pInputText [(ngModel)]="groupForm.groupName" required />
+                <label for="name">Group Name *</label>
+                <input id="groupName" pInputText [(ngModel)]="groupForm.name" required />
             </div>
         </div>
         <ng-template pTemplate="footer">
@@ -207,20 +260,52 @@
     </p-dialog>
 
     <!-- Assignment Dialog -->
-    <p-dialog [(visible)]="assignmentDialog" [style]="{width: '500px'}"
-              header="Assign Groups to {{ selectedUser?.username }}">
-        <div class="p-fluid">
-            <div class="field">
+    <!-- Assignment Dialog -->
+    <p-dialog [(visible)]="assignmentDialog" [style]="{width: '600px', height: '500px'}"
+              header="Assign Groups to {{ selectedUser?.username }}" [modal]="true">
+        <div class="p-fluid h-full flex flex-col">
+            <!-- Selected Groups List -->
+            <div class="mb-4" *ngIf="selectedGroupsForAssignment.length > 0">
+                <h4 class="font-semibold mb-2">Selected Groups:</h4>
+                <div class="selected-groups-container border rounded p-3 max-h-32 overflow-y-auto">
+                    <p-tag *ngFor="let group of selectedGroupsForAssignment"
+                           [value]="group.name"
+                           severity="success"
+                           class="mr-2 mb-2">
+                        <i class="pi pi-times ml-2 cursor-pointer"
+                           (click)="removeGroupFromSelection(group)"></i>
+                    </p-tag>
+                </div>
+            </div>
+
+            <!-- Group Selection -->
+            <div class="field flex-1">
                 <label>Select Groups</label>
                 <p-multiSelect [options]="groups" [(ngModel)]="selectedGroupsForAssignment"
-                               optionLabel="groupName" placeholder="Select groups" />
+                               optionLabel="name" placeholder="Select groups"
+                               [filter]="true" filterPlaceholder="Search groups..."
+                               [virtualScroll]="true" [showToggleAll]="false"
+                               class="w-full h-full">
+                    <ng-template let-group pTemplate="item">
+                        <div class="flex items-center justify-between">
+                            <span>{{ group.name }}</span>
+                            <small class="text-surface-500">({{ group.memberCount || 0 }} members)</small>
+                        </div>
+                    </ng-template>
+                </p-multiSelect>
+            </div>
+
+            <!-- Available Groups Count -->
+            <div class="text-sm text-surface-500 mt-2">
+                {{ groups.length }} groups available
             </div>
         </div>
         <ng-template pTemplate="footer">
             <button pButton type="button" label="Cancel" icon="pi pi-times"
                     (click)="assignmentDialog = false" class="p-button-text"></button>
-            <button pButton type="button" label="Assign" icon="pi pi-check"
-                    (click)="assignGroupsToUser()" class="p-button-success"></button>
+            <button pButton type="button" label="Assign Selected Groups" icon="pi pi-check"
+                    (click)="assignGroupsToUser()" class="p-button-success"
+                    [disabled]="selectedGroupsForAssignment.length === 0"></button>
         </ng-template>
     </p-dialog>
 </div>
