@@ -105,9 +105,32 @@ export class ProcessSnapshotsComponent implements OnInit {
         }
     }
 
-    getStatusText(status: string): string {
-        if (!status) return 'Unknown';
-        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+    getStatusText(status: any): string {
+        if (status === null || status === undefined) return 'Unknown';
+
+        // Handle boolean values
+        if (typeof status === 'boolean') {
+            return status ? 'Active' : 'Not Active';
+        }
+
+        // Handle string values
+        if (typeof status === 'string') {
+            const lowerStatus = status.toLowerCase();
+            if (lowerStatus === 'true' || lowerStatus === 'active') {
+                return 'Active';
+            } else if (lowerStatus === 'false' || lowerStatus === 'inactive') {
+                return 'Not Active';
+            }
+            // For other string values, capitalize first letter
+            return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+        }
+
+        // Handle numeric values (1 = active, 0 = inactive)
+        if (typeof status === 'number') {
+            return status === 1 ? 'Active' : 'Not Active';
+        }
+
+        return 'Unknown';
     }
 
     formatDate(dateString: string): string {
@@ -130,7 +153,7 @@ export class ProcessSnapshotsComponent implements OnInit {
     }
 
     goBack(): void {
-        this.router.navigate(['/pages/process']);
+        this.router.navigate(['/pages/processmanagement']);
     }
 
     refreshSnapshots(): void {
