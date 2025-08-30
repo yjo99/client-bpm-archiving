@@ -4,7 +4,7 @@ import { CoachDefinitionNodeDTO, DynamicViewService } from "../service/dynamic.v
 import { MessageService } from 'primeng/api';
 import { Subscription } from 'rxjs';
 import {FormsModule} from "@angular/forms";
-import { CommonModule } from "@angular/common";
+import {CommonModule, Location} from "@angular/common";
 import {DropdownModule} from "primeng/dropdown";
 import {CheckboxModule} from "primeng/checkbox";
 import {RadioButtonModule} from "primeng/radiobutton";
@@ -46,7 +46,7 @@ import {ProgressSpinnerModule} from "primeng/progressspinner";
         // Custom
         DynamicRendererComponent
     ],
-    providers: [MessageService],
+    providers: [MessageService, Location],
     selector: 'app-dynamic-view',
     templateUrl: './dynamic.view.component.html'
 })
@@ -63,7 +63,8 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
         private processService: DynamicViewService,
         private route: ActivatedRoute,
         private router: Router,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private location: Location
     ) {}
 
     ngOnInit() {
@@ -72,11 +73,21 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
                 this.id = params['id'] || '';
                 this.versionId = 'ca3f8a99-5948-4744-a521-228a89e31439';
 
-                // Alternatively, if using query parameters:
-                // this.route.queryParams.subscribe(queryParams => {
-                //   this.id = queryParams['id'] || '';
-                //   this.versionId = queryParams['versionId'] || '';
-                // });
+                // Initialize form structure based on expected bindings
+                this.formData = {
+                    businessData: {
+                        App: {
+                            name: '',
+                            age: '',
+                            mobileNumber: ''
+                        }
+                    },
+                    local: {
+                        App: {
+                            age: ''
+                        }
+                    }
+                };
 
                 if (this.id && this.versionId) {
                     this.loadCoachDefinitions();
@@ -173,16 +184,33 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
         return Object.keys(this.formData).length > 0;
     }
 
-    goBack() {
-        this.router.navigate(['/']);
+    goBack(): void {
+        if (window.history.length > 1) {
+            this.location.back();
+        } else {
+            // Fallback to default navigation if no history
+            this.router.navigate(['/pages/processmanagement']);
+        }
     }
 
-    onButtonClick(event: any) {
-        console.log('Button clicked:', event);
+    onButtonClick(buttonNode: any) {
+        console.log('Button clicked:', buttonNode);
+
+        // Try different ways to get the button text
+        let buttonText = 'Button';
+
+        if (buttonNode.label) {
+            buttonText = buttonNode.label;
+        } else if (buttonNode.children && buttonNode.children[0] && buttonNode.children[0].text) {
+            buttonText = buttonNode.children[0].text;
+        } else if (buttonNode.text) {
+            buttonText = buttonNode.text;
+        }
+
         this.messageService.add({
             severity: 'info',
             summary: 'Button Clicked',
-            detail: `You clicked button: ${event.label || 'Unnamed'}`
+            detail: `You clicked: ${buttonText}`
         });
     }
 

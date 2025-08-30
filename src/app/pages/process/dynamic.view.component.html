@@ -214,21 +214,23 @@
                 </div>
 
                 <!-- Dynamic Form Renderer -->
-                <app-dynamic-renderer
-                        [node]="{children: bpmResponse}"
-                        [form]="formData"
-                        (buttonClick)="onButtonClick($event)">
-                </app-dynamic-renderer>
+                <ng-container *ngFor="let node of bpmResponse">
+                    <app-dynamic-renderer
+                            [node]="node"
+                            [form]="formData"
+                            (buttonClick)="onButtonClick($event)">
+                    </app-dynamic-renderer>
+                </ng-container>
 
                 <!-- Submit Button -->
-                <div class="flex justify-content-end mt-4 pt-3 border-top-1 surface-border">
-                    <p-button
-                            label="Submit Form"
-                            icon="pi pi-check"
-                            (onClick)="onSubmit()"
-                            [disabled]="loading">
-                    </p-button>
-                </div>
+<!--                <div class="flex justify-content-end mt-4 pt-3 border-top-1 surface-border">-->
+<!--                    <p-button-->
+<!--                            label="Submit Form"-->
+<!--                            icon="pi pi-check"-->
+<!--                            (onClick)="onSubmit()"-->
+<!--                            [disabled]="loading">-->
+<!--                    </p-button>-->
+<!--                </div>-->
             </p-card>
         </div>
 
