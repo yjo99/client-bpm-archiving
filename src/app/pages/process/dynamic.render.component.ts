@@ -103,34 +103,29 @@ export class DynamicRendererComponent {
         }
     }
 
-    // Safe value setter to prevent errors
-// Safe value setter to prevent errors
-    setValue(binding: string, value: any): void {
+    setValue(binding: string, event: Event): void {
+        const target = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+        if (!target) return;
+
+        const value = target.value;
+
         try {
-            if (!binding) return;
+            if (!binding || !this.form) return;
 
-            // Update local values store
-            this.values[binding] = value;
-
-            // Also update the form object if it exists
-            if (!this.form) return;
-
-            // Convert binding string to object reference (e.g., "process.details.name")
+            // Convert binding string to object reference
             const parts = binding.split('.');
-            let obj: any = this.form;
+            let obj = this.form;
 
-            // Navigate to the parent object
-            for (let i = 0; i < parts.length - 1; i++) {
+            for (let i = 1; i < parts.length - 1; i++) {
                 const part = parts[i];
-                if (obj[part] === undefined || obj[part] === null) {
-                    obj[part] = {}; // create missing path
-                }
+                if (obj[part] === undefined) obj[part] = {};
                 obj = obj[part];
             }
 
-            // Set the value at the last part
             const lastPart = parts[parts.length - 1];
             obj[lastPart] = value;
+            this.values[binding] = value;
+
         } catch (error) {
             console.error('Error setting form value', error);
             this.messageService.add({

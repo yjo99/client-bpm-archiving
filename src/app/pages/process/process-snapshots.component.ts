@@ -255,4 +255,9 @@ export class ProcessSnapshotsComponent implements OnInit {
         //   queryParams: { id, versionId }
         // });
     }
+    viewDynamic(instanceId: string, event: Event) {
+        const id = 'd2a3a0b2-0a66-4c3f-ad74-64c3261ce758';
+        event.stopPropagation(); // prevent row click handler from firing
+        this.router.navigate(['pages/process/view', id]);
+    }
 }

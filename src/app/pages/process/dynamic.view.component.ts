@@ -70,7 +70,7 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
         this.routeSub = this.route.params.subscribe({
             next: (params) => {
                 this.id = params['id'] || '';
-                this.versionId = params['versionId'] || '';
+                this.versionId = 'ca3f8a99-5948-4744-a521-228a89e31439';
 
                 // Alternatively, if using query parameters:
                 // this.route.queryParams.subscribe(queryParams => {
