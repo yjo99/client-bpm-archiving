@@ -168,14 +168,13 @@ export class ProcessesManagement implements OnInit {
 
     // In your ProcessesManagement component
     viewSnapshots(processId: string, processName: string): void {
-        this.router.navigate(['/pages/process/snapshots', processId], {
-            state: {
+        this.router.navigate(['/pages/process/snapshots'], {
+            queryParams: {
                 processId: processId,
                 processName: processName
             }
         });
     }
-
     getConfigurationSeverity(configured: boolean): string {
         return configured ? 'success' : 'warning';
     }

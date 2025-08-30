@@ -151,7 +151,10 @@ export class ProcessInstancesComponent implements OnInit {
 
     goBack(): void {
         this.router.navigate(['/pages/process/snapshots'], {
-            queryParams: { processId: this.snapshotID, processName: this.processName }
+            queryParams: {
+                processId: this.snapshotID, // or whatever parameter you need
+                processName: this.processName
+            }
         });
     }
 
