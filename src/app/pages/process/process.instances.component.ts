@@ -90,7 +90,7 @@ export class ProcessInstancesComponent implements OnInit {
         this.loading = true;
 
         const processSnapshotDTO: ProcessSnapshotDTO = {
-            name: this.snapshotAcronym,
+            name: '',
             snapshotID: this.snapshotID,
             pageNumber: this.pageNumber,
             pageSize: this.pageSize
