@@ -84,9 +84,12 @@
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-snapshot let-rowIndex="rowIndex">
-                    <tr [class.bg-blue-50]="isSelected(snapshot)">
+                    <tr [class.bg-blue-50]="isSelected(snapshot)"
+                        [class.cursor-pointer]="true"
+                        [class.hover:bg-blue-100]="true"
+                        (click)="viewInstances(snapshot)">
                         <td>
-                            <p-tableCheckbox [value]="snapshot"></p-tableCheckbox>
+                            <p-tableCheckbox [value]="snapshot" (click)="$event.stopPropagation()"></p-tableCheckbox>
                         </td>
                         <td>{{ snapshot.name || 'N/A' }}</td>
                         <td>{{ snapshot.acronym || 'N/A' }}</td>

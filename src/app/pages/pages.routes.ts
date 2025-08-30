@@ -13,6 +13,7 @@ import {DynamicViewComponent} from "./process/DynamicViewComponent";
 import {ProcessConfigurationComponent} from "./process/process-configuration.component";
 import {ProcessSnapshotsComponent} from "./process/process-snapshots.component";
 import {SuperAdminGuard} from "../core/guards/super-admin.guard";
+import {ProcessInstancesComponent} from "./process/process.instances.component";
 
 
 export default [
@@ -26,6 +27,7 @@ export default [
     {path: "processmanagement", component: ProcessesManagement},
     {path: 'process/instance/:processId/instances', component: InstanceListManagement},
     {path: 'process/snapshots/:id', component: ProcessSnapshotsComponent},
+    {path: 'process/instatnces', component: ProcessInstancesComponent},
     { path: 'process/instance-view/:id', component: DynamicViewComponent },
     {path: 'process/configure/:id', component: ProcessConfigurationComponent},
     { path: 'empty', component: Empty },

@@ -229,4 +229,15 @@ export class ProcessSnapshotsComponent implements OnInit {
     isSelected(snapshot: InstalledSnapshots): boolean {
         return this.selectedSnapshots.some(s => s.ID === snapshot.ID);
     }
+
+    // pages/process/snapshots/process-snapshots.component.ts (add this method)
+    viewInstances(snapshot: InstalledSnapshots): void {
+        this.router.navigate(['/pages/process/instances'], {
+            queryParams: {
+                processName: this.processName,
+                acronym: snapshot.acronym,
+                snapshotID: snapshot.ID
+            }
+        });
+    }
 }

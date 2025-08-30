@@ -1,0 +1,109 @@
+<!-- pages/process/instances/process-instances.component.html -->
+<div class="p-4">
+    <p-toast></p-toast>
+
+    <div class="card">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1>Instances for: {{ processName }}</h1>
+                <p class="text-surface-500">Snapshot: {{ snapshotAcronym }} (ID: {{ snapshotID }})</p>
+            </div>
+            <div class="flex gap-2">
+                <button
+                        pButton
+                        type="button"
+                        label="Refresh"
+                        icon="pi pi-refresh"
+                        (click)="refreshInstances()"
+                        [loading]="loading"
+                        class="p-button-outlined"></button>
+                <button
+                        pButton
+                        type="button"
+                        label="Back to Snapshots"
+                        icon="pi pi-arrow-left"
+                        (click)="goBack()"
+                        class="p-button-secondary"></button>
+            </div>
+        </div>
+
+        <!-- Overview Stats -->
+        <div *ngIf="instances?.overview" class="mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                <div class="text-center p-4 bg-blue-50 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600">{{ instances.overview.Total }}</div>
+                    <div class="text-sm text-blue-800">Total</div>
+                </div>
+                <div class="text-center p-4 bg-green-50 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600">{{ instances.overview.Active }}</div>
+                    <div class="text-sm text-green-800">Active</div>
+                </div>
+                <div class="text-center p-4 bg-purple-50 rounded-lg">
+                    <div class="text-2xl font-bold text-purple-600">{{ instances.overview.Completed }}</div>
+                    <div class="text-sm text-purple-800">Completed</div>
+                </div>
+                <div class="text-center p-4 bg-red-50 rounded-lg">
+                    <div class="text-2xl font-bold text-red-600">{{ instances.overview.Failed }}</div>
+                    <div class="text-sm text-red-800">Failed</div>
+                </div>
+                <div class="text-center p-4 bg-orange-50 rounded-lg">
+                    <div class="text-2xl font-bold text-orange-600">{{ instances.overview.Terminated }}</div>
+                    <div class="text-sm text-orange-800">Terminated</div>
+                </div>
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-2xl font-bold text-gray-600">{{ instances.overview.Did_not_Start }}</div>
+                    <div class="text-sm text-gray-800">Not Started</div>
+                </div>
+                <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                    <div class="text-2xl font-bold text-yellow-600">{{ instances.overview.Suspended }}</div>
+                    <div class="text-sm text-yellow-800">Suspended</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div *ngIf="loading" class="flex justify-center items-center p-6">
+            <p-progressSpinner></p-progressSpinner>
+            <span class="ml-3">Loading instances...</span>
+        </div>
+
+        <!-- No instances message -->
+        <div *ngIf="!loading && (!instances || !instances.processes || instances.processes.length === 0)" class="text-center p-8">
+            <i class="pi pi-inbox text-4xl text-surface-400 mb-4"></i>
+            <h3 class="text-lg font-semibold text-surface-700 mb-2">No instances found</h3>
+            <p class="text-surface-500">No instances are available for this snapshot.</p>
+        </div>
+
+        <!-- Instances table -->
+        <div *ngIf="!loading && instances && instances.processes && instances.processes.length > 0">
+            <p-table [value]="instances.processes" [rows]="pageSize" [paginator]="true"
+                     [totalRecords]="totalRecords" [rowsPerPageOptions]="[5, 10, 20, 50]"
+                     [loading]="loading" (onPage)="onPageChange($event)">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th *ngFor="let col of cols" [pSortableColumn]="col.field">
+                            {{ col.header }}
+                            <p-sortIcon [field]="col.field"></p-sortIcon>
+                        </th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-instance>
+                    <tr>
+                        <td>{{ instance.piid || 'N/A' }}</td>
+                        <td>{{ instance.name || 'N/A' }}</td>
+                        <td>{{ instance.bpdName || 'N/A' }}</td>
+                        <td>
+                            <p-tag [value]="instance.executionState"
+                                   [severity]="getStatusSeverity(instance.executionState)"></p-tag>
+                        </td>
+                        <td>{{ formatDate(instance.lastModificationTime) }}</td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="paginatorleft">
+                    <span class="text-surface-500">Total: {{ totalRecords }} instances</span>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>
