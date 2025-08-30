@@ -27,7 +27,7 @@ export default [
     {path: "processmanagement", component: ProcessesManagement},
     {path: 'process/instance/:processId/instances', component: InstanceListManagement},
     {path: 'process/snapshots/:id', component: ProcessSnapshotsComponent},
-    {path: 'process/instatnces', component: ProcessInstancesComponent},
+    {path: 'process/instances', component: ProcessInstancesComponent},
     { path: 'process/instance-view/:id', component: DynamicViewComponent },
     {path: 'process/configure/:id', component: ProcessConfigurationComponent},
     { path: 'empty', component: Empty },
