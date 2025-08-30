@@ -155,7 +155,7 @@ export class ProcessInstancesComponent implements OnInit {
             this.location.back();
         } else {
             // Fallback to default navigation if no history
-            this.router.navigate(['/pages/process']);
+            this.router.navigate(['/pages/processmanagement']);
         }
     }
 

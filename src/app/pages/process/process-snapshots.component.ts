@@ -222,7 +222,7 @@ export class ProcessSnapshotsComponent implements OnInit {
     }
 
     goBack(): void {
-        this.router.navigate(['/pages/process']);
+        this.router.navigate(['/pages/processmanagement']);
     }
 
     refreshSnapshots(): void {
