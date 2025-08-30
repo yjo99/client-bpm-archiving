@@ -9,11 +9,11 @@ import {EcmServerFormComponent} from "./ConfigurationManagment/component/EcmServ
 import {DbServerFormComponent} from "./ConfigurationManagment/component/DbServerFormComponent";
 import {ProcessesManagement} from "./process/ProcessesManagement";
 import {InstanceListManagement} from "./process/InastanceListManagment";
-import {DynamicViewComponent} from "./process/DynamicViewComponent";
 import {ProcessConfigurationComponent} from "./process/process-configuration.component";
 import {ProcessSnapshotsComponent} from "./process/process-snapshots.component";
 import {SuperAdminGuard} from "../core/guards/super-admin.guard";
 import {ProcessInstancesComponent} from "./process/process.instances.component";
+import {DynamicViewComponent} from "./process/dynamic.view.component";
 
 
 export default [
@@ -28,7 +28,8 @@ export default [
     {path: 'process/instance/:processId/instances', component: InstanceListManagement},
     {path: 'process/snapshots', component: ProcessSnapshotsComponent},
     {path: 'process/instances', component: ProcessInstancesComponent},
-    { path: 'process/instance-view/:id', component: DynamicViewComponent },
+    { path: 'process/view/:id', component: DynamicViewComponent },
+    { path: 'process/view', component: DynamicViewComponent },
     {path: 'process/configure/:id', component: ProcessConfigurationComponent},
     { path: 'empty', component: Empty },
     { path: '**', redirectTo: '/notfound' }

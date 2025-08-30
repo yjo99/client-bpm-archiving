@@ -1,0 +1,255 @@
+<style>
+    // dynamic-view.component.scss
+    :host {
+        display: block;
+        height: 100%;
+    }
+
+    .dynamic-view-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background-color: #f8f9fa;
+    }
+
+    .header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color) 100%);
+        color: white;
+        box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+        z-index: 10;
+    }
+
+    .content {
+        flex: 1;
+        overflow-y: auto;
+        position: relative;
+
+        &.content-loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    }
+
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-content {
+        text-align: center;
+
+        p {
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+    }
+
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        text-align: center;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--surface-border);
+
+        h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+    }
+
+    .empty-state {
+        padding: 3rem 1rem;
+
+        i {
+            opacity: 0.5;
+        }
+
+        h3 {
+            margin: 1rem 0 0.5rem;
+            color: var(--text-color);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .header {
+            flex-direction: column;
+            align-items: flex-start;
+
+            h2 {
+                margin-bottom: 1rem;
+            }
+        }
+
+        .form-container {
+            margin: 0;
+        }
+    }
+
+       :host ::ng-deep {
+           .p-panel {
+               transition: transform 0.2s, box-shadow 0.2s;
+
+               &:hover {
+                   transform: translateY(-2px);
+                   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+               }
+           }
+
+           .p-field {
+               transition: background-color 0.2s;
+
+               &:focus-within {
+                   background-color: rgba(0, 0, 0, 0.02);
+                   border-radius: 4px;
+               }
+           }
+       }
+
+       .error-boundary {
+           border: 1px dashed #e24c4c;
+           padding: 1rem;
+           margin-bottom: 1rem;
+           border-radius: 6px;
+           background-color: #ffe6e6;
+
+           .error-icon {
+               color: #e24c4c;
+               margin-right: 0.5rem;
+           }
+       }
+
+       .submission-success {
+           text-align: center;
+           padding: 2rem;
+           color: var(--green-700);
+           background-color: var(--green-100);
+           border-radius: 6px;
+           border: 1px solid var(--green-200);
+
+           i {
+               font-size: 3rem;
+               margin-bottom: 1rem;
+           }
+       }
+
+</style>
+<div class="dynamic-view-container">
+    <!-- Header Section -->
+    <div class="header p-4 flex align-items-center justify-content-between">
+        <div class="flex align-items-center">
+            <i class="pi pi-list mr-3" style="font-size: 1.5rem;"></i>
+            <h2 class="m-0">Dynamic Form View</h2>
+        </div>
+        <div>
+            <p-button
+                    label="Back to List"
+                    icon="pi pi-arrow-left"
+                    (onClick)="goBack()"
+                    class="p-button-secondary mr-2">
+            </p-button>
+            <p-button
+                    label="Reload"
+                    icon="pi pi-refresh"
+                    (onClick)="loadCoachDefinitions()"
+                    [disabled]="loading">
+            </p-button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div *ngIf="loading" class="loading-overlay">
+        <div class="loading-content text-center">
+            <p-progressSpinner
+                    styleClass="w-4rem h-4rem"
+                    strokeWidth="4"
+                    animationDuration=".5s">
+            </p-progressSpinner>
+            <p class="mt-3">Loading form data...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content p-4" [class.content-loading]="loading">
+        <!-- Error Message -->
+        <div *ngIf="errorMessage" class="mb-4">
+            <p-message
+                    severity="error"
+                    [closable]="true"
+                    (onClose)="errorMessage = null">
+                <div class="flex align-items-center">
+                    <i class="pi pi-exclamation-triangle mr-2"></i>
+                    <span>{{ errorMessage }}</span>
+                </div>
+            </p-message>
+        </div>
+
+        <!-- No Parameters Warning -->
+        <div *ngIf="!id || !versionId" class="mb-4">
+            <p-message severity="warn">
+                <div class="flex align-items-center">
+                    <i class="pi pi-info-circle mr-2"></i>
+                    <span>Missing form ID or version ID. Please check the URL parameters.</span>
+                </div>
+            </p-message>
+        </div>
+
+        <!-- Form Content -->
+        <div *ngIf="!loading && bpmResponse.length > 0" class="form-container">
+            <p-card>
+                <div class="form-header mb-4">
+                    <h3>Dynamic Form</h3>
+                    <p class="text-color-secondary">
+                        Form ID: {{id}} | Version: {{versionId}}
+                    </p>
+                </div>
+
+                <!-- Dynamic Form Renderer -->
+                <app-dynamic-renderer
+                        [node]="{children: bpmResponse}"
+                        [form]="formData"
+                        (buttonClick)="onButtonClick($event)">
+                </app-dynamic-renderer>
+
+                <!-- Submit Button -->
+                <div class="flex justify-content-end mt-4 pt-3 border-top-1 surface-border">
+                    <p-button
+                            label="Submit Form"
+                            icon="pi pi-check"
+                            (onClick)="onSubmit()"
+                            [disabled]="loading">
+                    </p-button>
+                </div>
+            </p-card>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!loading && bpmResponse.length === 0 && !errorMessage" class="empty-state text-center">
+            <i class="pi pi-inbox text-6xl text-color-secondary"></i>
+            <h3>No Form Data Available</h3>
+            <p class="text-color-secondary">The form definition is empty or could not be loaded.</p>
+            <p-button
+                    label="Try Again"
+                    icon="pi pi-refresh"
+                    (onClick)="loadCoachDefinitions()"
+                    class="mt-3">
+            </p-button>
+        </div>
+    </div>
+
+    <!-- Toast Container for Messages -->
+    <p-toast
+            position="top-right"
+            [breakpoints]="{'920px': {width: '100%', right: '0', left: '0'}}">
+    </p-toast>
+</div>

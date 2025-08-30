@@ -1,0 +1,182 @@
+<ng-container *ngIf="node">
+    <!-- Error boundary for each control -->
+    <div class="control-container">
+        <ng-container *ngIf="isSupported(node); else unsupportedControl">
+            <!-- Collapsible Panel / Panel / Section -->
+            <p-panel *ngIf="['Collapsible Panel','Panel','Section'].includes(node.controlType || '')"
+                     [header]="node.label"
+                     [toggleable]="true">
+                <ng-container *ngFor="let child of node.children">
+                    <app-dynamic-renderer [node]="child" [form]="form"></app-dynamic-renderer>
+                </ng-container>
+            </p-panel>
+
+            <!-- Input Group -->
+            <div *ngIf="node.controlType === 'Input Group'" class="p-field">
+                <label>{{ node.label }}</label>
+                <input
+                        pInputText
+                        [value]="getValue(node.binding)"
+                        (input)="setValue(node.binding, $event)"
+                        [placeholder]="node.label"
+                />
+            </div>
+
+            <!-- Editable Text -->
+            <div *ngIf="node.controlType === 'Text'" class="p-field">
+                <label>{{ node.label }}</label>
+                <input
+                        pInputText
+                        [value]="getValue(node.binding)"
+                        (input)="setValue(node.binding, $event)"
+                        [placeholder]="node.label"
+                />
+            </div>
+
+            <!-- Output Text / Label -->
+            <div *ngIf="node.controlType === 'Output Text' || node.controlType === 'Label'" class="p-field">
+                <label *ngIf="node.label">{{ node.label }}</label>
+                <span class="output-value">{{ getValue(node.binding) || '(No value)' }}</span>
+            </div>
+
+            <!-- Button -->
+            <p-button *ngIf="node.controlType === 'Button'"
+                      [label]="node.label || 'OK'"
+                      (onClick)="onButtonClick(node)"
+                      [class]="node.label === 'OK' ? 'p-button-primary' : 'p-button-secondary'">
+            </p-button>
+
+            <!-- Dropdown -->
+            <div *ngIf="node.controlType === 'Dropdown' || node.controlType === 'Select'" class="p-field">
+                <label>{{ node.label }}</label>
+                <p-dropdown
+                        [options]="getOptions(node)"
+                        [(ngModel)]="form[node.binding]"
+                        [placeholder]="'Select ' + (node.label || 'option')"
+                        optionLabel="label"
+                        optionValue="value"
+                        [showClear]="true">
+                </p-dropdown>
+            </div>
+
+            <!-- Checkbox -->
+            <div class="flex items-center gap-2">
+                <p-checkbox
+                        [(ngModel)]="node.value"
+                        [binary]="true"
+                        [inputId]="'chk-' + node.id">
+                </p-checkbox>
+                <label [for]="'chk-' + node.id">{{ node.label }}</label>
+            </div>
+
+            <!-- Radio -->
+            <div *ngFor="let opt of node.options" class="flex items-center gap-2">
+                <p-radioButton
+                        name="{{node.id}}"
+                        [value]="opt.value"
+                        [(ngModel)]="node.value"
+                        [inputId]="'rb-' + node.id + '-' + opt.value">
+                </p-radioButton>
+                <label [for]="'rb-' + node.id + '-' + opt.value">{{ opt.label }}</label>
+            </div>
+
+
+            <!-- Table / Data Grid -->
+            <div *ngIf="node.controlType === 'Table' || node.controlType === 'Data Grid'" class="p-field">
+                <label>{{ node.label }}</label>
+                <p-table
+                        [value]="form[node.binding] || []"
+                        [paginator]="true"
+                        [rows]="5"
+                        [showCurrentPageReport]="true"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th *ngFor="let col of node.children">{{ col.label }}</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
+                        <tr>
+                            <td *ngFor="let col of node.children">
+                                <app-dynamic-renderer [node]="col" [form]="rowData"></app-dynamic-renderer>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td [attr.colspan]="node.children.length" class="text-center p-4">
+                                No data available
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+
+            <!-- Date Picker -->
+            <div *ngIf="node.controlType === 'Date' || node.controlType === 'DateTime Picker'" class="p-field">
+                <label>{{ node.label }}</label>
+                <p-calendar
+                        [(ngModel)]="form[node.binding]"
+                        [showTime]="node.controlType === 'DateTime Picker'"
+                        [showIcon]="true"
+                        dateFormat="dd.mm.yy"
+                        [placeholder]="'Select ' + (node.label || 'date')">
+                </p-calendar>
+            </div>
+
+            <!-- File Upload -->
+            <div *ngIf="node.controlType === 'File Upload'" class="p-field">
+                <label>{{ node.label }}</label>
+                <p-fileUpload
+                        name="{{node.binding}}"
+                        chooseLabel="Browse"
+                        uploadLabel="Upload"
+                        cancelLabel="Cancel"
+                        [maxFileSize]="1000000">
+                </p-fileUpload>
+            </div>
+
+            <!-- Link -->
+            <div *ngIf="node.controlType === 'Link'" class="p-field">
+                <label>{{ node.label }}</label>
+                <div>
+                    <a [href]="getValue(node.binding)" target="_blank" class="link-value">
+                        {{ getValue(node.binding) || '(No link)' }}
+                    </a>
+                </div>
+            </div>
+
+            <!-- Image -->
+            <div *ngIf="node.controlType === 'Image'" class="p-field">
+                <label>{{ node.label }}</label>
+                <div>
+                    <img
+                            [src]="getValue(node.binding)"
+                            [alt]="node.label"
+                            class="image-preview"
+                            (error)="handleImageError($event)"
+                            *ngIf="getValue(node.binding); else noImage"/>
+                    <ng-template #noImage>
+                        <div class="image-placeholder">
+                            <i class="pi pi-image"></i>
+                            <span>No image available</span>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+
+            <!-- Spacer -->
+            <div *ngIf="node.controlType === 'Spacer'" class="spacer"></div>
+
+            <!-- Separator -->
+            <div *ngIf="node.controlType === 'Separator'" class="separator"></div>
+        </ng-container>
+
+        <ng-template #unsupportedControl>
+            <div class="unsupported-control error-boundary">
+                <i class="pi pi-exclamation-triangle error-icon"></i>
+                <span>Unsupported control type: <strong>{{ node.controlType }}</strong></span>
+            </div>
+        </ng-template>
+    </div>
+</ng-container>

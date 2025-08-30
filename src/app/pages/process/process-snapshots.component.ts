@@ -244,4 +244,15 @@ export class ProcessSnapshotsComponent implements OnInit {
             }
         });
     }
+    navigateToDynamicView() {
+        const id = 'd2a3a0b2-0a66-4c3f-ad74-64c3261ce758';
+        const versionId = 'ca3f8a99-5948-4744-a521-228a89e31439';
+
+        this.router.navigate(['/pages/process/view', id]);
+
+        // Or if you want to use query parameters instead:
+        // this.router.navigate(['/dynamic-view'], {
+        //   queryParams: { id, versionId }
+        // });
+    }
 }
