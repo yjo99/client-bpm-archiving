@@ -75,13 +75,11 @@ export class ProcessConfigurationComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        console.log('History state:', history.state);
 
         // Get process data from history state (works after navigation)
         if (history.state && history.state.processData) {
             this.process = history.state.processData;
             this.processId = this.process?.ID;
-            console.log('Process set from history state:', this.process);
 
             // Check if we're editing an existing configuration
             this.checkIfEditMode();
@@ -89,12 +87,10 @@ export class ProcessConfigurationComponent implements OnInit {
         // Try to get from navigation state (works during navigation)
         else {
             const navigation = this.router.getCurrentNavigation();
-            console.log('Navigation state:', navigation?.extras.state);
 
             if (navigation?.extras?.state?.["processData"]) {
                 this.process = navigation.extras.state["processData"];
                 this.processId = this.process?.ID;
-                console.log('Process set from navigation state:', this.process);
 
                 // Check if we're editing an existing configuration
                 this.checkIfEditMode();
@@ -182,7 +178,6 @@ export class ProcessConfigurationComponent implements OnInit {
         this.loadingGroups = true;
         this.superAdminService.getAllGroups().subscribe({
             next: (groups) => {
-                console.log(groups)
                 this.allGroups = groups;
                 this.loadingGroups = false;
             },
@@ -268,7 +263,6 @@ export class ProcessConfigurationComponent implements OnInit {
 
         // Prepare the data for submission
         const submissionData = this.prepareSubmissionData();
-        console.log('Submitting data:', submissionData);
 
         // Call the API service
         this.processService.configProcess(submissionData).subscribe({

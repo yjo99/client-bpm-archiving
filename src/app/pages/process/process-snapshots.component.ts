@@ -234,7 +234,7 @@ export class ProcessSnapshotsComponent implements OnInit {
         return this.selectedSnapshots.some(s => s.ID === snapshot.ID);
     }
 
-    // pages/process/snapshots/process-snapshots.component.ts (add this method)
+    // pages/process/snapshots/process-snapshots.component.ts
     viewInstances(snapshot: InstalledSnapshots): void {
         this.router.navigate(['/pages/process/instances'], {
             queryParams: {

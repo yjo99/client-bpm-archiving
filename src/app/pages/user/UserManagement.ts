@@ -180,8 +180,6 @@ export class UserManagement implements OnInit {
         this.userGroupsLoading = true;
         this.superAdminService.getUserGroups(username).subscribe({
             next: (groups: Group[]) => {
-                console.log("groups of user ")
-                console.log(groups)
                 this.userGroups = groups;
                 this.userGroupsLoading = false;
             },

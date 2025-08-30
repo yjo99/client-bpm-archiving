@@ -77,8 +77,6 @@ export class AppMenu implements OnInit {
     private isSuperAdmin(): boolean {
         // Get token from localStorage
         const token = localStorage.getItem('authToken');
-        console.log("token is")
-        console.log(token)
         if (!token) return false;
 
         try {
