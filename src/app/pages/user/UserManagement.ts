@@ -104,8 +104,6 @@ export class UserManagement implements OnInit {
     userGroups: Group[] = [];
 
     onPageSizeChange(): void {
-        // This will trigger the table to update with new page size
-        // You might want to save this preference to local storage
         localStorage.setItem('userManagementPageSize', this.pageSize.toString());
     }
 

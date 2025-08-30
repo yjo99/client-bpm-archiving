@@ -14,6 +14,8 @@ import {EcmServerModel} from "../../layout/model/ecm-server.model";
 import {DbServerModel} from "../../layout/model/db-server.model";
 import {Dialog} from "primeng/dialog";
 import {ServerConfigService} from "../../core/services/ServerConfigService";
+import {MessageService} from "primeng/api";
+import {AuthService} from "../../core/services/auth.service";
 
 // @ts-ignore
 @Component({
@@ -21,7 +23,7 @@ import {ServerConfigService} from "../../core/services/ServerConfigService";
     standalone: true,
     imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator , NgForOf , Dialog],
     templateUrl: './datasourceConfig.html',
-    providers: [DatasourceConfigService]
+    providers: [DatasourceConfigService, MessageService]
 
 })
 export class DatasourceConfig implements OnInit{
@@ -40,9 +42,24 @@ export class DatasourceConfig implements OnInit{
         private datasourceConfigService: DatasourceConfigService,
         private serverConfigService: ServerConfigService,
         private router: Router,
+        private messageService: MessageService,
+        private authService: AuthService,
     ) {}
 
     ngOnInit(): void {
+
+        // Check if user has SUPER_ADMIN role
+        if (!this.authService.isSuperAdmin()) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Access Denied',
+                detail: 'You require SUPER_ADMIN privileges to access this page',
+                life: 5000
+            });
+            this.router.navigate(['/auth/login']);
+            return;
+        }
+
         this.datasourceConfigService.getBPMServers().subscribe(data => {
             this.bpmServers = data;
         });

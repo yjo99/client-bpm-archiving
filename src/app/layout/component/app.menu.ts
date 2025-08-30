@@ -28,21 +28,33 @@ export class AppMenu implements OnInit {
                 label: 'Home',
                 items: [{ label: 'Home', icon: 'pi pi-fw pi-home', routerLink: ['/'] }]
             },
-            {
-                label: 'Configuration',
-                items: [{ label: 'Datasource Management', icon: 'pi pi-fw pi-cog', routerLink: ['/pages/dataconfig'] }]
-            },
+
+            ...this.getDataConfigMenuSection()
+            ,
             // Conditionally add User menu section
             ...this.getUserMenuSection(),
             {
                 label: 'Process',
                 items: [{ label: 'Process Management', icon: 'pi pi-fw pi-share-alt', routerLink: ['/pages/processmanagement'] }]
-            },
-            {
-                label: 'System',
-                items: [{ label: 'System Dashboard', icon: 'pi pi-fw pi-tablet', routerLink: ['/pages/empty'] }]
             }
         ];
+    }
+
+    private getDataConfigMenuSection(): MenuItem[] {
+        // Check if user has SUPER_ADMIN role
+        if (this.isSuperAdmin()) {
+            return [
+                {
+                    label: 'Configuration',
+                    items: [{
+                        label: 'Datasource Management',
+                        icon: 'pi pi-fw pi-users',
+                        routerLink: ['/pages/dataconfig']
+                    }]
+                }
+            ];
+        }
+        return [];
     }
 
     private getUserMenuSection(): MenuItem[] {
