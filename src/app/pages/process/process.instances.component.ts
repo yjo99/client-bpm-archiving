@@ -1,7 +1,7 @@
 // pages/process/instances/process-instances.component.ts
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
@@ -64,7 +64,8 @@ export class ProcessInstancesComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private messageService: MessageService,
-        private instancesService: InstancesService
+        private instancesService: InstancesService,
+        private location: Location
     ) {}
 
     ngOnInit(): void {
@@ -150,12 +151,12 @@ export class ProcessInstancesComponent implements OnInit {
     }
 
     goBack(): void {
-        this.router.navigate(['/pages/process/snapshots'], {
-            queryParams: {
-                processId: this.snapshotID, // or whatever parameter you need
-                processName: this.processName
-            }
-        });
+        if (window.history.length > 1) {
+            this.location.back();
+        } else {
+            // Fallback to default navigation if no history
+            this.router.navigate(['/pages/process']);
+        }
     }
 
     refreshInstances(): void {

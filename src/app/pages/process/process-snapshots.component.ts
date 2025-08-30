@@ -51,19 +51,23 @@ export class ProcessSnapshotsComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        // Get process ID and name from route parameters
-        this.route.params.subscribe(params => {
-            this.processId = params['id'];
-            this.processName = params['name'] || 'Process';
-            this.loadSnapshots();
-        });
+        // Get process ID and name from query parameters
+        this.route.queryParams.subscribe(params => {
+            console.log("get query params")
+            console.log(params)
+            this.processId = params['processId'];
+            this.processName = params['processName'] || 'Process';
 
-        // Alternatively, get from state if navigating from process list
-        const navigation = this.router.getCurrentNavigation();
-        if (navigation?.extras?.state) {
-            this.processId = navigation.extras.state['processId'] || this.processId;
-            this.processName = navigation.extras.state['processName'] || this.processName;
-        }
+            if (this.processId) {
+                this.loadSnapshots();
+            } else {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Process ID is required'
+                });
+            }
+        });
     }
 
     loadSnapshots(): void {
