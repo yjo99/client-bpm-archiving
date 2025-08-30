@@ -86,6 +86,7 @@
                             {{ col.header }}
                             <p-sortIcon [field]="col.field"></p-sortIcon>
                         </th>
+                        <th>Actions</th>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-instance>
@@ -98,6 +99,16 @@
                                    [severity]="getStatusSeverity(instance.executionState)"></p-tag>
                         </td>
                         <td>{{ formatDate(instance.lastModificationTime) }}</td>
+                        <td>
+                            <button
+                                    pButton
+                                    type="button"
+                                    icon="pi pi-eye"
+                                    label="View"
+                                    class="p-button-text p-button-sm"
+                                    (click)="viewDynamic(instance.piid, $event)">
+                            </button>
+                        </td>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="paginatorleft">

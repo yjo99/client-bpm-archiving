@@ -86,7 +86,6 @@
                             {{ col.header }}
                             <p-sortIcon [field]="col.field"></p-sortIcon>
                         </th>
-                        <th>Actions</th>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-snapshot let-rowIndex="rowIndex">
@@ -109,16 +108,6 @@
                             {{ snapshot.snapshotTip ? 'Yes' : 'No' }}
                         </td>
                         <td>{{ snapshot.branchName || 'N/A' }}</td>
-                        <td>
-                            <button
-                                    pButton
-                                    type="button"
-                                    icon="pi pi-eye"
-                                    label="View"
-                                    class="p-button-text p-button-sm"
-                                    (click)="viewDynamic(snapshot.id, $event)">
-                            </button>
-                        </td>
                     </tr>
                 </ng-template>
 
