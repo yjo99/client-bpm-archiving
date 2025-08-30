@@ -30,7 +30,7 @@ import {InstancesService} from "../../layout/service/instances.service";
 })
 export class ProcessInstancesComponent implements OnInit {
     processName: string = '';
-    snapshotAcronym: string = '';
+    processAcronym: string = '';
     snapshotID: string = '';
     instances: Instances = {
     overview: {
@@ -71,10 +71,10 @@ export class ProcessInstancesComponent implements OnInit {
     ngOnInit(): void {
         this.route.queryParams.subscribe(params => {
             this.processName = params['processName'] || 'Process';
-            this.snapshotAcronym = params['acronym'] || '';
+            this.processAcronym = params['acronym'] || '';
             this.snapshotID = params['snapshotID'] || '';
 
-            if (this.snapshotAcronym && this.snapshotID) {
+            if (this.processAcronym && this.snapshotID) {
                 this.loadInstances();
             } else {
                 this.messageService.add({
@@ -90,7 +90,7 @@ export class ProcessInstancesComponent implements OnInit {
         this.loading = true;
 
         const processSnapshotDTO: ProcessSnapshotDTO = {
-            name: '',
+            name: this.processAcronym,
             snapshotID: this.snapshotID,
             pageNumber: this.pageNumber,
             pageSize: this.pageSize

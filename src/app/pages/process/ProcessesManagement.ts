@@ -167,11 +167,12 @@ export class ProcessesManagement implements OnInit {
     }
 
     // In your ProcessesManagement component
-    viewSnapshots(processId: string, processName: string): void {
+    viewSnapshots(processId: string, processName: string, processShortName: string): void {
         this.router.navigate(['/pages/process/snapshots'], {
             queryParams: {
                 processId: processId,
-                processName: processName
+                processName: processName,
+                processShortName: processShortName
             }
         });
     }

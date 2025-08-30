@@ -28,6 +28,7 @@ import { ProcessService, InstalledSnapshots, SnapshotDto } from "../../layout/se
 export class ProcessSnapshotsComponent implements OnInit {
     processId: string = '';
     processName: string = '';
+    processAcronym: String = '';
     snapshots: InstalledSnapshots[] = [];
     selectedSnapshots: InstalledSnapshots[] = [];
     loading: boolean = false;
@@ -57,7 +58,7 @@ export class ProcessSnapshotsComponent implements OnInit {
             console.log(params)
             this.processId = params['processId'];
             this.processName = params['processName'] || 'Process';
-
+            this.processAcronym = params['processShortName'] || ''
             if (this.processId) {
                 this.loadSnapshots();
             } else {
@@ -239,7 +240,7 @@ export class ProcessSnapshotsComponent implements OnInit {
         this.router.navigate(['/pages/process/instances'], {
             queryParams: {
                 processName: this.processName,
-                acronym: snapshot.acronym,
+                acronym: this.processAcronym,
                 snapshotID: snapshot.ID
             }
         });
