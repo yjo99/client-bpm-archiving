@@ -29,6 +29,7 @@ import {InstancesService} from "../../layout/service/instances.service";
     providers: [MessageService]
 })
 export class ProcessInstancesComponent implements OnInit {
+    processId: string= '';
     processName: string = '';
     processAcronym: string = '';
     snapshotID: string = '';
@@ -73,6 +74,7 @@ export class ProcessInstancesComponent implements OnInit {
             this.processName = params['processName'] || 'Process';
             this.processAcronym = params['acronym'] || '';
             this.snapshotID = params['snapshotID'] || '';
+            this.processId = params['processID'] || '';
 
             if (this.processAcronym && this.snapshotID) {
                 this.loadInstances();
@@ -163,9 +165,24 @@ export class ProcessInstancesComponent implements OnInit {
         this.loadInstances();
     }
 
-    viewDynamic(instanceId: string, event: Event) {
-        const id = 'd2a3a0b2-0a66-4c3f-ad74-64c3261ce758';
-        event.stopPropagation(); // prevent row click handler from firing
-        this.router.navigate(['pages/process/view', id]);
+    viewDynamic(ppid: string, event: Event) {
+        event.stopPropagation();
+        this.router.navigate(['pages/process/view'], {
+            queryParams: {
+                processID: this.processId,
+                snapshotID: this.snapshotID,
+                ppid: ppid
+            }
+        });
     }
+
+
+        // this.router.navigate(['/pages/process/instances'], {
+        //     queryParams: {
+        //         processName: this.processName,
+        //         acronym: this.processAcronym,
+        //         snapshotID: snapshot.ID,
+        //         processID: this.processId
+        //     }
+        // });
 }

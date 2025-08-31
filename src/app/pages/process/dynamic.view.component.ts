@@ -55,8 +55,9 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
     formData: any = {};
     errorMessage: string | null = null;
     loading = false;
-    id: string = '';
-    versionId: string = '';
+    ppid: string = '';
+    snapshotID: string = '';
+    processID: string = '';
     private routeSub: Subscription | null = null;
 
     constructor(
@@ -70,8 +71,9 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.routeSub = this.route.params.subscribe({
             next: (params) => {
-                this.id = params['id'] || '';
-                this.versionId = 'ca3f8a99-5948-4744-a521-228a89e31439';
+                this.ppid = params['ppid'] || '';
+                this.snapshotID = params['snapshotID'] || '';
+                this.processID = params['processID'] || '';
 
                 // Initialize form structure based on expected bindings
                 this.formData = {
@@ -89,10 +91,10 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
                     }
                 };
 
-                if (this.id && this.versionId) {
+                if (this.ppid && this.snapshotID && this.processID) {
                     this.loadCoachDefinitions();
                 } else {
-                    this.handleError('Missing required parameters: id and versionId');
+                    this.handleError('Missing required parameters: ppid and snapshotid && processid');
                 }
             },
             error: (err) => {
@@ -108,15 +110,15 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
     }
 
     loadCoachDefinitions() {
-        if (!this.id || !this.versionId) {
-            this.handleError('Cannot load data: missing id or versionId');
+        if (!this.ppid || !this.snapshotID || !this.processID) {
+            this.handleError('Cannot load data: missing processID or snapshotId');
             return;
         }
 
         this.loading = true;
         this.errorMessage = null;
 
-        this.processService.getInstanceDynamicView(this.id, this.versionId)
+        this.processService.getInstanceDynamicView(this.ppid, this.snapshotID, this.processID)
             .subscribe({
                 next: (res) => {
                     this.bpmResponse = res || [];

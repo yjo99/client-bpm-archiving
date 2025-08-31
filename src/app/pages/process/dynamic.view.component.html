@@ -194,11 +194,11 @@
         </div>
 
         <!-- No Parameters Warning -->
-        <div *ngIf="!id || !versionId" class="mb-4">
+        <div *ngIf="!ppid || !snapshotID" class="mb-4">
             <p-message severity="warn">
                 <div class="flex align-items-center">
                     <i class="pi pi-info-circle mr-2"></i>
-                    <span>Missing form ID or version ID. Please check the URL parameters.</span>
+                    <span>Missing form SnapshotID or InstanceID. Please check the URL parameters.</span>
                 </div>
             </p-message>
         </div>
@@ -207,9 +207,9 @@
         <div *ngIf="!loading && bpmResponse.length > 0" class="form-container">
             <p-card>
                 <div class="form-header mb-4">
-                    <h3>Dynamic Form</h3>
+<!--                    <h3>Dynamic Form</h3>-->
                     <p class="text-color-secondary">
-                        Form ID: {{id}} | Version: {{versionId}}
+                        Form instanceID: {{ppid}} | SnapshotID: {{snapshotID}}
                     </p>
                 </div>
 

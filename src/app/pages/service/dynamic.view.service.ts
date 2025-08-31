@@ -22,10 +22,11 @@ export class DynamicViewService {
 
     constructor(private http: HttpClient) {}
 
-    getInstanceDynamicView(id: string, versionId: string): Observable<CoachDefinitionNodeDTO[]> {
+    getInstanceDynamicView(ppId: string, snapshotId: string, processID: string): Observable<CoachDefinitionNodeDTO[]> {
         const params = new HttpParams()
-            .set('id', id)
-            .set('versionId', versionId);
+            .set('instanceID', ppId)
+            .set('snapshotID', snapshotId)
+            .set('processAppID', processID);
 
         return this.http.get<CoachDefinitionNodeDTO[]>(`${this.baseUrl}/xml`, { params })
             .pipe(

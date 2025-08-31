@@ -62,7 +62,7 @@
         </div>
 
         <!-- No snapshots message -->
-        <div *ngIf="!loading && snapshots.length === 0" class="text-center p-8">
+        <div *ngIf="!loading && (!snapshots || snapshots.length === 0)" class="text-center p-8">
             <i class="pi pi-database text-4xl text-surface-400 mb-4"></i>
             <h3 class="text-lg font-semibold text-surface-700 mb-2">No snapshots found</h3>
             <p class="text-surface-500">No snapshots are available for this process.</p>

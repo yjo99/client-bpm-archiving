@@ -241,7 +241,8 @@ export class ProcessSnapshotsComponent implements OnInit {
             queryParams: {
                 processName: this.processName,
                 acronym: this.processAcronym,
-                snapshotID: snapshot.ID
+                snapshotID: snapshot.ID,
+                processID: this.processId
             }
         });
     }
