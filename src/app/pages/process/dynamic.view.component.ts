@@ -69,12 +69,15 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.routeSub = this.route.params.subscribe({
-            next: (params) => {
-                this.ppid = params['ppid'] || '';
-                this.snapshotID = params['snapshotID'] || '';
-                this.processID = params['processID'] || '';
-
+        this.routeSub = this.route.queryParams.subscribe({
+            next: (queryParams) => {
+                this.ppid = queryParams['ppid'] || '';
+                this.snapshotID = queryParams['snapshotID'] || '';
+                this.processID = queryParams['processID'] || '';
+                console.log('test params')
+                console.log(queryParams['ppid'])
+                console.log(queryParams['snapshotID'])
+                console.log(queryParams['processID'])
                 // Initialize form structure based on expected bindings
                 this.formData = {
                     businessData: {
