@@ -5,6 +5,7 @@ import { MessageService } from 'primeng/api';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 import { PanelModule } from 'primeng/panel';
 import { DropdownModule } from 'primeng/dropdown';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -13,7 +14,6 @@ import { CalendarModule } from 'primeng/calendar';
 import { FileUploadModule } from 'primeng/fileupload';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { CardModule } from 'primeng/card';
-import {InputTextModule} from "primeng/inputtext";
 
 @Component({
     selector: 'app-dynamic-renderer',
@@ -41,10 +41,12 @@ export class DynamicRendererComponent {
 
     constructor(private messageService: MessageService) {}
 
+    // Check if node has children that need to be rendered
     hasChildren(): boolean {
         return this.node.children && this.node.children.length > 0;
     }
 
+    // Check if control type is supported
     isSupported(): boolean {
         try {
             const supportedTypes = [
@@ -52,7 +54,8 @@ export class DynamicRendererComponent {
                 'Input Group', 'Text', 'Output Text', 'Label',
                 'Button', 'Dropdown', 'Select', 'CheckBox', 'Radio',
                 'Table', 'Data Grid', 'Date', 'DateTime Picker',
-                'File Upload', 'Link', 'Image', 'Spacer', 'Separator'
+                'File Upload', 'Link', 'Image', 'Spacer', 'Separator',
+                'BPM File Uploader', 'BPM Document List' // Add these to supported types
             ];
 
             return !this.node.controlType || supportedTypes.includes(this.node.controlType);
@@ -85,30 +88,15 @@ export class DynamicRendererComponent {
         }
     }
 
-    // Safe value accessor - simplified to handle direct binding names
-    getValue(binding: string): any {
-        try {
-            if (!binding || !this.form) return '';
+    // For BPM controls, show the binding value as the display value
+    getDisplayValue(binding: string): string {
+        return binding || '';
+    }
 
-            // If binding is a simple key like "we", "qqq", "dasd"
-            if (this.form.hasOwnProperty(binding)) {
-                return this.form[binding];
-            }
-
-            // For complex bindings like "tw.local.App.name"
-            const parts = binding.split('.');
-            let value = this.form;
-
-            for (const part of parts) {
-                if (value[part] === undefined) return '';
-                value = value[part];
-            }
-
-            return value;
-        } catch (error) {
-            console.error('Error accessing form value', error);
-            return '';
-        }
+    // Check if this should be a hidden field
+    isHiddenField(controlType: string): boolean {
+        // Make certain control types hidden
+        return controlType === 'Text' || controlType === 'Output Text';
     }
 
     // Check if this should be a read-only field

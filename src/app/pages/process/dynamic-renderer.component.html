@@ -1,4 +1,50 @@
 <style>
+    .hidden-field {
+        display: none;
+    }
+
+    .binding-value {
+        display: inline-block;
+        padding: 0.5rem;
+        background-color: #f0f0f0;
+        border: 1px solid #d1d1d1;
+        border-radius: 3px;
+        margin-left: 0.5rem;
+    }
+
+    .binding-info {
+        display: block;
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+
+    .document-list {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 1rem;
+        background-color: #f9f9f9;
+    }
+
+    .document-item {
+        padding: 0.5rem;
+        background-color: #e8f4ff;
+        border: 1px solid #b8daff;
+        border-radius: 3px;
+        margin-top: 0.5rem;
+    }
+
+    .no-documents {
+        color: #888;
+        font-style: italic;
+        margin-top: 0.5rem;
+    }
+
+    .output-text {
+        background-color: #f0f0f0;
+        border: 1px solid #d1d1d1;
+    }
+
     .unsupported-control {
         padding: 0.75rem;
         border: 1px dashed #ccc;
@@ -11,11 +57,6 @@
 
     .unsupported-control span {
         font-size: 0.9rem;
-    }
-
-    .output-text {
-        background-color: #f0f0f0;
-        border: 1px solid #d1d1d1;
     }
 
     .unknown-field {
@@ -42,7 +83,7 @@
                 <div class="unsupported-control">
                     <span><strong>Control Type:</strong> {{ node.controlType || 'Unknown' }}</span>
                     <span *ngIf="node.binding"><strong>Binding:</strong> {{ node.binding }}</span>
-                    <span><strong>Value:</strong> {{ getValue(node.binding) || '(No value)' }}</span>
+                    <span><strong>Value:</strong> {{ getDisplayValue(node.binding) || '(No value)' }}</span>
                 </div>
             </div>
         </ng-container>
@@ -66,27 +107,32 @@
                 </ng-container>
             </div>
 
-            <!-- Text Input (Editable) -->
+            <!-- Text Input (Hidden - show binding value) -->
             <div *ngIf="node.controlType === 'Text'" class="p-field">
                 <label>{{ node.label }}</label>
                 <input
                         pInputText
-                        [value]="getValue(node.binding)"
+                        [value]="getDisplayValue(node.binding)"
                         (input)="handleInput($event, node.binding)"
                         [placeholder]="node.label"
-                        [readonly]="isReadOnly(node.controlType)"
+                        [readonly]="true"
+                        [type]="isHiddenField(node.controlType) ? 'hidden' : 'text'"
+                        class="hidden-field"
                 />
+                <span class="binding-value">{{ getDisplayValue(node.binding) }}</span>
             </div>
 
-            <!-- Output Text (Read-only) -->
+            <!-- Output Text (Read-only - show binding value) -->
             <div *ngIf="node.controlType === 'Output Text'" class="p-field">
                 <label *ngIf="node.label">{{ node.label }}</label>
                 <input
                         pInputText
-                        [value]="getValue(node.binding)"
+                        [value]="getDisplayValue(node.binding)"
                         [readonly]="true"
+                        [type]="isHiddenField(node.controlType) ? 'hidden' : 'text'"
                         class="output-text"
                 />
+                <span class="binding-value">{{ getDisplayValue(node.binding) }}</span>
             </div>
 
             <!-- Button -->
@@ -96,6 +142,33 @@
                         (onClick)="onButtonClick(node)"
                         [class]="node.label === 'OK' ? 'p-button-primary' : 'p-button-secondary'">
                 </p-button>
+            </div>
+
+            <!-- BPM File Uploader (Show as button) -->
+            <div *ngIf="node.controlType === 'BPM File Uploader'" class="p-field">
+                <label *ngIf="node.label">{{ node.label }}</label>
+                <p-button
+                        icon="pi pi-upload"
+                        label="Upload File"
+                        (onClick)="onButtonClick(node)"
+                        class="p-button-info">
+                </p-button>
+                <span *ngIf="node.binding" class="binding-info">Binding: {{ node.binding }}</span>
+            </div>
+
+            <!-- BPM Document List (Show as list) -->
+            <div *ngIf="node.controlType === 'BPM Document List'" class="p-field">
+                <label *ngIf="node.label">{{ node.label }}</label>
+                <div class="document-list">
+                    <p>Document List</p>
+                    <span *ngIf="node.binding" class="binding-info">Binding: {{ node.binding }}</span>
+                    <div *ngIf="getDisplayValue(node.binding)" class="document-item">
+                        {{ getDisplayValue(node.binding) }}
+                    </div>
+                    <div *ngIf="!getDisplayValue(node.binding)" class="no-documents">
+                        No documents available
+                    </div>
+                </div>
             </div>
 
             <!-- Nodes with null controlType but with children -->
@@ -110,10 +183,11 @@
                 <label>{{ node.label || 'Field' }}</label>
                 <input
                         pInputText
-                        [value]="getValue(node.binding)"
+                        [value]="getDisplayValue(node.binding)"
                         [readonly]="true"
                         class="output-text"
                 />
+                <span class="binding-value">{{ getDisplayValue(node.binding) }}</span>
             </div>
 
             <!-- Nodes with no controlType, no children, and no binding (show as text) -->
