@@ -1,48 +1,56 @@
 <style>
-    .hidden-field {
-        display: none;
+    /* Remove the hidden-field class as we're using type="hidden" instead */
+    .value-display {
+        display: flex;
+        align-items: center;
     }
 
     .binding-value {
         display: inline-block;
         padding: 0.5rem;
-        background-color: #f0f0f0;
-        border: 1px solid #d1d1d1;
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
         border-radius: 3px;
-        margin-left: 0.5rem;
+        min-width: 200px;
+        font-family: inherit;
+        font-size: 1rem;
+        color: #495057;
     }
 
     .binding-info {
         display: block;
         font-size: 0.8rem;
-        color: #666;
+        color: #6c757d;
         margin-top: 0.25rem;
     }
 
     .document-list {
-        border: 1px solid #ddd;
+        border: 1px solid #dee2e6;
         border-radius: 4px;
         padding: 1rem;
-        background-color: #f9f9f9;
+        background-color: #f8f9fa;
     }
 
     .document-item {
-        padding: 0.5rem;
+        padding: 0.75rem;
         background-color: #e8f4ff;
         border: 1px solid #b8daff;
-        border-radius: 3px;
+        border-radius: 4px;
         margin-top: 0.5rem;
+        min-width: 200px;
     }
 
     .no-documents {
-        color: #888;
+        color: #6c757d;
         font-style: italic;
         margin-top: 0.5rem;
+        padding: 0.5rem;
     }
 
     .output-text {
         background-color: #f0f0f0;
         border: 1px solid #d1d1d1;
+        min-width: 200px;
     }
 
     .unsupported-control {
@@ -53,6 +61,7 @@
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
+        min-width: 200px;
     }
 
     .unsupported-control span {
@@ -60,18 +69,45 @@
     }
 
     .unknown-field {
-        color: #888;
+        color: #6c757d;
         font-style: italic;
+        padding: 0.5rem;
+        display: inline-block;
+        min-width: 200px;
     }
 
     .p-field {
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
 
     .p-field label {
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 500;
+        color: #495057;
+    }
+
+    /* Make sure all value displays have consistent width */
+    .value-display > span,
+    .document-item,
+    .no-documents,
+    .unsupported-control,
+    .unknown-field {
+        width: 100%;
+        max-width: 400px;
+        box-sizing: border-box;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .value-display > span,
+        .document-item,
+        .no-documents,
+        .unsupported-control,
+        .unknown-field {
+            max-width: 100%;
+            min-width: unset;
+        }
     }
 </style>
 <ng-container *ngIf="node">
@@ -107,32 +143,32 @@
                 </ng-container>
             </div>
 
-            <!-- Text Input (Hidden - show binding value) -->
+            <!-- Text Input (Hidden input, show binding value in span) -->
             <div *ngIf="node.controlType === 'Text'" class="p-field">
                 <label>{{ node.label }}</label>
-                <input
-                        pInputText
-                        [value]="getDisplayValue(node.binding)"
-                        (input)="handleInput($event, node.binding)"
-                        [placeholder]="node.label"
-                        [readonly]="true"
-                        [type]="isHiddenField(node.controlType) ? 'hidden' : 'text'"
-                        class="hidden-field"
-                />
-                <span class="binding-value">{{ getDisplayValue(node.binding) }}</span>
+                <div class="value-display">
+                    <input
+                            pInputText
+                            [value]="getDisplayValue(node.binding)"
+                            [readonly]="true"
+                            [type]="'hidden'"
+                    />
+                    <span class="binding-value">{{ getDisplayValue(node.binding) }}</span>
+                </div>
             </div>
 
-            <!-- Output Text (Read-only - show binding value) -->
+            <!-- Output Text (Hidden input, show binding value in span) -->
             <div *ngIf="node.controlType === 'Output Text'" class="p-field">
                 <label *ngIf="node.label">{{ node.label }}</label>
-                <input
-                        pInputText
-                        [value]="getDisplayValue(node.binding)"
-                        [readonly]="true"
-                        [type]="isHiddenField(node.controlType) ? 'hidden' : 'text'"
-                        class="output-text"
-                />
-                <span class="binding-value">{{ getDisplayValue(node.binding) }}</span>
+                <div class="value-display">
+                    <input
+                            pInputText
+                            [value]="getDisplayValue(node.binding)"
+                            [readonly]="true"
+                            [type]="'hidden'"
+                    />
+                    <span class="binding-value">{{ getDisplayValue(node.binding) }}</span>
+                </div>
             </div>
 
             <!-- Button -->
@@ -161,7 +197,7 @@
                 <label *ngIf="node.label">{{ node.label }}</label>
                 <div class="document-list">
                     <p>Document List</p>
-                    <span *ngIf="node.binding" class="binding-info">Binding: {{ node.binding }}</span>
+<!--                    <span *ngIf="node.binding" class="binding-info">Binding: {{ node.binding }}</span>-->
                     <div *ngIf="getDisplayValue(node.binding)" class="document-item">
                         {{ getDisplayValue(node.binding) }}
                     </div>
@@ -181,13 +217,15 @@
             <!-- Nodes with no controlType and no children but with binding -->
             <div *ngIf="!node.controlType && !hasChildren() && node.binding" class="p-field">
                 <label>{{ node.label || 'Field' }}</label>
-                <input
-                        pInputText
-                        [value]="getDisplayValue(node.binding)"
-                        [readonly]="true"
-                        class="output-text"
-                />
-                <span class="binding-value">{{ getDisplayValue(node.binding) }}</span>
+                <div class="value-display">
+                    <input
+                            pInputText
+                            [value]="getDisplayValue(node.binding)"
+                            [readonly]="true"
+                            [type]="'hidden'"
+                    />
+                    <span class="binding-value">{{ getDisplayValue(node.binding) }}</span>
+                </div>
             </div>
 
             <!-- Nodes with no controlType, no children, and no binding (show as text) -->

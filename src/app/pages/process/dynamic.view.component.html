@@ -141,28 +141,181 @@
                margin-bottom: 1rem;
            }
        }
+    /* Professional Dashboard Header */
+.dashboard-header {
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    background: var(--surface-card);
+}
 
+.header-badge {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-600) 100%);
+    color: white;
+}
+
+.header-badge i {
+    font-size: 1.5rem;
+}
+
+/* Button group styling */
+.button-group {
+    flex-shrink: 0; /* Prevent buttons from shrinking */
+    margin-left: auto; /* Push buttons to the right */
+}
+
+/* Button specific styles */
+.button-group .p-button {
+    min-width: 100px;
+    height: 36px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.button-group .p-button.p-button-outlined {
+    border-width: 1.5px;
+}
+
+.button-group .p-button.p-button-primary {
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+/* Hover effects */
+.button-group .p-button:not(:disabled):hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s ease;
+}
+
+/* Loading state */
+.button-group .p-button[loading] {
+    position: relative;
+    opacity: 0.8;
+}
+
+.button-group .p-button[loading] .p-button-label {
+    visibility: hidden;
+}
+
+.button-group .p-button[loading]::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    left: 50%;
+    top: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .dashboard-header > div {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .button-group {
+        align-self: stretch;
+        justify-content: center;
+        margin-left: 0;
+    }
+
+    .button-group .p-button {
+        flex: 1;
+        min-width: unset;
+    }
+
+    .dashboard-header .flex.gap-3 {
+        flex-wrap: wrap;
+        gap: 0.5rem !important;
+    }
+
+    .dashboard-header .flex.gap-3 span {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .button-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .button-group .p-button {
+        width: 100%;
+    }
+}
+
+/* Optional: Add some spacing and visual hierarchy */
+.dashboard-header h2 {
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.dashboard-header .text-sm {
+    font-size: 0.875rem;
+}
+
+/* Ensure proper alignment on all screens */
+.dashboard-header > div {
+    min-height: 60px;
+}
 </style>
 <div class="dynamic-view-container">
     <!-- Header Section -->
-    <div class="header p-4 flex align-items-center justify-content-between">
-        <div class="flex align-items-center">
-            <i class="pi pi-list mr-3" style="font-size: 1.5rem;"></i>
-            <h2 class="m-0">Dynamic Form View</h2>
-        </div>
-        <div>
-            <p-button
-                    label="Back to List"
-                    icon="pi pi-arrow-left"
-                    (onClick)="goBack()"
-                    class="p-button-secondary mr-2">
-            </p-button>
-            <p-button
-                    label="Reload"
-                    icon="pi pi-refresh"
-                    (onClick)="loadCoachDefinitions()"
-                    [disabled]="loading">
-            </p-button>
+    <div class="dashboard-header p-4 surface-0 border-bottom-1 surface-border">
+        <div class="flex align-items-center justify-content-between">
+            <div class="flex align-items-center">
+            <span class="header-badge bg-primary-100 text-primary-800 border-circle p-3 mr-3">
+                <i class="pi pi-sitemap"></i>
+            </span>
+                <div>
+                    <h2 class="m-0 text-900">Form Instance Viewer</h2>
+                    <div class="flex align-items-center gap-3 mt-1">
+                    <span class="text-sm text-600">
+                        <i class="pi pi-id-card mr-1"></i>ID: {{ppid}}
+                    </span>
+                        <span class="text-sm text-600">
+                        <i class="pi pi-database mr-1"></i>Snapshot: {{snapshotID}}
+                    </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right-aligned button group -->
+            <div class="flex justify-content-end gap-2 button-group">
+                <p-button
+                        label="Back"
+                        icon="pi pi-arrow-left"
+                        (onClick)="goBack()"
+                        class="p-button-outlined p-button-secondary"
+                        size="small">
+                </p-button>
+                <p-button
+                        label="Reload"
+                        icon="pi pi-refresh"
+                        (onClick)="loadCoachDefinitions()"
+                        [disabled]="loading"
+                        class="p-button-primary"
+                        size="small"
+                        [loading]="loading">
+                </p-button>
+            </div>
         </div>
     </div>
 
@@ -206,12 +359,12 @@
         <!-- Form Content -->
         <div *ngIf="!loading && bpmResponse.length > 0" class="form-container">
             <p-card>
-                <div class="form-header mb-4">
-<!--                    <h3>Dynamic Form</h3>-->
-                    <p class="text-color-secondary">
-                        Form instanceID: {{ppid}} | SnapshotID: {{snapshotID}}
-                    </p>
-                </div>
+<!--                <div class="form-header mb-4">-->
+<!--&lt;!&ndash;                    <h3>Dynamic Form</h3>&ndash;&gt;-->
+<!--                    <p class="text-color-secondary">-->
+<!--                        Form instanceID: {{ppid}} | SnapshotID: {{snapshotID}}-->
+<!--                    </p>-->
+<!--                </div>-->
 
                 <!-- Dynamic Form Renderer -->
                 <ng-container *ngFor="let node of bpmResponse">
