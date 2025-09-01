@@ -3,24 +3,25 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CoachDefinitionNodeDTO, DynamicViewService } from "../service/dynamic.view.service";
 import { MessageService } from 'primeng/api';
 import { Subscription } from 'rxjs';
-import {FormsModule} from "@angular/forms";
-import {CommonModule, Location} from "@angular/common";
-import {DropdownModule} from "primeng/dropdown";
-import {CheckboxModule} from "primeng/checkbox";
-import {RadioButtonModule} from "primeng/radiobutton";
-import {PanelModule} from "primeng/panel";
-import {ButtonModule} from "primeng/button";
-import {ToastModule} from "primeng/toast";
-import {InputTextModule} from "primeng/inputtext";
-import {TableModule} from "primeng/table";
-import {CalendarModule} from "primeng/calendar";
-import {FileUploadModule} from "primeng/fileupload";
-import {CardModule} from "primeng/card";
-import {TryCatchDirective} from "./try-catch.directive";
+import { FormsModule } from "@angular/forms";
+import { CommonModule, Location } from "@angular/common";
+
+// PrimeNG imports
+import { DropdownModule } from "primeng/dropdown";
+import { CheckboxModule } from "primeng/checkbox";
+import { RadioButtonModule } from "primeng/radiobutton";
+import { PanelModule } from "primeng/panel";
+import { ButtonModule } from "primeng/button";
+import { ToastModule } from "primeng/toast";
+import { InputTextModule } from "primeng/inputtext";
+import { TableModule } from "primeng/table";
+import { CalendarModule } from "primeng/calendar";
+import { FileUploadModule } from "primeng/fileupload";
+import { CardModule } from "primeng/card";
+import { MessagesModule } from "primeng/messages";
+import { MessageModule } from "primeng/message";
+import { ProgressSpinnerModule } from "primeng/progressspinner";
 import {DynamicRendererComponent} from "./dynamic.render.component";
-import {MessagesModule} from "primeng/messages";
-import {MessageModule} from "primeng/message";
-import {ProgressSpinnerModule} from "primeng/progressspinner";
 
 @Component({
     imports: [
@@ -74,22 +75,22 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
                 this.ppid = queryParams['ppid'] || '';
                 this.snapshotID = queryParams['snapshotID'] || '';
                 this.processID = queryParams['processID'] || '';
-                console.log('test params')
-                console.log(queryParams['ppid'])
-                console.log(queryParams['snapshotID'])
-                console.log(queryParams['processID'])
-                // Initialize form structure based on expected bindings
+
+                // Initialize form structure with some default values based on your JSON bindings
                 this.formData = {
-                    businessData: {
-                        App: {
-                            name: '',
-                            age: '',
-                            mobileNumber: ''
-                        }
-                    },
+                    we: 'Name Value', // Example value for 'we' binding
+                    qqq: '25', // Example value for 'qqq' binding
+                    dasd: '+1234567890', // Example value for 'dasd' binding
                     local: {
                         App: {
-                            age: ''
+                            age: '30'
+                        }
+                    },
+                    businessData: {
+                        App: {
+                            name: 'John Doe',
+                            age: '30',
+                            mobileNumber: '+1234567890'
                         }
                     }
                 };
@@ -97,11 +98,11 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
                 if (this.ppid && this.snapshotID && this.processID) {
                     this.loadCoachDefinitions();
                 } else {
-                    this.handleError('Missing required parameters: ppid and snapshotid && processid');
+                    this.handleError('Missing required parameters: ppid, snapshotID, and processID');
                 }
             },
             error: (err) => {
-                this.handleError('Failed to parse route parameters', err);
+                this.handleError('Failed to parse query parameters', err);
             }
         });
     }
@@ -114,7 +115,7 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
 
     loadCoachDefinitions() {
         if (!this.ppid || !this.snapshotID || !this.processID) {
-            this.handleError('Cannot load data: missing processID or snapshotId');
+            this.handleError('Cannot load data: missing processID, snapshotID, or ppid');
             return;
         }
 
@@ -137,7 +138,6 @@ export class DynamicViewComponent implements OnInit, OnDestroy {
                 }
             });
     }
-
     private handleError(message: string, error?: any) {
         this.loading = false;
         this.errorMessage = message;

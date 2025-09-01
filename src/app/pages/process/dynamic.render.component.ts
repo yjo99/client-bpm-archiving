@@ -5,7 +5,6 @@ import { MessageService } from 'primeng/api';
 
 // PrimeNG imports
 import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
 import { PanelModule } from 'primeng/panel';
 import { DropdownModule } from 'primeng/dropdown';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -14,6 +13,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { FileUploadModule } from 'primeng/fileupload';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { CardModule } from 'primeng/card';
+import {InputTextModule} from "primeng/inputtext";
 
 @Component({
     selector: 'app-dynamic-renderer',
@@ -41,12 +41,10 @@ export class DynamicRendererComponent {
 
     constructor(private messageService: MessageService) {}
 
-    // Check if node has children that need to be rendered
     hasChildren(): boolean {
         return this.node.children && this.node.children.length > 0;
     }
 
-    // Check if control type is supported
     isSupported(): boolean {
         try {
             const supportedTypes = [
@@ -87,20 +85,21 @@ export class DynamicRendererComponent {
         }
     }
 
-    // Safe value accessor
+    // Safe value accessor - simplified to handle direct binding names
     getValue(binding: string): any {
         try {
             if (!binding || !this.form) return '';
 
-            // Convert binding string to object reference (e.g., "tw.businessData.App.name")
+            // If binding is a simple key like "we", "qqq", "dasd"
+            if (this.form.hasOwnProperty(binding)) {
+                return this.form[binding];
+            }
+
+            // For complex bindings like "tw.local.App.name"
             const parts = binding.split('.');
             let value = this.form;
 
-            // Skip the 'tw' prefix if present
-            const startIndex = parts[0] === 'tw' ? 1 : 0;
-
-            for (let i = startIndex; i < parts.length; i++) {
-                const part = parts[i];
+            for (const part of parts) {
                 if (value[part] === undefined) return '';
                 value = value[part];
             }
@@ -112,20 +111,36 @@ export class DynamicRendererComponent {
         }
     }
 
+    // Check if this should be a read-only field
+    isReadOnly(controlType: string): boolean {
+        // Make Output Text and unsupported controls read-only
+        return controlType === 'Output Text' || !this.isSupported();
+    }
+
+    handleInput(event: Event, binding: string): void {
+        const target = event.target as HTMLInputElement;
+        if (target) {
+            this.setValue(binding, target.value);
+        }
+    }
+
     // Safe value setter
     setValue(binding: string, value: any): void {
         try {
             if (!binding || !this.form) return;
 
-            // Convert binding string to object reference
+            // For simple bindings
+            if (this.form.hasOwnProperty(binding)) {
+                this.form[binding] = value;
+                return;
+            }
+
+            // For complex bindings
             const parts = binding.split('.');
             let obj = this.form;
 
-            // Skip the 'tw' prefix if present
-            const startIndex = parts[0] === 'tw' ? 1 : 0;
-
             // Navigate to the parent object
-            for (let i = startIndex; i < parts.length - 1; i++) {
+            for (let i = 0; i < parts.length - 1; i++) {
                 const part = parts[i];
                 if (obj[part] === undefined) obj[part] = {};
                 obj = obj[part];
@@ -143,13 +158,6 @@ export class DynamicRendererComponent {
                 summary: 'Error',
                 detail: 'Failed to update form value'
             });
-        }
-    }
-
-    handleInput(event: Event, binding: string): void {
-        const target = event.target as HTMLInputElement;
-        if (target) {
-            this.setValue(binding, target.value);
         }
     }
 }

@@ -1,7 +1,54 @@
+<style>
+    .unsupported-control {
+        padding: 0.75rem;
+        border: 1px dashed #ccc;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .unsupported-control span {
+        font-size: 0.9rem;
+    }
+
+    .output-text {
+        background-color: #f0f0f0;
+        border: 1px solid #d1d1d1;
+    }
+
+    .unknown-field {
+        color: #888;
+        font-style: italic;
+    }
+
+    .p-field {
+        margin-bottom: 1rem;
+    }
+
+    .p-field label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+</style>
 <ng-container *ngIf="node">
-    <!-- Error boundary for each control -->
     <div class="control-container">
-        <ng-container *ngIf="node && isSupported()">
+        <!-- Unsupported control types show as text -->
+        <ng-container *ngIf="!isSupported()">
+            <div class="p-field">
+                <label *ngIf="node.label">{{ node.label }}</label>
+                <div class="unsupported-control">
+                    <span><strong>Control Type:</strong> {{ node.controlType || 'Unknown' }}</span>
+                    <span *ngIf="node.binding"><strong>Binding:</strong> {{ node.binding }}</span>
+                    <span><strong>Value:</strong> {{ getValue(node.binding) || '(No value)' }}</span>
+                </div>
+            </div>
+        </ng-container>
+
+        <!-- Supported control types -->
+        <ng-container *ngIf="isSupported()">
             <!-- Collapsible Panel / Panel / Section -->
             <p-panel *ngIf="['Collapsible Panel','Panel','Section'].includes(node.controlType || '')"
                      [header]="node.label"
@@ -19,30 +66,37 @@
                 </ng-container>
             </div>
 
-            <!-- Text Input -->
+            <!-- Text Input (Editable) -->
             <div *ngIf="node.controlType === 'Text'" class="p-field">
                 <label>{{ node.label }}</label>
-                <!-- Change this line: -->
                 <input
                         pInputText
                         [value]="getValue(node.binding)"
                         (input)="handleInput($event, node.binding)"
                         [placeholder]="node.label"
+                        [readonly]="isReadOnly(node.controlType)"
                 />
             </div>
 
-            <!-- Output Text -->
+            <!-- Output Text (Read-only) -->
             <div *ngIf="node.controlType === 'Output Text'" class="p-field">
                 <label *ngIf="node.label">{{ node.label }}</label>
-                <span class="output-value">{{ getValue(node.binding) || '(No value)' }}</span>
+                <input
+                        pInputText
+                        [value]="getValue(node.binding)"
+                        [readonly]="true"
+                        class="output-text"
+                />
             </div>
 
             <!-- Button -->
-            <p-button *ngIf="node.controlType === 'Button'"
-                      [label]="node.label || 'Button'"
-                      (onClick)="onButtonClick(node)"
-                      [class]="node.label === 'OK' ? 'p-button-primary' : 'p-button-secondary'">
-            </p-button>
+            <div *ngIf="node.controlType === 'Button'" class="p-field">
+                <p-button
+                        [label]="node.label || 'Button'"
+                        (onClick)="onButtonClick(node)"
+                        [class]="node.label === 'OK' ? 'p-button-primary' : 'p-button-secondary'">
+                </p-button>
+            </div>
 
             <!-- Nodes with null controlType but with children -->
             <ng-container *ngIf="!node.controlType && hasChildren()">
@@ -51,26 +105,22 @@
                 </ng-container>
             </ng-container>
 
-            <!-- Nodes with no controlType and no children (display binding info) -->
+            <!-- Nodes with no controlType and no children but with binding -->
             <div *ngIf="!node.controlType && !hasChildren() && node.binding" class="p-field">
                 <label>{{ node.label || 'Field' }}</label>
-                <span class="output-value">{{ getValue(node.binding) || '(No value)' }}</span>
+                <input
+                        pInputText
+                        [value]="getValue(node.binding)"
+                        [readonly]="true"
+                        class="output-text"
+                />
+            </div>
+
+            <!-- Nodes with no controlType, no children, and no binding (show as text) -->
+            <div *ngIf="!node.controlType && !hasChildren() && !node.binding" class="p-field">
+                <label>{{ node.label || 'Unknown Field' }}</label>
+                <span class="unknown-field">No binding specified</span>
             </div>
         </ng-container>
-
-        <!-- Unsupported control type -->
-        <ng-container *ngIf="node && !isSupported()">
-            <div class="unsupported-control error-boundary">
-                <i class="pi pi-exclamation-triangle error-icon"></i>
-                <span>Unsupported control type: <strong>{{ node.controlType }}</strong></span>
-            </div>
-        </ng-container>
-
-        <ng-template #unsupportedControl>
-            <div class="unsupported-control error-boundary">
-                <i class="pi pi-exclamation-triangle error-icon"></i>
-                <span>Unsupported control type: <strong>{{ node.controlType }}</strong></span>
-            </div>
-        </ng-template>
     </div>
 </ng-container>
